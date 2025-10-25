@@ -11,9 +11,9 @@ v2.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
 });
 
-async function getAllFiles(req: Request, res: Response) {
+async function getAllFiles(req: Request, res: Response): Promise<void> {
     try {
-        const getUserId = req.params.id;
+        const getUserId = req.params.user_id;
         const getAllFiles = await File.find({ user_id: getUserId });
         res.json(getAllFiles);
     } catch (error) {
@@ -21,7 +21,7 @@ async function getAllFiles(req: Request, res: Response) {
     }
 }
 
-async function deleteAllFiles(req: Request, res: Response) {
+async function deleteAllFiles(req: Request, res: Response): Promise<void> {
     try {
         const getUserId = req.params.id;
         const getUserFiles = await File.find({ user_id: getUserId });
@@ -37,7 +37,7 @@ async function deleteAllFiles(req: Request, res: Response) {
     }
 }
 
-async function deleteSelectedFile(req: Request, res: Response) {
+async function deleteSelectedFile(req: Request, res: Response): Promise<void> {
     try {
         const getFileId = req.params.id;
         const getFile = await File.find({ _id: getFileId });
@@ -53,4 +53,14 @@ async function deleteSelectedFile(req: Request, res: Response) {
     }
 }
 
-export { deleteAllFiles, deleteSelectedFile, getAllFiles }
+async function insertNewFile(req: Request, res: Response): Promise<void> {
+    try {
+        const newFile = new File(req.body);
+        await newFile.save();
+        res.status(201).json({ message: 'new file added' });
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export { deleteAllFiles, deleteSelectedFile, getAllFiles, insertNewFile }

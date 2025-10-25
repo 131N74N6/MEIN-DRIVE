@@ -25,6 +25,7 @@ async function signIn(req: Request, res: Response) {
         );
 
         res.status(200).json({
+            status: 'ok',
             token: generatedToken,
             signin_user_id: findUser._id
         });
@@ -53,4 +54,17 @@ async function signUp(req: Request, res: Response) {
     }
 }
 
-export { signIn, signUp }
+async function getUserData(req: Request, res: Response) {
+    try {
+        const currentUserId = req.params.id;
+        const findUser = await User.findOne({ _id: currentUserId });
+        res.json({
+            username: findUser?.username,
+            email: findUser?.email
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export { getUserData, signIn, signUp }
