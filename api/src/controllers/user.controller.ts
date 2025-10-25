@@ -9,20 +9,24 @@ dotenv.config();
 async function signIn(req: Request, res: Response) {
     try {
         const { email, password } = req.body;
-        const findUser = await User.find({ email });
+        const findUser = await User.findOne({ email });
 
-        const isPasswordMatch = await bcrypt.compare(password, findUser[0].password);
+        if (!email) return res.status(400).json({ message: 'email is required' });
+        if (!password) return res.status(400).json({ message: 'password is required' });
+        if (!findUser) return res.status(401).json({ message: 'Invalid data. Try again later' });
+
+        const isPasswordMatch = await bcrypt.compare(password, findUser.password);
         if (!isPasswordMatch) return res.status(404).json({ message: 'incorrect password' });
 
         const generatedToken = jwt.sign(
-            { id: findUser[0]._id, email, password },
+            { id: findUser._id, email, password },
             process.env.JWT_TOKEN || 'jwt key',
             { expiresIn: '1h' }
         );
 
         res.status(200).json({
             token: generatedToken,
-            signin_user_id: findUser[0]._id
+            signin_user_id: findUser._id
         });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
@@ -32,6 +36,14 @@ async function signIn(req: Request, res: Response) {
 async function signUp(req: Request, res: Response) {
     try {
         const { created_at, email, password, username } = req.body;
+        const findUser = await User.findOne({ email });
+
+        if (!email) return res.status(400).send({ message: 'email is required' });
+        if (!password) return res.status(400).send({ message: 'password is required' });
+        if (!username) return res.status(400).send({ message: 'username is required' });
+
+        if (findUser) return res.status(409).send({ message: 'User already exist' });
+
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ created_at, email, password: hashedPassword, username });
         await newUser.save();
