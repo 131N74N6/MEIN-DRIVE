@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-async function signIn(req: Request, res: Response) {
+async function signIn(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined> {
     try {
         const { email, password } = req.body;
         const findUser = await User.findOne({ email });
@@ -34,7 +34,7 @@ async function signIn(req: Request, res: Response) {
     }
 }
 
-async function signUp(req: Request, res: Response) {
+async function signUp(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined> {
     try {
         const { created_at, email, password, username } = req.body;
         const findUser = await User.findOne({ email });
@@ -54,7 +54,7 @@ async function signUp(req: Request, res: Response) {
     }
 }
 
-async function getUserData(req: Request, res: Response) {
+async function getUserData(req: Request, res: Response): Promise<void> {
     try {
         const currentUserId = req.params.id;
         const findUser = await User.findOne(

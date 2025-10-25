@@ -1,3 +1,8 @@
+export type ChangeDataProps<A> = {
+    api_url: string;
+    data: Partial<Omit<A, '_id'>>;
+}
+
 export type GetDataProps = {
     api_url: string;
     stale_time: number;
@@ -16,6 +21,11 @@ export type InfiniteScrollProps = {
     limit: number;
     stale_time: number;
     query_key: string[];
+}
+
+export type InputDataProps<A> = {
+    api_url: string;
+    data: Omit<A, '_id'>;
 }
 
 export type SignUpProps = {
