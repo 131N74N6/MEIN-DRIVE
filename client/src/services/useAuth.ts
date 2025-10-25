@@ -79,11 +79,17 @@ export default function useAuth() {
         }
     }
 
-    const getCurrentUserData = async (): Promise<GetCurrentUserProps | undefined> => {
+    const getCurrentUserData = async () => {
         try {
             const request = await fetch(`http://localhost:1234/user-data/${user?.signin_user_id}`);
             const response: GetCurrentUserProps = await request.json();
-            return response;
+
+            return { 
+                created_at: response.created_at,
+                email: response.email,
+                user_id: response.user_id,
+                username: response.username, 
+            }
         } catch (error) {
             setError('failed to get user data');
         }
