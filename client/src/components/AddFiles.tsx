@@ -1,9 +1,9 @@
 import { useRef, useState } from "react"
-import type { MediaFilesProps } from "../services/custom-types";
+import type { AddFilesProps, MediaFilesProps } from "../services/custom-types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../services/useAuth";
 
-export default function AddFiles() {
+export default function AddFiles(props: AddFilesProps) {
     const { user } = useAuth();
     const currentUserId = user ? user.signin_user_id : '';
     const queryClient = useQueryClient();
@@ -125,10 +125,11 @@ export default function AddFiles() {
                         className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                     >
                         Upload
-                    </button>                    
+                    </button>
                     <button 
                         type="button" 
                         disabled={isUploading}
+                        onClick={() => props.setOpenUploader(false)}
                         className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                     >
                         <i className="fa-solid fa-xmark"></i>

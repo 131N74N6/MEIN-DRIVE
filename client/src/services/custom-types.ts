@@ -1,3 +1,7 @@
+export type AddFilesProps = {
+    setOpenUploader: (value: React.SetStateAction<boolean>) => void;
+}
+
 export type AuthStateProps = {
     user: UserTokenProps | null;
     loading: boolean;
