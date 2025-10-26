@@ -45,6 +45,13 @@ export type InputDataProps<A> = {
     data: Omit<A, '_id'>;
 }
 
+export type MediaFilesProps = {
+    file: File;
+    file_name: string;
+    file_type: string;
+    preview_url: string;
+}
+
 export type SignUpProps = {
     created_at: string;
     email: string;
