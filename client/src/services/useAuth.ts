@@ -53,7 +53,7 @@ export default function useAuth() {
     const signUp = async (props: SignUpProps): Promise<void> => {
         setLoading(true);
         try {
-            const request = await fetch(`http://localhost:1234/users/sign-in`, {
+            const request = await fetch(`http://localhost:1234/users/sign-up`, {
                 body: JSON.stringify(props),
                 headers: { 'Content-Type': 'application/json' },
                 method: 'POST'
