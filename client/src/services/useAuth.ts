@@ -1,18 +1,32 @@
-import { useEffect, useState } from "react"
-import type { GetCurrentUserProps, SignUpProps, UserTokenProps } from "./custom-types";
+import { useEffect, useReducer } from "react"
+import type { AuthActionProps, AuthStateProps, GetCurrentUserProps, SignUpProps, UserTokenProps } from "./custom-types";
 import { useNavigate } from "react-router-dom";
 
-export default function useAuth() {
-    const [user, setUser] = useState<UserTokenProps | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
-    const [userId, setUserId] = useState<string>('');
-    const [username, setUsername] = useState<string>('');
-    const [email, setEmail] = useState<string>('');
-    const [createdAt, setCreatedAt] = useState<string>('');
+const initialState: AuthStateProps = {
+    user: null,
+    loading: false,
+    error: null,
+    userId: '',
+    username: '',
+    email: '',
+    createdAt: ''
+}
 
+const authReducer = (state: AuthStateProps, action: AuthActionProps) => {
+    switch (action.type) {
+        case "SET_LOADING": return { ...state, loading: action.payload }
+        case "SET_ERROR": return { ...state, error: action.payload, loading: false }
+        case "SET_USER": return { ...state, user: action.payload, error: null };
+        case "SET_USER_DATA": return { ...state, ...action.payload, error: null };
+        case "RESET_STATE": return initialState;
+        default: return state;
+    }
+}
+
+export default function useAuth() {
+    const [state, dispatch] = useReducer(authReducer, initialState);
     const navigate = useNavigate();
-    const token = user ? user.token : '';
+    const token = state.user ? state.user.token : '';
 
     useEffect(() => {
         const existedUser = localStorage.getItem('user');
