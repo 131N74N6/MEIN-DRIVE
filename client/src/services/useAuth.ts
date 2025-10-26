@@ -6,7 +6,13 @@ export default function useAuth() {
     const [user, setUser] = useState<UserTokenProps | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string>('');
+    const [username, setUsername] = useState<string>('');
+    const [email, setEmail] = useState<string>('');
+    const [createdAt, setCreatedAt] = useState<string>('');
+
     const navigate = useNavigate();
+    const token = user ? user.token : '';
 
     useEffect(() => {
         const existedUser = localStorage.getItem('user');
@@ -81,27 +87,28 @@ export default function useAuth() {
 
     const getCurrentUserData = async () => {
         try {
-            const request = await fetch(`http://localhost:1234/user-data/${user?.signin_user_id}`);
+            const request = await fetch(`http://localhost:1234/user-data/${user?.signin_user_id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                method: 'GET'
+            });
+
             const response: GetCurrentUserProps = await request.json();
 
-            return { 
-                created_at: response.created_at,
-                email: response.email,
-                user_id: response.user_id,
-                username: response.username, 
-            }
+            setUsername(response.username);
+            setEmail(response.email);
+            setUserId(response.user_id);
+            setCreatedAt(new Date(response.created_at).toLocaleString());
         } catch (error) {
             setError('failed to get user data');
         }
     }
 
     return { 
-        getCurrentUserData, 
-        loading, 
-        error, 
-        signIn, 
-        signOut, 
-        signUp, 
-        user 
+        getCurrentUserData, userId, loading, username,
+        error, email, signIn, createdAt,
+        signOut, signUp, user 
     }
 }
