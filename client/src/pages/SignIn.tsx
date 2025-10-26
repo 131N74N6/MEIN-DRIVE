@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function SignIn() {
     const [email, setEmail] = useState<string>('');
@@ -29,6 +30,7 @@ export default function SignIn() {
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
                     />
                 </div>
+                <Link to={'/sign-up'}>Sign In</Link>
                 <button type="submit" className="bg-purple-400 text-purple-950 font-[500] text-[0.9rem] p-[0.4rem]">Sign In</button>
             </form>
         </div>
