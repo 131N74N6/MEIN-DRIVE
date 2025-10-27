@@ -30,12 +30,12 @@ export default function useAuth() {
 
     useEffect(() => {
         const existedUser = localStorage.getItem('user');
-        if (existedUser) setUser(JSON.parse(existedUser));
-        setLoading(false);
+        if (existedUser) dispatch({ type: 'SET_USER', payload: JSON.parse(existedUser) });
+        dispatch({ type: 'SET_LOADING', payload: false });
     }, []);
 
     const signIn = async (email: string, password: string): Promise<void> => {
-        setLoading(true);
+        dispatch({ type: 'SET_LOADING', payload: true });
         try {
             const request = await fetch(`http://localhost:1234/users/sign-in`, {
                 headers: { 'Content-Type': 'application/json' },
@@ -55,17 +55,17 @@ export default function useAuth() {
                 token: response.token
             }
 
-            setUser(currentUserToken);
+            dispatch({ type: 'SET_USER', payload: currentUserToken });
             localStorage.setItem('user', JSON.stringify(currentUserToken));
         } catch (error: any) {
-            setError(error.message || 'failed to sign-in');
+            dispatch({ type: 'SET_ERROR', payload: error.message || 'failed to sign-in' });
         } finally {
-            setLoading(false);
+            dispatch({ type: 'SET_LOADING', payload: false });
         }
     }
 
     const signUp = async (props: SignUpProps): Promise<void> => {
-        setLoading(true);
+        dispatch({ type: 'SET_LOADING', payload: true });
         try {
             const request = await fetch(`http://localhost:1234/users/sign-up`, {
                 body: JSON.stringify(props),
@@ -80,22 +80,22 @@ export default function useAuth() {
 
             if (request.ok) navigate('/sign-in');
         } catch (error: any) {
-            setError(error.message || 'failed to sign-up');
+            dispatch({ type: 'SET_ERROR', payload: error.message || 'failed to sign-up' });
         } finally {
-            setLoading(false);
+            dispatch({ type: 'SET_LOADING', payload: false });
         }
     }
 
     const signOut = async () => {
-        setLoading(true);
+        dispatch({ type: 'SET_LOADING', payload: true });
         try {
             localStorage.removeItem('user');
-            setUser(null);
+            dispatch({ type: 'SET_USER', payload: null });
             navigate('/sign-in');
         } catch (error) {
-            setError('failed to sign-out');
+            dispatch({ type: 'SET_ERROR', payload: 'failed to sign-out' });
         } finally {
-            setLoading(false);
+            dispatch({ type: 'SET_LOADING', payload: false });
         }
     }
 
@@ -111,12 +111,14 @@ export default function useAuth() {
 
             const response: GetCurrentUserProps = await request.json();
 
-            setUsername(response.username);
-            setEmail(response.email);
-            setUserId(response.user_id);
-            setCreatedAt(new Date(response.created_at).toLocaleString());
+            dispatch({ type: 'SET_USER_DATA', payload: {
+                createdAt: new Date(response.created_at).toLocaleString(),
+                email: response.email,
+                userId: response.user_id,
+                username: response.username
+            }});
         } catch (error) {
-            setError('failed to get user data');
+            dispatch({ type: 'SET_ERROR', payload: 'failed to get user data' });
         }
     }
 
