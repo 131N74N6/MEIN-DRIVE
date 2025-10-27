@@ -24,6 +24,24 @@ export type ChangeDataProps<A> = {
     data: Partial<Omit<A, '_id'>>;
 }
 
+export type FilesDataProps = {
+    created_at: string;
+    files: {
+        public_id: string;
+        url: string;
+    }
+    file_name: string;
+    user_id: string;
+}
+
+export type FileItemProps = {
+    file: FilesDataProps;
+}
+
+export type FileListProps = {
+    files: FilesDataProps[];
+}
+
 export type GetDataProps = {
     api_url: string;
     stale_time: number;
@@ -70,6 +88,7 @@ export type UserTokenProps = {
 }
 
 export type UploadResult = {
+    file_name: string;
     url: string;
     public_id: string;
     resource_type: string;

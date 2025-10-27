@@ -1,10 +1,13 @@
 import { useRef, useState } from "react"
-import type { AddFilesProps, MediaFilesProps } from "../services/custom-types";
+import type { AddFilesProps, FilesDataProps, MediaFilesProps } from "../services/custom-types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../services/useAuth";
+import DataModifier from "../services/data-modifier";
+import { uploadToCloudinary } from "../services/media-storage";
 
 export default function AddFiles(props: AddFilesProps) {
     const { user } = useAuth();
+    const { insertData } = DataModifier();
     const currentUserId = user ? user.signin_user_id : '';
     const queryClient = useQueryClient();
 
@@ -39,7 +42,35 @@ export default function AddFiles(props: AddFilesProps) {
 
     const uploadFilesMutation = useMutation({
         onMutate: () => setIsUploading(true),
-        mutationFn: async () => {},
+        mutationFn: async () => {
+            const folderName = 'drive_files';
+            const getCurrentDate = new Date();
+            const filesToUpload: { file_name: string; url: string; public_id: string; }[] = [];
+
+            for (const mediaFile of mediaFiles) {
+                const result = await uploadToCloudinary(mediaFile.file, folderName);
+                filesToUpload.push({ 
+                    file_name: result.file_name, 
+                    public_id: result.public_id, 
+                    url: result.url 
+                });
+            }
+
+            filesToUpload.forEach(async (fileToUpload) => {
+                await insertData<FilesDataProps>({
+                    api_url: `http://localhost:1234/files/add`,
+                    data: {
+                        created_at: getCurrentDate.toISOString(),
+                        file_name: fileToUpload.file_name,
+                        files: {
+                            public_id: fileToUpload.public_id,
+                            url: fileToUpload.url
+                        },
+                        user_id: currentUserId
+                    }
+                });
+            });
+        },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`files-${currentUserId}`] }),
         onSettled: () => setIsUploading(false)
     });
@@ -73,27 +104,42 @@ export default function AddFiles(props: AddFilesProps) {
                                         className="w-full h-50 object-cover rounded-lg"
                                         controls
                                     />
-                                ) : mediaFile.file_type.startsWith('text/') ? (
+                                ) : mediaFile.file_type.startsWith('audio/') ? (
                                     <div className="flex justify-center items-center text-white border border-white">
                                         <i className="fa-solid fa-file-lines"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
-                                ) : mediaFile.file_name.includes('.pdf') ? (
+                                ) : mediaFile.file_type.startsWith('text/') ? (
+                                    <div className="flex justify-center items-center text-white border border-white">
+                                        <i className="fa-solid fa-headphones"></i>
+                                        <p>{mediaFile.file_name}</p>
+                                    </div>
+                                ) : mediaFile.file_type.includes('/pdf') ? (
                                     <div className="flex justify-center items-center text-white border border-white">
                                         <i className="fa-solid fa-file-pdf"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
-                                ) : mediaFile.file_name.includes('.xlsx') || mediaFile.file_name.includes('.csv') ? (
+                                ) : mediaFile.file_type.includes('/zip') ? (
+                                    <div className="flex justify-center items-center text-white border border-white">
+                                        <i className="fa-solid fa-file-zipper"></i>
+                                        <p>{mediaFile.file_name}</p>
+                                    </div>
+                                ) : mediaFile.file_type.includes('/sql') ? (
+                                    <div className="flex justify-center items-center text-white border border-white">
+                                        <i className="fa-solid fa-database"></i>
+                                        <p>{mediaFile.file_name}</p>
+                                    </div>
+                                ) : mediaFile.file_type.includes('.sheet') ? (
                                     <div className="flex justify-center items-center text-white border border-white">
                                         <i className="fa-solid fa-file-excel"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
-                                ) : mediaFile.file_name.includes('.docx') ? (
+                                ) : mediaFile.file_type.includes('.document') ? (
                                     <div className="flex justify-center items-center text-white border border-white">
                                         <i className="fa-solid fa-file-word"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
-                                ) : mediaFile.file_name.includes('.pptx') ? (
+                                ) : mediaFile.file_type.includes('.presentation') ? (
                                     <div className="flex justify-center items-center text-white border border-white">
                                         <i className="fa-solid fa-file-powerpoint"></i>
                                         <p>{mediaFile.file_name}</p>
