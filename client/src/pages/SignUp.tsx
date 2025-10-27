@@ -1,12 +1,29 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import useAuth from "../services/useAuth";
 
 export default function SignUp() {
+    const { loading, user, signUp } = useAuth();
+    const navigate = useNavigate();
+
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [username, setUsername] = useState<string>('');
 
-    const signUpButton = async () => {}
+    useEffect(() => {
+        if (user && !loading) navigate('/home', { replace:true });
+    }, [loading, navigate, user]);
+
+    const signUpButton = async (event: React.FormEvent) => {
+        event.preventDefault();
+        const getCurrentDate = new Date();
+        await signUp({ 
+            created_at: getCurrentDate.toISOString(), 
+            email: email, 
+            password: password, 
+            username: username 
+        });
+    }
 
     return (
         <div className="flex justify-center items-center h-screen bg-purple-950">

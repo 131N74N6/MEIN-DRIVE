@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 export type AddFilesProps = {
     setOpenUploader: (value: React.SetStateAction<boolean>) => void;
 }
@@ -72,6 +74,10 @@ export type MediaFilesProps = {
     file_name: string;
     file_type: string;
     preview_url: string;
+}
+
+export type ProtectedRouteProps = {
+    children: ReactNode;
 }
 
 export type SignUpProps = {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import AddFiles from "../components/AddFiles";
 
-export default function Files() {
+export default function Home() {
     const [openUploader, setOpemUploader] = useState<boolean>(false);
     return (
         <div className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-purple-950">
