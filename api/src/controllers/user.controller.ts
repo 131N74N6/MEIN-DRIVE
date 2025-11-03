@@ -54,18 +54,21 @@ async function signUp(req: Request, res: Response): Promise<Response<any, Record
     }
 }
 
-async function getUserData(req: Request, res: Response): Promise<void> {
+async function getUserData(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined> {
     try {
         const currentUserId = req.params.id;
         const findUser = await User.findOne(
             { _id: currentUserId }, 
             { _id: 1, created_at: 1, email: 1, username: 1 }
         );
+
+        if (!findUser) return res.status(404).json({ message: 'User not found' });
+
         res.json({
-            created_at: findUser?.created_at,
-            email: findUser?.email,
-            user_id: findUser?._id,
-            username: findUser?.username
+            created_at: findUser.created_at,
+            email: findUser.email,
+            user_id: findUser._id,
+            username: findUser.username
         });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
