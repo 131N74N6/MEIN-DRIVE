@@ -4,6 +4,7 @@ import AddFiles from "../components/AddFiles";
 import DataModifier from "../services/data-modifier";
 import useAuth from "../services/useAuth";
 import type { FilesDataProps } from "../services/custom-types";
+import FileList from "../components/FileList";
 
 export default function Home() {
     const { currentUserId } = useAuth();
@@ -11,10 +12,8 @@ export default function Home() {
     const [openUploader, setOpenUploader] = useState<boolean>(false);
     
     const { 
-        error, 
         fetchNextPage, 
         isFetchingNextPage, 
-        isLoading, 
         isReachedEnd, 
         paginatedData 
     } = infiniteScroll<FilesDataProps>({
@@ -26,9 +25,15 @@ export default function Home() {
 
     return (
         <div className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-purple-950">
+            <button onClick={() => setOpenUploader(true)}></button>
             {openUploader ? <AddFiles setOpenUploader={setOpenUploader}/> : null}
             <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-[1rem] p-[1rem] border border-purple-400 rounded">
-                <button onClick={() => setOpenUploader(true)}></button>
+                <FileList 
+                    fetchNextPage={fetchNextPage} 
+                    files={paginatedData} 
+                    isFetchingNextPage={isFetchingNextPage}
+                    isReachedEnd={isReachedEnd} 
+                />
             </div>
             <Navbar2/>
             <Navbar1/>
