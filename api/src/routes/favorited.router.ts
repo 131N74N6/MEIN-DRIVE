@@ -2,11 +2,11 @@ import { Router } from 'express';
 import { deleteAllFavoriteFiles, deleteFavoriteFile, getCurrentUserFavorite } from '../controllers/favorited.controller';
 import { checkOwnership, verifyToken } from '../middleware/auth.middleware';
 
-const favoriteRouter = Router();
-favoriteRouter.use(verifyToken);
+const favoriteRoutes = Router();
+favoriteRoutes.use(verifyToken);
 
-favoriteRouter.get('/get-all/:user_id', checkOwnership, getCurrentUserFavorite);
-favoriteRouter.delete('/erase-all/:user_id', deleteAllFavoriteFiles);
-favoriteRouter.delete('/erase/:id', checkOwnership, deleteFavoriteFile);
+favoriteRoutes.get('/get-all/:user_id', checkOwnership, getCurrentUserFavorite);
+favoriteRoutes.delete('/erase-all/:user_id', deleteAllFavoriteFiles);
+favoriteRoutes.delete('/erase/:id', checkOwnership, deleteFavoriteFile);
 
-export default favoriteRouter;
+export default favoriteRoutes;
