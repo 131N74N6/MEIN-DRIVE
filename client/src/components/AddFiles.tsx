@@ -45,31 +45,31 @@ export default function AddFiles(props: AddFilesProps) {
         mutationFn: async () => {
             const folderName = 'drive_files';
             const getCurrentDate = new Date();
-            const filesToUpload: { file_name: string; url: string; public_id: string; }[] = [];
+            const uploadedFiles: { file_name: string; url: string; public_id: string; }[] = [];
 
             for (const mediaFile of mediaFiles) {
                 const result = await uploadToCloudinary(mediaFile.file, folderName);
-                filesToUpload.push({ 
+                uploadedFiles.push({ 
                     file_name: result.file_name, 
                     public_id: result.public_id, 
                     url: result.url 
                 });
             }
 
-            filesToUpload.forEach(async (fileToUpload) => {
+            for (const uploadedFile of uploadedFiles) {
                 await insertData<FilesDataProps>({
                     api_url: `http://localhost:1234/files/add`,
                     data: {
                         created_at: getCurrentDate.toISOString(),
-                        file_name: fileToUpload.file_name,
+                        file_name: uploadedFile.file_name,
                         files: {
-                            public_id: fileToUpload.public_id,
-                            url: fileToUpload.url
+                            public_id: uploadedFile.public_id,
+                            url: uploadedFile.url
                         },
                         user_id: currentUserId
                     }
                 });
-            });
+            }
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`files-${currentUserId}`] }),
         onSettled: () => setIsUploading(false)
