@@ -1,0 +1,27 @@
+import mongoose, { Schema, Types } from "mongoose";
+
+interface IFavoritedFiles {
+    created_at: string;
+    files: {
+        public_id: string;
+        url: string;
+    };
+    file_name: string;
+    user_id: Types.ObjectId;
+    is_favorited: boolean;
+}
+
+const favoritedSchema = new Schema<IFavoritedFiles>({
+    created_at: { type: String, required: true },
+    files: {
+        public_id: { type: String, required: true },
+        url: { type: String, required: true },
+    },
+    file_name: { type: String, required: true },
+    user_id: { type: Schema.Types.ObjectId, required: true },
+    is_favorited: { type: Boolean, required: true }
+});
+
+const Favorited = mongoose.model<IFavoritedFiles>('favorited', favoritedSchema, 'favorited');
+
+export { IFavoritedFiles, Favorited }
