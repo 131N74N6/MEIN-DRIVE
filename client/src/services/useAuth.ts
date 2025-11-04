@@ -30,9 +30,14 @@ export default function useAuth() {
     const token = state.user ? state.user.token : '';
 
     useEffect(() => {
-        const existedUser = localStorage.getItem('user');
-        if (existedUser) dispatch({ type: 'SET_USER', payload: JSON.parse(existedUser) });
-        dispatch({ type: 'SET_LOADING', payload: false });
+        async function initApp() {            
+            const existedUser = localStorage.getItem('user');
+            if (existedUser) dispatch({ type: 'SET_USER', payload: JSON.parse(existedUser) });
+            dispatch({ type: 'SET_LOADING', payload: false });
+            await getCurrentUserData();
+        }
+
+        initApp();
     }, []);
 
     const signIn = async (email: string, password: string): Promise<void> => {
@@ -130,7 +135,6 @@ export default function useAuth() {
     }
 
     return { 
-        getCurrentUserData, 
         currentUserId, 
         loading: state.loading, 
         username: state.username,

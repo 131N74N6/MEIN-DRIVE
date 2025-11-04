@@ -44,12 +44,13 @@ export default function AddFiles(props: AddFilesProps) {
         mutationFn: async () => {
             const folderName = 'drive_files';
             const getCurrentDate = new Date();
-            const uploadedFiles: { file_name: string; url: string; public_id: string; }[] = [];
+            const uploadedFiles: { file_name: string; file_type: string; url: string; public_id: string; }[] = [];
 
             for (const mediaFile of mediaFiles) {
                 const result = await uploadToCloudinary(mediaFile.file, folderName);
                 uploadedFiles.push({ 
                     file_name: result.file_name, 
+                    file_type: result.file_type,
                     public_id: result.public_id, 
                     url: result.url 
                 });
@@ -61,6 +62,7 @@ export default function AddFiles(props: AddFilesProps) {
                     data: {
                         created_at: getCurrentDate.toISOString(),
                         file_name: uploadedFile.file_name,
+                        file_type: uploadedFile.file_type,
                         files: {
                             public_id: uploadedFile.public_id,
                             url: uploadedFile.url

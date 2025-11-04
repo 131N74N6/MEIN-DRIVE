@@ -1,3 +1,4 @@
+import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
 export type AddFilesProps = {
@@ -27,12 +28,14 @@ export type ChangeDataProps<A> = {
 }
 
 export type FilesDataProps = {
+    _id: string;
     created_at: string;
     files: {
         public_id: string;
         url: string;
     }
     file_name: string;
+    file_type: string;
     user_id: string;
 }
 
@@ -41,7 +44,10 @@ export type FileItemProps = {
 }
 
 export type FileListProps = {
+    fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>
     files: FilesDataProps[];
+    isFetchingNextPage: boolean;
+    isReachedEnd: boolean;
 }
 
 export type GetDataProps = {
@@ -95,6 +101,7 @@ export type UserTokenProps = {
 
 export type UploadResult = {
     file_name: string;
+    file_type: string;
     url: string;
     public_id: string;
     resource_type: string;
