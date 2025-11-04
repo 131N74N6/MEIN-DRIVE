@@ -144,6 +144,6 @@ export default function useAuth() {
         created_at: state.createdAt,
         signOut, 
         signUp, 
-        user_token: state.user 
+        token
     }
 }

@@ -3,8 +3,7 @@ import useAuth from "./useAuth";
 import type { ChangeDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "./custom-types";
 
 export default function DataModifier() {
-    const { user } = useAuth();
-    const token = user ? user.token : '';
+    const { token } = useAuth();
 
     const changeData = async <S>(props: ChangeDataProps<S>) => {
         const request = await fetch(props.api_url, {

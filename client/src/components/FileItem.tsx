@@ -27,68 +27,72 @@ export default function FileItem(props: FileItemProps) {
                 </>
             ) : props.file.file_type.startsWith('audio/') ? (
                 <>
-                    <div className="flex justify-center items-center text-white border border-white">
+                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                         <i className="fa-solid fa-headphones"></i>
                     </div>
                     <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
             ) : props.file.file_type.startsWith('text/') ? (
                 <>
-                    <div className="flex justify-center items-center text-white border border-white">
+                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                         <i className="fa-solid fa-file-lines"></i>
                     </div>
                     <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
             ) : props.file.file_type.includes('/pdf') ? (
                 <>
-                    <div className="flex justify-center items-center text-white border border-white">
+                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                         <i className="fa-solid fa-file-pdf"></i>
                     </div>
                     <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
             ) : props.file.file_type.includes('/zip') ? (
                 <>
-                    <div className="flex justify-center items-center text-white border border-white">
+                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                         <i className="fa-solid fa-file-zipper"></i>
                     </div>
                     <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
             ) : props.file.file_type.includes('/sql') ? (
                 <>
-                    <div className="flex justify-center items-center text-white border border-white">
+                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                         <i className="fa-solid fa-database"></i>
                     </div>
                     <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
             ) : props.file.file_type.includes('.sheet') ? (
                 <>
-                    <div className="flex justify-center items-center text-white border border-white">
+                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                         <i className="fa-solid fa-file-excel"></i>
                     </div>
                     <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
             ) : props.file.file_type.includes('.document') ? (
                 <>
-                    <div className="flex justify-center items-center text-white border border-white">
+                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                         <i className="fa-solid fa-file-word"></i>
                     </div>
                     <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
             ) : props.file.file_type.includes('.presentation') ? (
                 <>
-                    <div className="flex justify-center items-center text-white border border-white">
+                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                         <i className="fa-solid fa-file-powerpoint"></i>
                     </div>
                     <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
             ) : (
                 <>
-                    <div className="flex justify-center items-center text-white border border-white">
+                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                         <i className="fa-solid fa-file"></i>
                     </div>
                     <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
             )}
+            <div className="p-[1rem] opacity-0 hover:opacity-100">
+                <button></button>
+                <button></button>
+            </div>
         </div>
     );
 }

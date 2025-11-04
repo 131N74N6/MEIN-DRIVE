@@ -106,54 +106,54 @@ export default function AddFiles(props: AddFilesProps) {
                                         controls
                                     />
                                 ) : mediaFile.file_type.startsWith('audio/') ? (
-                                    <div className="flex justify-center items-center text-white border border-white">
+                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                                         <i className="fa-solid fa-file-lines"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
                                 ) : mediaFile.file_type.startsWith('text/') ? (
-                                    <div className="flex justify-center items-center text-white border border-white">
+                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                                         <i className="fa-solid fa-headphones"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
                                 ) : mediaFile.file_type.includes('/pdf') ? (
-                                    <div className="flex justify-center items-center text-white border border-white">
+                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                                         <i className="fa-solid fa-file-pdf"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
                                 ) : mediaFile.file_type.includes('/zip') ? (
-                                    <div className="flex justify-center items-center text-white border border-white">
+                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                                         <i className="fa-solid fa-file-zipper"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
                                 ) : mediaFile.file_type.includes('/sql') ? (
-                                    <div className="flex justify-center items-center text-white border border-white">
+                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                                         <i className="fa-solid fa-database"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
                                 ) : mediaFile.file_type.includes('.sheet') ? (
-                                    <div className="flex justify-center items-center text-white border border-white">
+                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                                         <i className="fa-solid fa-file-excel"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
                                 ) : mediaFile.file_type.includes('.document') ? (
-                                    <div className="flex justify-center items-center text-white border border-white">
+                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                                         <i className="fa-solid fa-file-word"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
                                 ) : mediaFile.file_type.includes('.presentation') ? (
-                                    <div className="flex justify-center items-center text-white border border-white">
+                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                                         <i className="fa-solid fa-file-powerpoint"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
                                 ) : (
-                                    <div className="flex justify-center items-center text-white border border-white">
+                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
                                         <i className="fa-solid fa-file"></i>
                                         <p>{mediaFile.file_name}</p>
                                     </div>
                                 )}
                                 <button 
                                     type="button"
-                                    className="bg-green-800 text-[1rem] text-white cursor-pointer opacity-0 hover:opacity-100 transition-opacity"
+                                    className="bg-green-800 text-[1rem] text-gray-700 cursor-pointer opacity-0 hover:opacity-100 transition-opacity"
                                     onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
                                         event.stopPropagation();
                                         removeChosenFiles(index);
