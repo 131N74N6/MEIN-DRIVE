@@ -3,15 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../services/useAuth";
 
 export default function SignIn() {
-    const { loading, user, signIn } = useAuth();
+    const { loading, currentUserId, signIn } = useAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     
     useEffect(() => {
-        if (user && !loading) navigate('/home', { replace: true });
-    }, [loading, user, navigate]);
+        if (currentUserId && !loading) navigate('/home', { replace: true });
+    }, [loading, currentUserId, navigate]);
 
     const signInButton = async (event: React.FormEvent) => {
         event.preventDefault();

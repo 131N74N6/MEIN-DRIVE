@@ -32,7 +32,7 @@ async function verifyToken(req: AuthenticatedRequest, res: Response, next: NextF
 }
 
 async function checkOwnership(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-    const requestedUserId = req.params.id;
+    const requestedUserId = req.params.user_id;
   
     if (req.user._id.toString() !== requestedUserId) return res.status(403).json({ message: 'Access denied' });
     

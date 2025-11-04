@@ -56,7 +56,7 @@ async function signUp(req: Request, res: Response): Promise<Response<any, Record
 
 async function getUserData(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined> {
     try {
-        const currentUserId = req.params.id;
+        const currentUserId = req.params.user_id;
         const findUser = await User.findOne(
             { _id: currentUserId }, 
             { _id: 1, created_at: 1, email: 1, username: 1 }

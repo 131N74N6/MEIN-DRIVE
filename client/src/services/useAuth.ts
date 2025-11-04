@@ -25,6 +25,7 @@ const authReducer = (state: AuthStateProps, action: AuthActionProps) => {
 
 export default function useAuth() {
     const [state, dispatch] = useReducer(authReducer, initialState);
+    const currentUserId = state.user ? state.user.signin_user_id : '';
     const navigate = useNavigate();
     const token = state.user ? state.user.token : '';
 
@@ -91,6 +92,12 @@ export default function useAuth() {
         try {
             localStorage.removeItem('user');
             dispatch({ type: 'SET_USER', payload: null });
+            dispatch({ type: 'SET_USER_DATA', payload: {
+                createdAt: '',
+                email: '',
+                userId: '',
+                username: ''
+            }});
             navigate('/sign-in');
         } catch (error) {
             dispatch({ type: 'SET_ERROR', payload: 'failed to sign-out' });
@@ -101,7 +108,7 @@ export default function useAuth() {
 
     const getCurrentUserData = async () => {
         try {
-            const request = await fetch(`http://localhost:1234/user-data/${user?.signin_user_id}`, {
+            const request = await fetch(`http://localhost:1234/user-data/${currentUserId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -123,8 +130,16 @@ export default function useAuth() {
     }
 
     return { 
-        getCurrentUserData, userId, loading, username,
-        error, email, signIn, createdAt,
-        signOut, signUp, user 
+        getCurrentUserData, 
+        currentUserId, 
+        loading: state.loading, 
+        username: state.username,
+        error: state.error, 
+        email: state.email, 
+        signIn, 
+        created_at: state.createdAt,
+        signOut, 
+        signUp, 
+        user_token: state.user 
     }
 }

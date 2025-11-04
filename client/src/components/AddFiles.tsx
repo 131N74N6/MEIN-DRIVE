@@ -6,9 +6,8 @@ import DataModifier from "../services/data-modifier";
 import { uploadToCloudinary } from "../services/media-storage";
 
 export default function AddFiles(props: AddFilesProps) {
-    const { user } = useAuth();
+    const { currentUserId } = useAuth();
     const { insertData } = DataModifier();
-    const currentUserId = user ? user.signin_user_id : '';
     const queryClient = useQueryClient();
 
     const [mediaFiles, setMediaFiles] = useState<MediaFilesProps[]>([]);

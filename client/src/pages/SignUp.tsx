@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../services/useAuth";
 
 export default function SignUp() {
-    const { loading, user, signUp } = useAuth();
+    const { loading, currentUserId, signUp } = useAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState<string>('');
@@ -11,8 +11,8 @@ export default function SignUp() {
     const [username, setUsername] = useState<string>('');
 
     useEffect(() => {
-        if (user && !loading) navigate('/home', { replace:true });
-    }, [loading, navigate, user]);
+        if (currentUserId && !loading) navigate('/home', { replace:true });
+    }, [loading, navigate, currentUserId]);
 
     const signUpButton = async (event: React.FormEvent) => {
         event.preventDefault();
