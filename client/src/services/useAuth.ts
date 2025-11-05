@@ -25,7 +25,7 @@ const authReducer = (state: AuthStateProps, action: AuthActionProps) => {
 
 export default function useAuth() {
     const [state, dispatch] = useReducer(authReducer, initialState);
-    const currentUserId = state.user ? state.user.signin_user_id : '';
+    const currentUserId = state.user ? state.user.user_id : '';
     const navigate = useNavigate();
     const token = state.user ? state.user.token : '';
 
@@ -59,7 +59,7 @@ export default function useAuth() {
             const response: UserTokenProps = await request.json();
             const currentUserToken = {
                 status: response.status,
-                signin_user_id: response.signin_user_id,
+                user_id: response.user_id,
                 token: response.token
             }
 
@@ -115,7 +115,7 @@ export default function useAuth() {
 
     const getCurrentUserData = async () => {
         try {
-            const request = await fetch(`http://localhost:1234/user-data/${currentUserId}`, {
+            const request = await fetch(`http://localhost:1234/users/user-data/${currentUserId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'

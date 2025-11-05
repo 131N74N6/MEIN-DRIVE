@@ -96,7 +96,7 @@ export type SignUpProps = {
 export type UserTokenProps = {
     status: string;
     token: string;
-    signin_user_id: string;
+    user_id: string;
 }
 
 export type UploadResult = {

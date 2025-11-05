@@ -27,7 +27,7 @@ async function signIn(req: Request, res: Response): Promise<Response<any, Record
         res.status(200).json({
             status: 'ok',
             token: generatedToken,
-            signin_user_id: findUser._id
+            user_id: findUser._id
         });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
