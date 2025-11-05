@@ -24,7 +24,7 @@ export default function Home() {
     });
 
     return (
-        <div className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-purple-950">
+        <div className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
             <button onClick={() => setOpenUploader(true)}></button>
             {openUploader ? <AddFiles setOpenUploader={setOpenUploader}/> : null}
             <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-[1rem] p-[1rem] border border-purple-400 rounded">

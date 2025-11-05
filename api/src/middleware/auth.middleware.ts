@@ -32,11 +32,16 @@ async function verifyToken(req: AuthenticatedRequest, res: Response, next: NextF
 }
 
 async function checkOwnership(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-    const requestedUserId = req.params.user_id;
-  
-    if (req.user._id.toString() !== requestedUserId) return res.status(403).json({ message: 'Access denied' });
+    try {        
+        const requestedUserId = req.params.user_id;
     
-    next();
+        if (!req.user) return res.status(401).json({ message: 'User not authenticated' });
+        if (req.user._id.toString() !== requestedUserId) return res.status(403).json({ message: 'Access denied' });
+        
+        next();
+    } catch (error) {
+        res.status(500).json({ message: 'Ownership verification failed' })
+    }
 }
 
 export { checkOwnership, verifyToken }

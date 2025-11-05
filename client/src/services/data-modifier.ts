@@ -104,7 +104,7 @@ export default function DataModifier() {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            method: 'DELETE'
+            method: 'POST'
         });
 
         await request.json();

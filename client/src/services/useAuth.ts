@@ -32,9 +32,11 @@ export default function useAuth() {
     useEffect(() => {
         async function initApp() {            
             const existedUser = localStorage.getItem('user');
-            if (existedUser) dispatch({ type: 'SET_USER', payload: JSON.parse(existedUser) });
+            if (existedUser) {
+                dispatch({ type: 'SET_USER', payload: JSON.parse(existedUser) });
+                await getCurrentUserData();
+            }
             dispatch({ type: 'SET_LOADING', payload: false });
-            await getCurrentUserData();
         }
 
         initApp();
