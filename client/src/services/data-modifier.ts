@@ -36,7 +36,7 @@ export default function DataModifier() {
             queryFn: async () => {
                 const request = await fetch(props.api_url, {
                     headers: { 
-                        'Authentication': `Bearer ${token}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json' 
                     },
                     method: 'GET'
@@ -59,8 +59,8 @@ export default function DataModifier() {
         const fetchers = async ({ pageParam = 1 }: { pageParam?: number }) => {
             const request = await fetch(`${props.api_url}?page=${pageParam}&limit=${props.limit}`, {
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 },
                 method: 'GET'
             });
