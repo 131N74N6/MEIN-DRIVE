@@ -1,15 +1,12 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import useAuth from "./useAuth";
-import type { ChangeDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "./custom-types";
+import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "./custom-types";
 
 export default function DataModifier() {
-    const { token } = useAuth();
-
     const changeData = async <S>(props: ChangeDataProps<S>) => {
         const request = await fetch(props.api_url, {
             body: JSON.stringify(props.data),
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Bearer ${props.token}`,
                 'Content-Type': 'application/json'
             },
             method: 'PUT'
@@ -18,10 +15,10 @@ export default function DataModifier() {
         await request.json();
     }
 
-    const deleteData = async (api_url: string) => {
-        const request = await fetch(api_url, {
+    const deleteData = async (props: DeleteDataProps) => {
+        const request = await fetch(props.api_url, {
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Bearer ${props.token}`,
                 'Content-Type': 'application/json'
             },
             method: 'DELETE'
@@ -32,11 +29,11 @@ export default function DataModifier() {
 
     const getData = async <V>(props: GetDataProps) => {
         const { data, error, isLoading } = useQuery<V, Error>({
-            gcTime: 480000,
+            gcTime: 420000,
             queryFn: async () => {
                 const request = await fetch(props.api_url, {
                     headers: { 
-                        'Authorization': `Bearer ${token}`,
+                        'Authorization': `Bearer ${props.token}`,
                         'Content-Type': 'application/json' 
                     },
                     method: 'GET'
@@ -59,7 +56,7 @@ export default function DataModifier() {
         const fetchers = async ({ pageParam = 1 }: { pageParam?: number }) => {
             const request = await fetch(`${props.api_url}?page=${pageParam}&limit=${props.limit}`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${props.token}`,
                     'Content-Type': 'application/json'
                 },
                 method: 'GET'
@@ -77,7 +74,7 @@ export default function DataModifier() {
             isFetchingNextPage, 
             isLoading 
         } = useInfiniteQuery({
-            gcTime: 480000,
+            gcTime: 420000,
             getNextPageParam: (lastPage, allPages): number | undefined => {
                 if (lastPage.length < props.limit) return;
                 return allPages.length + 1;
@@ -101,7 +98,7 @@ export default function DataModifier() {
         const request = await fetch(props.api_url, {
             body: JSON.stringify(props.data),
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Bearer ${props.token}`,
                 'Content-Type': 'application/json'
             },
             method: 'POST'

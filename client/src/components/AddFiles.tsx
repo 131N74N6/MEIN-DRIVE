@@ -6,7 +6,7 @@ import DataModifier from "../services/data-modifier";
 import { uploadToCloudinary } from "../services/media-storage";
 
 export default function AddFiles(props: AddFilesProps) {
-    const { currentUserId } = useAuth();
+    const { currentUserId, token } = useAuth();
     const { insertData } = DataModifier();
     const queryClient = useQueryClient();
 
@@ -68,7 +68,8 @@ export default function AddFiles(props: AddFilesProps) {
                             url: uploadedFile.url
                         },
                         user_id: currentUserId
-                    }
+                    },
+                    token: token
                 });
             }
         },

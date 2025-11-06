@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../services/useAuth";
+import Loading from "../components/Loading";
 
 export default function SignUp() {
     const { loading, currentUserId, signUp } = useAuth();
@@ -24,6 +25,14 @@ export default function SignUp() {
             username: username 
         });
     }
+    
+        if (loading) {
+            return (
+                <div className="flex justify-center items-center h-screen">
+                    <Loading/>
+                </div>
+            );
+        }
 
     return (
         <div className="flex justify-center items-center h-screen bg-purple-950">

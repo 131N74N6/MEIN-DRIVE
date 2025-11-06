@@ -25,6 +25,12 @@ export type AuthActionProps =
 export type ChangeDataProps<A> = {
     api_url: string;
     data: Partial<Omit<A, '_id'>>;
+    token: string;
+}
+
+export type DeleteDataProps = {
+    api_url: string;
+    token: string;
 }
 
 export type FilesDataProps = {
@@ -54,6 +60,7 @@ export type GetDataProps = {
     api_url: string;
     stale_time: number;
     query_key: string[];
+    token: string;
 }
 
 export type GetCurrentUserProps = {
@@ -68,11 +75,13 @@ export type InfiniteScrollProps = {
     limit: number;
     stale_time: number;
     query_key: string[];
+    token: string;
 }
 
 export type InputDataProps<A> = {
     api_url: string;
     data: Omit<A, '_id'>;
+    token: string;
 }
 
 export type MediaFilesProps = {
