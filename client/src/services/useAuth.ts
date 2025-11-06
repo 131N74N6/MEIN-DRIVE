@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const initialState: AuthStateProps = {
     user: null,
-    loading: false,
+    loading: true, // Set initial loading to true
     error: null,
     userId: '',
     username: '',
@@ -16,8 +16,19 @@ const authReducer = (state: AuthStateProps, action: AuthActionProps) => {
     switch (action.type) {
         case "SET_LOADING": return { ...state, loading: action.payload }
         case "SET_ERROR": return { ...state, error: action.payload, loading: false }
-        case "SET_USER": return { ...state, user: action.payload, error: null };
-        case "SET_USER_DATA": return { ...state, ...action.payload, error: null };
+        case "SET_USER": 
+            return { 
+                ...state, 
+                user: action.payload, 
+                userId: action.payload?.user_id || '', // Ensure userId is set
+                error: null 
+            };
+        case "SET_USER_DATA": 
+            return { 
+                ...state, 
+                ...action.payload, 
+                error: null 
+            };
         case "RESET_STATE": return initialState;
         default: return state;
     }
@@ -27,8 +38,10 @@ export default function useAuth() {
     const [state, dispatch] = useReducer(authReducer, initialState);
     const navigate = useNavigate();
 
-    // Gunakan useCallback untuk menghindari recreating function
+    // Use useCallback to prevent unnecessary recreations
     const getCurrentUserData = useCallback(async (userId: string, token: string) => {
+        if (!userId || !token) return;
+        
         try {
             const request = await fetch(`http://localhost:1234/users/user-data/${userId}`, {
                 headers: {
@@ -44,27 +57,37 @@ export default function useAuth() {
 
             const response: GetCurrentUserProps = await request.json();
 
-            dispatch({ type: 'SET_USER_DATA', payload: {
-                createdAt: new Date(response.created_at).toLocaleString(),
-                email: response.email,
-                userId: response.user_id,
-                username: response.username
-            }});
+            dispatch({ 
+                type: 'SET_USER_DATA', 
+                payload: {
+                    createdAt: new Date(response.created_at).toLocaleString(),
+                    email: response.email,
+                    userId: response.user_id,
+                    username: response.username
+                }
+            });
         } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: 'Failed to get user data' });
+            console.error('Failed to get user data:', error);
+            // Don't set error here to avoid blocking navigation
         }
     }, []);
 
     useEffect(() => {
-        async function initApp() {            
-            const existedUser = localStorage.getItem('user');
-            if (existedUser) {
-                const userData = JSON.parse(existedUser);
-                dispatch({ type: 'SET_USER', payload: userData });
-                await getCurrentUserData(userData.user_id, userData.token);
+        const initApp = async () => {            
+            try {
+                const existedUser = localStorage.getItem('user');
+                if (existedUser) {
+                    const userData = JSON.parse(existedUser);
+                    dispatch({ type: 'SET_USER', payload: userData });
+                    // Get user data in background, don't wait for it
+                    getCurrentUserData(userData.user_id, userData.token);
+                }
+            } catch (error) {
+                console.error('Init app error:', error);
+            } finally {
+                dispatch({ type: 'SET_LOADING', payload: false });
             }
-            dispatch({ type: 'SET_LOADING', payload: false });
-        }
+        };
 
         initApp();
     }, [getCurrentUserData]);
@@ -92,15 +115,15 @@ export default function useAuth() {
                 token: response.token
             }
 
+            // Set user immediately for navigation
             dispatch({ type: 'SET_USER', payload: currentUserToken });
             localStorage.setItem('user', JSON.stringify(currentUserToken));
             
-            // Get user data immediately after successful sign in
-            await getCurrentUserData(response.user_id, response.token);
+            // Get additional user data in background
+            getCurrentUserData(response.user_id, response.token);
             
         } catch (error: any) {
             dispatch({ type: 'SET_ERROR', payload: error.message || 'Failed to sign in' });
-        } finally {
             dispatch({ type: 'SET_LOADING', payload: false });
         }
     }
@@ -152,6 +175,6 @@ export default function useAuth() {
         created_at: state.createdAt,
         signOut, 
         signUp, 
-        token: state.user ? state.user.token : ''
+        token: state.user?.token || ''
     }
 }

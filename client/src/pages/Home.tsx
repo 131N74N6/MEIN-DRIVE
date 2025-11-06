@@ -8,7 +8,7 @@ import FileList from "../components/FileList";
 import Loading from "../components/Loading";
 
 export default function Home() {
-    const { currentUserId } = useAuth();
+    const { currentUserId, token } = useAuth();
     const { infiniteScroll } = DataModifier();
     const [openUploader, setOpenUploader] = useState<boolean>(false);
     
@@ -23,14 +23,15 @@ export default function Home() {
         api_url: `http://localhost:1234/files/get-all/${currentUserId}`,
         limit: 14,
         query_key: [`all-files-${currentUserId}`],
-        stale_time: 600000
+        stale_time: 600000,
+        token: token
     });
 
     return (
         <div className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
-            <button onClick={() => setOpenUploader(true)}>Add Files +</button>
             {openUploader ? <AddFiles setOpenUploader={setOpenUploader}/> : null}
             <div className="flex flex-col p-[1rem] gap-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full bg-[#1a1a1a]">
+                <button onClick={() => setOpenUploader(true)}>Add Files +</button>
                 {isLoading ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
