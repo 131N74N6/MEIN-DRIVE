@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../services/useAuth";
+import Loading from "../components/Loading";
 
 export default function SignIn() {
     const { loading, currentUserId, signIn } = useAuth();
@@ -16,6 +17,14 @@ export default function SignIn() {
     const signInButton = async (event: React.FormEvent) => {
         event.preventDefault();
         await signIn(email, password);
+    }
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Loading/>
+            </div>
+        );
     }
 
     return (

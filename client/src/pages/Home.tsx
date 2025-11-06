@@ -5,6 +5,7 @@ import DataModifier from "../services/data-modifier";
 import useAuth from "../services/useAuth";
 import type { FilesDataProps } from "../services/custom-types";
 import FileList from "../components/FileList";
+import Loading from "../components/Loading";
 
 export default function Home() {
     const { currentUserId } = useAuth();
@@ -12,8 +13,10 @@ export default function Home() {
     const [openUploader, setOpenUploader] = useState<boolean>(false);
     
     const { 
+        error,
         fetchNextPage, 
         isFetchingNextPage, 
+        isLoading,
         isReachedEnd, 
         paginatedData 
     } = infiniteScroll<FilesDataProps>({
@@ -25,15 +28,31 @@ export default function Home() {
 
     return (
         <div className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
-            <button onClick={() => setOpenUploader(true)}></button>
+            <button onClick={() => setOpenUploader(true)}>Add Files +</button>
             {openUploader ? <AddFiles setOpenUploader={setOpenUploader}/> : null}
-            <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-[1rem] p-[1rem] border border-purple-400 rounded">
-                <FileList 
-                    fetchNextPage={fetchNextPage} 
-                    files={paginatedData} 
-                    isFetchingNextPage={isFetchingNextPage}
-                    isReachedEnd={isReachedEnd} 
-                />
+            <div className="flex flex-col p-[1rem] gap-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full bg-[#1a1a1a]">
+                {isLoading ? (
+                    <div className="flex justify-center items-center h-full">
+                        <Loading/>
+                    </div>
+                ) : paginatedData ? (
+                    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-[1rem] p-[1rem] border border-purple-400 rounded">
+                        <FileList 
+                            fetchNextPage={fetchNextPage} 
+                            files={paginatedData} 
+                            isFetchingNextPage={isFetchingNextPage}
+                            isReachedEnd={isReachedEnd} 
+                        />
+                    </div>
+                ) : error ? (
+                    <div className="flex justify-center items-center h-full">
+                        <span className="text-[2rem] font-[600] text-purple-700">{error.message}</span>
+                    </div>
+                ) : (
+                    <div className="flex justify-center items-center h-full bg-[#1a1a1a]">
+                        <span className="text-[2rem] font-[600] text-purple-700">Failed to get posts</span>
+                    </div>
+                )}
             </div>
             <Navbar2/>
             <Navbar1/>

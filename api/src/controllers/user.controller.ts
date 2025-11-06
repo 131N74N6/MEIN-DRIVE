@@ -19,7 +19,7 @@ async function signIn(req: Request, res: Response): Promise<Response<any, Record
         if (!isPasswordMatch) return res.status(404).json({ message: 'incorrect password' });
 
         const generatedToken = jwt.sign(
-            { id: findUser._id, email, password },
+            { user_id: findUser._id },
             process.env.JWT_TOKEN || 'jwt key',
             { expiresIn: '1h' }
         );
