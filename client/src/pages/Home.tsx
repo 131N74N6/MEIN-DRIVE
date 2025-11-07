@@ -20,7 +20,7 @@ export default function Home() {
         isReachedEnd, 
         paginatedData 
     } = infiniteScroll<FilesDataProps>({
-        api_url: `http://localhost:1234/files/get-all/${currentUserId}`,
+        api_url: currentUserId ? `http://localhost:1234/files/get-all/${currentUserId}` : '',
         limit: 14,
         query_key: [`all-files-${currentUserId}`],
         stale_time: 600000,
