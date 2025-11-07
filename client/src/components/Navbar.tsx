@@ -5,7 +5,7 @@ export function Navbar1() {
     const { username, signOut } = useAuth();
 
     return (
-        <nav className="md:w-1/4 md:flex flex-col gap-[1rem] p-[1rem] hidden shrink-0 shadow-[0_0_4px_#1a1a1a] bg-white">
+        <nav className="md:w-1/4 md:flex flex-col gap-[1rem] rounded p-[1rem] hidden shrink-0 shadow-[0_0_4px_#1a1a1a] bg-white">
             <div className="text-gray-700 font-[500] text-[1rem]">{username}</div>
             <Link to={'/home'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
                 <i className="fa-solid fa-house"></i>
@@ -26,7 +26,7 @@ export function Navbar1() {
 export function Navbar2() {
     const { signOut, username } = useAuth();
     return (
-        <div className="md:hidden flex justify-center gap-[1rem] shrink-0 shadow-[0_0_4px_#1a1a1a] bg-white p-[1rem]">
+        <nav className="md:hidden flex justify-center rounded gap-[1rem] shrink-0 shadow-[0_0_4px_#1a1a1a] bg-white p-[1rem]">
             <Link to={'/home'} className="text-gray-700 font-[500] text-[1rem]">
                 <i className="fa-solid fa-house"></i>
             </Link>
@@ -37,6 +37,6 @@ export function Navbar2() {
             <button onClick={async () => await signOut()} className="cursor-pointer text-gray-700 font-[500] text-[1rem]">
                 <i className="fa-solid fa-door-open"></i>
             </button>
-        </div>
+        </nav>
     )
 }

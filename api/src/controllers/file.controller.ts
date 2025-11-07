@@ -27,7 +27,7 @@ async function getAllFiles(req: Request, res: Response): Promise<void> {
 
 async function deleteAllFiles(req: Request, res: Response): Promise<void> {
     try {
-        const getUserId = req.params.id;
+        const getUserId = req.params.user_id;
         const getUserFiles = await File.find({ user_id: getUserId });
         const deletePromise = getUserFiles.map(user_file => {
             return v2.uploader.destroy(user_file.files.public_id);

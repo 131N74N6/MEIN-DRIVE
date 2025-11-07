@@ -84,14 +84,14 @@ export default function AddFiles(props: AddFilesProps) {
 
     return (
         <div className="flex justify-center items-center fixed inset-0 z-20 bg-[rgba(0,0,0,0.66)]">
-            <form onSubmit={uploadFiles} className="flex flex-col gap-[1rem]">
-                <input onChange={handleChosenFiles} type="file" ref={fileInputRef} className="hidden"/>
+            <form onSubmit={uploadFiles} className="flex flex-col gap-[1rem] bg-white p-[1rem]">
+                <input onChange={handleChosenFiles} multiple type="file" ref={fileInputRef} className="hidden"/>
                 {mediaFiles.length === 0 ? (                    
                     <div className="flex flex-col items-center justify-center text-purple-400" onClick={() => fileInputRef.current?.click()}>
                         <span className="text-lg">Click to select images or videos</span>
                     </div>
                 ) : (
-                    <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1rem] p-[1rem]">
+                    <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1rem] p-[1rem] border border-gray-400">
                         {mediaFiles.map((mediaFile, index) => (
                             <div className="relative">
                                 {mediaFile.file_type.startsWith('image/') ? (
@@ -154,7 +154,7 @@ export default function AddFiles(props: AddFilesProps) {
                                 )}
                                 <button 
                                     type="button"
-                                    className="bg-green-800 text-[1rem] text-gray-700 cursor-pointer opacity-0 hover:opacity-100 transition-opacity"
+                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-[1rem] w-6 h-6 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity"
                                     onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
                                         event.stopPropagation();
                                         removeChosenFiles(index);
@@ -170,7 +170,7 @@ export default function AddFiles(props: AddFilesProps) {
                     <button 
                         type="submit" 
                         disabled={isUploading}
-                        className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
+                        className="bg-blue-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                     >
                         Upload
                     </button>
@@ -178,7 +178,7 @@ export default function AddFiles(props: AddFilesProps) {
                         type="button" 
                         disabled={isUploading}
                         onClick={() => props.setOpenUploader(false)}
-                        className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
+                        className="bg-gray-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                     >
                         <i className="fa-solid fa-xmark"></i>
                     </button>

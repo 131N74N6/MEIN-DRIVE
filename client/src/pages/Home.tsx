@@ -30,21 +30,19 @@ export default function Home() {
     return (
         <div className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
             {openUploader ? <AddFiles setOpenUploader={setOpenUploader}/> : null}
-            <div className="flex flex-col p-[1rem] gap-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full bg-[#1a1a1a]">
+            <div className="flex flex-col p-[1rem] gap-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full shadow-[0_0_4px_#1a1a1a] rounded bg-white">
                 <button onClick={() => setOpenUploader(true)}>Add Files +</button>
                 {isLoading ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
                     </div>
                 ) : paginatedData ? (
-                    <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-[1rem] p-[1rem] border border-purple-400 rounded">
-                        <FileList 
-                            fetchNextPage={fetchNextPage} 
-                            files={paginatedData} 
-                            isFetchingNextPage={isFetchingNextPage}
-                            isReachedEnd={isReachedEnd} 
-                        />
-                    </div>
+                    <FileList 
+                        fetchNextPage={fetchNextPage} 
+                        files={paginatedData} 
+                        isFetchingNextPage={isFetchingNextPage}
+                        isReachedEnd={isReachedEnd} 
+                    />
                 ) : error ? (
                     <div className="flex justify-center items-center h-full">
                         <span className="text-[2rem] font-[600] text-purple-700">{error.message}</span>
