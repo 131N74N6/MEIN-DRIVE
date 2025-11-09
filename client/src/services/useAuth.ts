@@ -79,7 +79,6 @@ export default function useAuth() {
                 if (existedUser) {
                     const userData = JSON.parse(existedUser);
                     dispatch({ type: 'SET_USER', payload: userData });
-                    // Get user data in background, don't wait for it
                     getCurrentUserData(userData.user_id, userData.token);
                 }
             } catch (error) {
@@ -114,12 +113,10 @@ export default function useAuth() {
                 user_id: response.user_id,
                 token: response.token
             }
-
-            // Set user immediately for navigation
+            
             dispatch({ type: 'SET_USER', payload: currentUserToken });
             localStorage.setItem('user', JSON.stringify(currentUserToken));
             
-            // Get additional user data in background
             getCurrentUserData(response.user_id, response.token);
             
         } catch (error: any) {
