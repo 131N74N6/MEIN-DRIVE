@@ -121,6 +121,7 @@ export default function useAuth() {
             
         } catch (error: any) {
             dispatch({ type: 'SET_ERROR', payload: error.message || 'Failed to sign in' });
+        } finally {
             dispatch({ type: 'SET_LOADING', payload: false });
         }
     }

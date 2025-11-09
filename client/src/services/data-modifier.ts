@@ -29,7 +29,7 @@ export default function DataModifier() {
 
     const getData = async <V>(props: GetDataProps) => {
         const { data, error, isLoading } = useQuery<V, Error>({
-            gcTime: 420000,
+            gcTime: 600000,
             queryFn: async () => {
                 const request = await fetch(props.api_url, {
                     headers: { 
@@ -74,7 +74,7 @@ export default function DataModifier() {
             isFetchingNextPage, 
             isLoading 
         } = useInfiniteQuery({
-            gcTime: 420000,
+            gcTime: 600000,
             getNextPageParam: (lastPage, allPages): number | undefined => {
                 if (lastPage.length < props.limit) return;
                 return allPages.length + 1;
