@@ -11,6 +11,10 @@ export function Navbar1() {
                 <i className="fa-solid fa-house"></i>
                 <span>Home</span>
             </Link>
+            <Link to={'/add-file'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
+                <i className="fa-solid fa-plus"></i>
+                <span>Add File</span>
+            </Link>
             <Link to={'/favorite'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
                 <i className="fa-solid fa-star"></i>
                 <span>Favorite</span>
@@ -32,6 +36,9 @@ export function Navbar2() {
             </Link>
             <Link to={'/favorite'} className="text-gray-700 font-[500] text-[1rem]">
                 <i className="fa-solid fa-star"></i>
+            </Link>
+            <Link to={'/add-file'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
+                <i className="fa-solid fa-plus"></i>
             </Link>
             <div className="text-gray-700 font-[500] text-[1rem]">{username[0]}</div>
             <button onClick={async () => await signOut()} className="cursor-pointer text-gray-700 font-[500] text-[1rem]">

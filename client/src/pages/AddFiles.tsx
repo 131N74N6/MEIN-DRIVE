@@ -5,6 +5,7 @@ import useAuth from "../services/useAuth";
 import DataModifier from "../services/data-modifier";
 import { uploadToCloudinary } from "../services/media-storage";
 import { Link } from "react-router-dom";
+import { Navbar1, Navbar2 } from "../components/Navbar";
 
 export default function AddFiles() {
     const { currentUserId, token } = useAuth();
@@ -74,7 +75,7 @@ export default function AddFiles() {
                 });
             }
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`files-${currentUserId}`] }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] }),
         onSettled: () => setIsUploading(false)
     });
 
@@ -84,15 +85,15 @@ export default function AddFiles() {
     }
 
     return (
-        <div className="flex justify-center items-center fixed inset-0 z-20 bg-[rgba(0,0,0,0.66)]">
-            <form onSubmit={uploadFiles} className="flex flex-col gap-[1rem] bg-white p-[1rem]">
+        <section className="flex gap-[1rem] p-[1rem] md:flex-row flex-col h-screen">
+            <form onSubmit={uploadFiles} className="flex flex-col gap-[1rem] min-h-[679px] bg-white p-[1rem] w-full md:w-3/4 shadow-[0_0_4px_#1a1a1a] rounded">
                 <input onChange={handleChosenFiles} multiple type="file" ref={fileInputRef} className="hidden"/>
                 {mediaFiles.length === 0 ? (                    
-                    <div className="flex flex-col items-center justify-center text-purple-400" onClick={() => fileInputRef.current?.click()}>
+                    <div className="flex items-center h-full justify-center text-gray-500 border border-dashed cursor-pointer border-gray-600" onClick={() => fileInputRef.current?.click()}>
                         <span className="text-lg">Click to select images or videos</span>
                     </div>
                 ) : (
-                    <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1rem] p-[1rem] border border-gray-400">
+                    <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1rem] p-[1rem] border border-gray-400 overflow-y-auto">
                         {mediaFiles.map((mediaFile, index) => (
                             <div className="relative">
                                 {mediaFile.file_type.startsWith('image/') ? (
@@ -178,6 +179,8 @@ export default function AddFiles() {
                     </button>
                 </div>
             </form>
-        </div>
+            <Navbar1/>
+            <Navbar2/>
+        </section>
     );
 }
