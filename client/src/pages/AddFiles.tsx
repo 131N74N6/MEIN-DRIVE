@@ -41,20 +41,28 @@ export default function AddFiles() {
         setMediaFiles(prev => prev.filter((_, i) => i !== index));
     }
 
+    const getResourceType = (fileType: string): 'image' | 'video' | 'raw' => {
+        if (fileType.startsWith('image/')) return 'image';
+        if (fileType.startsWith('video/')) return 'video';
+        return 'raw';
+    }
+
     const uploadFilesMutation = useMutation({
         onMutate: () => setIsUploading(true),
         mutationFn: async () => {
             const folderName = 'drive_files';
             const getCurrentDate = new Date();
-            const uploadedFiles: { file_name: string; file_type: string; url: string; public_id: string; }[] = [];
+            const uploadedFiles: { file_name: string; file_type: string; url: string; public_id: string; resource_type: string; }[] = [];
 
             for (const mediaFile of mediaFiles) {
                 const result = await uploadToCloudinary(mediaFile.file, folderName);
+                const resourceType = getResourceType(mediaFile.file_type);
                 uploadedFiles.push({ 
                     file_name: result.file_name, 
                     file_type: result.file_type,
                     public_id: result.public_id, 
-                    url: result.url 
+                    resource_type: resourceType,
+                    url: result.url, 
                 });
             }
 
@@ -65,6 +73,7 @@ export default function AddFiles() {
                         created_at: getCurrentDate.toISOString(),
                         files: {
                             public_id: uploadedFile.public_id,
+                            resource_type: uploadedFile.resource_type,
                             url: uploadedFile.url
                         },
                         file_name: uploadedFile.file_name,

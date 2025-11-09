@@ -5,6 +5,7 @@ type IFile ={
     files: {
         public_id: string;
         url: string;
+        resource_type: string;
     };
     file_name: string;
     file_type: string;
@@ -16,6 +17,7 @@ const fileSchema = new Schema<IFile>({
     files: {
         public_id: { type: String, required: true },
         url: { type: String, required: true },
+        resource_type: { type: String, required: true, enum: ['image', 'video', 'raw'] }
     },
     file_name: { type: String, required: true },
     file_type: { type: String, required: true },

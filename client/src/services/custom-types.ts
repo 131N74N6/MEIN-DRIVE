@@ -35,6 +35,7 @@ export type FilesDataProps = {
     files: {
         public_id: string;
         url: string;
+        resource_type: string;
     }
     file_name: string;
     file_type: string;

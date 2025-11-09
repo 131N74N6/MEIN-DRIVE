@@ -21,9 +21,9 @@ async function uploadToCloudinary(chosenFile: File, folderName: string): Promise
     return {
         file_name: chosenFile.name,
         file_type: chosenFile.type,
-        url: response.secure_url,
         public_id: response.public_id,
-        resource_type: response.resource_type
+        resource_type: response.resource_type,
+        url: response.secure_url,
     }
 }
 
