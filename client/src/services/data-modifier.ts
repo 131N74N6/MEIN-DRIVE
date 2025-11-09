@@ -97,7 +97,10 @@ export default function DataModifier() {
     const insertData = async <S>(props: InputDataProps<S>) => {
         const request = await fetch(props.api_url, {
             body: JSON.stringify(props.data),
-            headers: { 'Authorization': `Bearer ${props.token}` },
+            headers: { 
+                'Authorization': `Bearer ${props.token}`,
+                'Content-Type': 'application/json'
+            },
             method: 'POST'
         });
 

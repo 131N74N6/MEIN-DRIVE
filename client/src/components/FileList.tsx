@@ -18,7 +18,9 @@ export default function FileList(props: FileListProps) {
             </div>
             <div className="flex justify-center">
                 {props.isFetchingNextPage ?  <Loading/> : null}
-                {props.isReachedEnd ? (
+                {props.files.length < 14 ? (
+                    <></>
+                ) : props.isReachedEnd ? (
                     <p className="text-gray-700 font-[500] text-center text-[1rem]">No More Files to Show</p>
                 ) : (
                     <button 

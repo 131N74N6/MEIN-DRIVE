@@ -91,6 +91,7 @@ export default function FileItem(props: FileItemProps) {
             )}
             <div className="p-[1rem] opacity-0 hover:opacity-100">
                 <button></button>
+                <button></button>
             </div>
         </div>
     );
