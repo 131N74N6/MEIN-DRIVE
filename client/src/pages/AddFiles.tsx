@@ -1,11 +1,12 @@
 import { useRef, useState } from "react"
-import type { AddFilesProps, FilesDataProps, MediaFilesProps } from "../services/custom-types";
+import type { FilesDataProps, MediaFilesProps } from "../services/custom-types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../services/useAuth";
 import DataModifier from "../services/data-modifier";
 import { uploadToCloudinary } from "../services/media-storage";
+import { Link } from "react-router-dom";
 
-export default function AddFiles(props: AddFilesProps) {
+export default function AddFiles() {
     const { currentUserId, token } = useAuth();
     const { insertData } = DataModifier();
     const queryClient = useQueryClient();
@@ -166,21 +167,14 @@ export default function AddFiles(props: AddFilesProps) {
                         ))}
                     </div>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.5rem]">                    
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.5rem]">
+                    <Link className="bg-gray-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer" to={'/home'}>Back</Link>
                     <button 
                         type="submit" 
                         disabled={isUploading}
                         className="bg-blue-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                     >
                         Upload
-                    </button>
-                    <button 
-                        type="button" 
-                        disabled={isUploading}
-                        onClick={() => props.setOpenUploader(false)}
-                        className="bg-gray-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
-                    >
-                        <i className="fa-solid fa-xmark"></i>
                     </button>
                 </div>
             </form>

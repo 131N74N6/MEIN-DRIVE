@@ -5,6 +5,7 @@ import SignIn from "./pages/SignIn";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Favorited from "./pages/Favorited";
+import AddFiles from "./pages/AddFiles";
 
 const queryClient = new QueryClient();
 
@@ -17,6 +18,7 @@ export default function App() {
                     <Route path='/sign-up' element={<SignUp/>}/>
                     <Route path='/home' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
                     <Route path='/favorite' element={<ProtectedRoute><Favorited/></ProtectedRoute>}/>
+                    <Route path='/add-file' element={<ProtectedRoute><AddFiles/></ProtectedRoute>}/>
                     <Route path="/" element={<Navigate to="/home" replace/>}/>
                     <Route path="*" element={<Navigate to="/sign-in" replace/>}/>
                 </Routes>

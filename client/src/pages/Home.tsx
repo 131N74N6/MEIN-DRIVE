@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
-import AddFiles from "../components/AddFiles";
 import DataModifier from "../services/data-modifier";
 import useAuth from "../services/useAuth";
 import type { FilesDataProps } from "../services/custom-types";
@@ -10,7 +8,6 @@ import Loading from "../components/Loading";
 export default function Home() {
     const { currentUserId, token } = useAuth();
     const { infiniteScroll } = DataModifier();
-    const [openUploader, setOpenUploader] = useState<boolean>(false);
     
     const { 
         error,
@@ -29,9 +26,7 @@ export default function Home() {
 
     return (
         <div className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
-            {openUploader ? <AddFiles setOpenUploader={setOpenUploader}/> : null}
             <div className="flex flex-col p-[1rem] gap-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full shadow-[0_0_4px_#1a1a1a] rounded bg-white">
-                <button onClick={() => setOpenUploader(true)}>Add Files +</button>
                 {isLoading ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
