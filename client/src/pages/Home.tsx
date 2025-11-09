@@ -24,9 +24,6 @@ export default function Home() {
         token: token
     });
 
-    console.log(token);
-    console.log(currentUserId);
-
     return (
         <div className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
             <div className="flex flex-col p-[1rem] gap-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full shadow-[0_0_4px_#1a1a1a] rounded bg-white">
@@ -42,12 +39,12 @@ export default function Home() {
                         isReachedEnd={isReachedEnd} 
                     />
                 ) : error ? (
-                    <div className="flex justify-center items-center h-full">
-                        <span className="text-[2rem] font-[600] text-purple-700">{error.message}</span>
+                    <div className="flex justify-center items-center h-full bg-white">
+                        <span className="text-[2rem] font-[600] text-gray-700">{error.message}</span>
                     </div>
                 ) : (
-                    <div className="flex justify-center items-center h-full bg-[#1a1a1a]">
-                        <span className="text-[2rem] font-[600] text-purple-700">Failed to get posts</span>
+                    <div className="flex justify-center items-center h-full bg-white">
+                        <span className="text-[2rem] font-[600] text-gray-700">Failed to get posts</span>
                     </div>
                 )}
             </div>

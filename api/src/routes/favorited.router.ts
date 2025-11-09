@@ -3,10 +3,9 @@ import { deleteAllFavoriteFiles, deleteFavoriteFile, getCurrentUserFavorite } fr
 import { checkOwnership, verifyToken } from '../middleware/auth.middleware';
 
 const favoriteRoutes = Router();
-favoriteRoutes.use(verifyToken);
 
-favoriteRoutes.get('/get-all/:user_id', checkOwnership, getCurrentUserFavorite);
-favoriteRoutes.delete('/erase-all/:user_id', deleteAllFavoriteFiles);
-favoriteRoutes.delete('/erase/:id', checkOwnership, deleteFavoriteFile);
+favoriteRoutes.get('/get-all/:user_id', verifyToken, checkOwnership, getCurrentUserFavorite);
+favoriteRoutes.delete('/erase-all/:user_id', verifyToken, checkOwnership, deleteAllFavoriteFiles);
+favoriteRoutes.delete('/erase/:id', verifyToken, deleteFavoriteFile);
 
 export default favoriteRoutes;
