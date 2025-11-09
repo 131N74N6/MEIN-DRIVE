@@ -17,7 +17,7 @@ export default function Favorited() {
         isReachedEnd,
         paginatedData,
     } = infiniteScroll<FilesDataProps>({
-        api_url: `http://localhost:1234/favorited/get-all/${currentUserId}`,
+        api_url: currentUserId ? `http://localhost:1234/favorited/get-all/${currentUserId}` : currentUserId,
         limit: 14,
         query_key: [`all-favorited-files-${currentUserId}`],
         stale_time: 600000,

@@ -63,12 +63,12 @@ export default function AddFiles() {
                     api_url: `http://localhost:1234/files/add`,
                     data: {
                         created_at: getCurrentDate.toISOString(),
-                        file_name: uploadedFile.file_name,
-                        file_type: uploadedFile.file_type,
                         files: {
                             public_id: uploadedFile.public_id,
                             url: uploadedFile.url
                         },
+                        file_name: uploadedFile.file_name,
+                        file_type: uploadedFile.file_type,
                         user_id: currentUserId
                     },
                     token: token
@@ -93,7 +93,7 @@ export default function AddFiles() {
                         <span className="text-lg">Click to select images or videos</span>
                     </div>
                 ) : (
-                    <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1rem] p-[1rem] border border-gray-400 overflow-y-auto">
+                    <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[1rem] p-[1rem] border border-gray-400 overflow-y-auto">
                         {mediaFiles.map((mediaFile, index) => (
                             <div className="relative">
                                 {mediaFile.file_type.startsWith('image/') ? (

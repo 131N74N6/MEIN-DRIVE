@@ -7,6 +7,7 @@ interface IFavoritedFiles {
         url: string;
     };
     file_name: string;
+    file_type: string;
     user_id: Types.ObjectId;
 }
 
@@ -17,6 +18,7 @@ const favoritedSchema = new Schema<IFavoritedFiles>({
         url: { type: String, required: true },
     },
     file_name: { type: String, required: true },
+    file_type: { type: String, required: true },
     user_id: { type: Schema.Types.ObjectId, required: true }
 });
 
