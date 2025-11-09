@@ -95,7 +95,7 @@ export default function AddFiles() {
                 ) : (
                     <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[1rem] p-[1rem] border border-gray-400 overflow-y-auto">
                         {mediaFiles.map((mediaFile, index) => (
-                            <div className="relative">
+                            <div className="relative" key={`${mediaFile.file_name}_${index}`}>
                                 {mediaFile.file_type.startsWith('image/') ? (
                                     <img 
                                         src={mediaFile.preview_url} 

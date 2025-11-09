@@ -43,7 +43,7 @@ export default function SignIn() {
     }
 
     return (
-        <div className="flex justify-center items-center h-screen bg-purple-950">
+        <section className="flex justify-center items-center h-screen bg-purple-950">
             <form onSubmit={signInButton} className="bg-purple-950 border border-purple-300 p-[1rem] w-[300px] flex flex-col gap-[1rem]">
                 <h3 className="text-purple-400 font-[500] text-[1.3rem] text-center">Welcome</h3>
                 <div className="flex flex-col gap-[1rem]">
@@ -70,6 +70,6 @@ export default function SignIn() {
                 <button type="submit" className="bg-purple-400 cursor-pointer text-purple-950 font-[500] text-[0.9rem] p-[0.4rem]">Sign In</button>
                 {showError ? <p className="bg-gray-400 text-red-500 p-[0.5rem]">{errorMsg}</p> : null}
             </form>
-        </div>
+        </section>
     );
 }

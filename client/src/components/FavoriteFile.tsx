@@ -89,9 +89,10 @@ export default function FileItem(props: FileItemProps) {
                     <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
             )}
-            <div className="p-[1rem] opacity-0 hover:opacity-100">
-                <button></button>
-                <button></button>
+            <div className="p-[1rem] opacity-0 hover:opacity-100 transition-opacity">
+                <button type="button" className="cursor-pointer text-gray-700 font-[500] text-[1rem]">
+                    <i className="fa-solid fa-trash"></i>
+                </button>
             </div>
         </div>
     );

@@ -4,10 +4,12 @@ import useAuth from "../services/useAuth";
 import type { FilesDataProps } from "../services/custom-types";
 import FileList from "../components/FileList";
 import Loading from "../components/Loading";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Home() {
     const { currentUserId, token } = useAuth();
-    const { infiniteScroll } = DataModifier();
+    const { deleteData, infiniteScroll } = DataModifier();
+    const queryClient = useQueryClient();
     
     const { 
         error,
@@ -24,9 +26,42 @@ export default function Home() {
         token: token
     });
 
+    const deleteFileMutation = useMutation({
+        mutationFn: async (id: string) => {
+            await deleteData({
+                api_url: `http://localhost:1234/files/erase/${id}`,
+                token: token
+            });
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] }),
+    });
+
+    const deleteAllFilesMutation = useMutation({
+        mutationFn: async () => {
+            await deleteData({
+                api_url: `http://localhost:1234/files/erase-all/${currentUserId}`,
+                token: token
+            });
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] }),
+    });
+
+    const deleteOneFile = (id: string) => {
+        deleteFileMutation.mutate(id);
+    }
+
+    const deleteAllFiles = () => {
+        deleteAllFilesMutation.mutate();
+    }
+
     return (
         <div className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
             <div className="flex flex-col p-[1rem] gap-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full shadow-[0_0_4px_#1a1a1a] rounded bg-white">
+                <div>
+                    <button className="cursor-pointer text-gray-700 text-[0.9rem]" type="button" onClick={deleteAllFiles}>
+                        <i className="fa-solid fa-trash"></i>
+                    </button>
+                </div>
                 {isLoading ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
@@ -37,6 +72,7 @@ export default function Home() {
                         files={paginatedData} 
                         isFetchingNextPage={isFetchingNextPage}
                         isReachedEnd={isReachedEnd} 
+                        deleteOne={deleteOneFile}
                     />
                 ) : error ? (
                     <div className="flex justify-center items-center h-full bg-white">

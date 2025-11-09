@@ -13,7 +13,11 @@ export default function FileList(props: FileListProps) {
         <section className="bg-white flex flex-col gap-[1rem] overflow-y-auto">
             <div className="grid md:grid-cols-2 grid-cols-1 gap-[1rem]">
                 {props.files.map((file) => (
-                    <FileItem file={file} key={`file_${file._id}`}/>
+                    <FileItem 
+                        key={`file_${file._id}`}
+                        file={file} 
+                        deleteOne={props.deleteOne}
+                    />
                 ))}
             </div>
             <div className="flex justify-center">

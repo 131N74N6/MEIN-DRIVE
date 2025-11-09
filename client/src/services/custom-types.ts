@@ -43,6 +43,7 @@ export type FilesDataProps = {
 
 export type FileItemProps = {
     file: FilesDataProps;
+    deleteOne: (id: string) => void;
 }
 
 export type FileListProps = {
@@ -50,6 +51,7 @@ export type FileListProps = {
     files: FilesDataProps[];
     isFetchingNextPage: boolean;
     isReachedEnd: boolean;
+    deleteOne: (id: string) => void;
 }
 
 export type GetDataProps = {
