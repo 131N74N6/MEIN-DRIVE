@@ -42,6 +42,20 @@ export type FilesDataProps = {
     user_id: string;
 }
 
+export type FavoritedFileDataProps = {
+    _id: string;
+    created_at: string;
+    files: {
+        public_id: string;
+        url: string;
+        resource_type: string;
+    }
+    file_id: string;
+    file_name: string;
+    file_type: string;
+    user_id: string;
+}
+
 export type FavoriteListProps = {
     fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>
     favorites: FilesDataProps[];
@@ -50,9 +64,16 @@ export type FavoriteListProps = {
     deleteOne: (id: string) => void;
 }
 
+export type FavoriteItemProps = {
+    file: FilesDataProps;
+    deleteOne: (id: string) => void;
+}
+
+
 export type FileItemProps = {
     file: FilesDataProps;
     deleteOne: (id: string) => void;
+    addToFavorite: (selected_file: FilesDataProps) => void;
 }
 
 export type FileListProps = {
@@ -61,6 +82,7 @@ export type FileListProps = {
     isFetchingNextPage: boolean;
     isReachedEnd: boolean;
     deleteOne: (id: string) => void;
+    addToFavorite: (selected_file: FilesDataProps) => void;
 }
 
 export type GetDataProps = {

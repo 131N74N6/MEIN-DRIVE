@@ -1,6 +1,6 @@
-import type { FileItemProps } from "../services/custom-types";
+import type { FavoriteItemProps } from "../services/custom-types";
 
-export default function FileItem(props: FileItemProps) {
+export default function FavoriteFile(props: FavoriteItemProps) {
     return (
         <div className="shadow-[0_0_4px_#1a1a1a] p-[0.5rem]">
             {props.file.file_type.startsWith('image/') ? (

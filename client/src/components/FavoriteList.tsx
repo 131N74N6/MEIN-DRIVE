@@ -1,5 +1,5 @@
 import type { FavoriteListProps } from "../services/custom-types";
-import FileItem from "./FileItem";
+import FavoriteFile from "./FavoriteFile";
 import Loading from "./Loading";
 
 export default function FavoriteList(props: FavoriteListProps) {
@@ -15,7 +15,7 @@ export default function FavoriteList(props: FavoriteListProps) {
         <div className="bg-white flex flex-col gap-[1rem] overflow-y-auto">
             <div className="grid md:grid-cols-2 grid-cols-1 gap-[1rem]">
                 {props.favorites.map((favorite) => (
-                    <FileItem 
+                    <FavoriteFile 
                         key={`file_${favorite._id}`}
                         file={favorite} 
                         deleteOne={props.deleteOne}

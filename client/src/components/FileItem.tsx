@@ -91,7 +91,7 @@ export default function FileItem(props: FileItemProps) {
             )}
             <hr className="bg-gray-700"/>
             <div className="flex gap-[0.5rem] opacity-0 hover:opacity-100 transition-opacity">
-                <button type="button" className="cursor-pointer text-gray-700 font-[500] text-[1rem]">
+                <button type="button" onClick={() => props.addToFavorite(props.file)} className="cursor-pointer text-gray-700 font-[500] text-[1rem]">
                     <i className="fa-solid fa-star"></i>
                 </button>
                 <button type="button" onClick={() => props.deleteOne(props.file._id)} className="cursor-pointer text-gray-700 font-[500] text-[1rem]">

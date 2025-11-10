@@ -5,9 +5,11 @@ interface IFavoritedFiles {
     files: {
         public_id: string;
         url: string;
+        resource_type: string;
     };
     file_name: string;
     file_type: string;
+    file_id: Types.ObjectId;
     user_id: Types.ObjectId;
 }
 
@@ -16,7 +18,9 @@ const favoritedSchema = new Schema<IFavoritedFiles>({
     files: {
         public_id: { type: String, required: true },
         url: { type: String, required: true },
+        resource_type: { type: String, required: true, enum: ['image', 'video', 'raw'] }
     },
+    file_id: { type: Schema.Types.ObjectId, required: true },
     file_name: { type: String, required: true },
     file_type: { type: String, required: true },
     user_id: { type: Schema.Types.ObjectId, required: true }

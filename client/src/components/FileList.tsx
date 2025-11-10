@@ -16,9 +16,10 @@ export default function FileList(props: FileListProps) {
             <div className="grid md:grid-cols-2 grid-cols-1 gap-[1rem]">
                 {props.files.map((file) => (
                     <FileItem 
-                        key={`file_${file._id}`}
-                        file={file} 
+                        addToFavorite={props.addToFavorite}
                         deleteOne={props.deleteOne}
+                        file={file} 
+                        key={`file_${file._id}`}
                     />
                 ))}
             </div>

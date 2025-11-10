@@ -1,14 +1,14 @@
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import DataModifier from "../services/data-modifier";
 import useAuth from "../services/useAuth";
-import type { FilesDataProps } from "../services/custom-types";
+import type { FavoritedFileDataProps, FilesDataProps } from "../services/custom-types";
 import FileList from "../components/FileList";
 import Loading from "../components/Loading";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Home() {
     const { currentUserId, token } = useAuth();
-    const { deleteData, infiniteScroll } = DataModifier();
+    const { deleteData, infiniteScroll, insertData } = DataModifier();
     const queryClient = useQueryClient();
     
     const { 
@@ -24,6 +24,29 @@ export default function Home() {
         query_key: [`all-files-${currentUserId}`],
         stale_time: 600000,
         token: token
+    });
+
+    const addToFavoriteMutation = useMutation({
+        mutationFn: async (selected_file: FilesDataProps) => {
+            const getCurrentDate = new Date();
+            await insertData<FavoritedFileDataProps>({
+                api_url: `http://localhost:1234/favorited/add`,
+                data: {
+                    created_at: getCurrentDate.toISOString(),
+                    files: {
+                        public_id: selected_file.files.public_id,
+                        resource_type: selected_file.files.resource_type,
+                        url: selected_file.files.url
+                    },
+                    file_id: selected_file._id,
+                    file_name: selected_file.file_name,
+                    file_type: selected_file.file_type,
+                    user_id: currentUserId
+                },
+                token: token
+            });
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] }),
     });
 
     const deleteFileMutation = useMutation({
@@ -45,6 +68,10 @@ export default function Home() {
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] }),
     });
+
+    const addToFavorite = (selected_file: FilesDataProps) => {
+        addToFavoriteMutation.mutate(selected_file);
+    }
 
     const deleteOneFile = (id: string) => {
         deleteFileMutation.mutate(id);
@@ -68,11 +95,12 @@ export default function Home() {
                     </div>
                 ) : paginatedData ? (
                     <FileList 
+                        addToFavorite={addToFavorite}
+                        deleteOne={deleteOneFile}
                         fetchNextPage={fetchNextPage} 
                         files={paginatedData} 
                         isFetchingNextPage={isFetchingNextPage}
                         isReachedEnd={isReachedEnd} 
-                        deleteOne={deleteOneFile}
                     />
                 ) : error ? (
                     <div className="flex justify-center items-center h-full bg-white">
