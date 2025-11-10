@@ -28,15 +28,18 @@ async function getAllFiles(req: Request, res: Response): Promise<void> {
 async function deleteAllFiles(req: Request, res: Response): Promise<void> {
     try {
         const getUserId = req.params.user_id;
-        const currentUserfiles: string[] = [];
+        const currentUserfiles: { public_id: string; resource_type: string }[] = [];
         const findUserFiles = await File.find({ user_id: getUserId });
 
         findUserFiles.forEach((user_file) => {
-            currentUserfiles.push(user_file.files.public_id);
+            currentUserfiles.push({ 
+                public_id: user_file.files.public_id, 
+                resource_type: user_file.files.resource_type 
+            });
         });
 
-        const deletePromise = currentUserfiles.map((filePublicId) => {
-            return v2.uploader.destroy(filePublicId);
+        const deletePromise = currentUserfiles.map((userFile) => {
+            return v2.uploader.destroy(userFile.public_id, { resource_type: userFile.resource_type });
         });
 
         await Promise.all(deletePromise);
@@ -54,7 +57,7 @@ async function deleteSelectedFile(req: Request, res: Response): Promise<Response
 
         if (!getFile) return res.status(404).json({ message: 'file not found' });
         
-        await v2.uploader.destroy(getFile.files.public_id);
+        await v2.uploader.destroy(getFile.files.public_id, { resource_type: getFile.files.resource_type });
         await File.deleteOne({ _id: getFileId });
         res.status(200).json({ message: 'file deleted' });
     } catch (error) {

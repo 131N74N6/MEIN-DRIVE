@@ -86,7 +86,7 @@ export default function FileItem(props: FileItemProps) {
                     <div className="flex justify-center items-center h-50 text-gray-700 text-[1.7rem] border border-gray-700">
                         <i className="fa-solid fa-file"></i>
                     </div>
-                    <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
+                    <p className="line-clamp-1">{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
             )}
             <hr className="bg-gray-700"/>

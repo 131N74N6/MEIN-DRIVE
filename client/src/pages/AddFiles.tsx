@@ -97,86 +97,88 @@ export default function AddFiles() {
         <section className="flex gap-[1rem] p-[1rem] md:flex-row flex-col h-screen">
             <form onSubmit={uploadFiles} className="flex flex-col gap-[1rem] min-h-[679px] bg-white p-[1rem] w-full md:w-3/4 shadow-[0_0_4px_#1a1a1a] rounded">
                 <input onChange={handleChosenFiles} multiple type="file" ref={fileInputRef} className="hidden"/>
-                {mediaFiles.length === 0 ? (                    
-                    <div className="flex items-center h-full justify-center text-gray-500 border border-dashed cursor-pointer border-gray-600" onClick={() => fileInputRef.current?.click()}>
-                        <span className="text-lg">Click to select images or videos</span>
-                    </div>
-                ) : (
-                    <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[1rem] p-[1rem] border border-gray-400 overflow-y-auto">
-                        {mediaFiles.map((mediaFile, index) => (
-                            <div className="relative" key={`${mediaFile.file_name}_${index}`}>
-                                {mediaFile.file_type.startsWith('image/') ? (
-                                    <img 
-                                        src={mediaFile.preview_url} 
-                                        alt={`Preview ${index + 1}`}
-                                        className="w-full h-50 object-cover rounded-lg"
-                                    />
-                                ) : mediaFile.file_type.startsWith('video/') ? (
-                                    <video 
-                                        src={mediaFile.preview_url}
-                                        className="w-full h-50 object-cover rounded-lg"
-                                        controls
-                                    />
-                                ) : mediaFile.file_type.startsWith('audio/') ? (
-                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                        <i className="fa-solid fa-file-lines"></i>
-                                        <p>{mediaFile.file_name}</p>
-                                    </div>
-                                ) : mediaFile.file_type.startsWith('text/') ? (
-                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                        <i className="fa-solid fa-headphones"></i>
-                                        <p>{mediaFile.file_name}</p>
-                                    </div>
-                                ) : mediaFile.file_type.includes('/pdf') ? (
-                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                        <i className="fa-solid fa-file-pdf"></i>
-                                        <p>{mediaFile.file_name}</p>
-                                    </div>
-                                ) : mediaFile.file_type.includes('/zip') ? (
-                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                        <i className="fa-solid fa-file-zipper"></i>
-                                        <p>{mediaFile.file_name}</p>
-                                    </div>
-                                ) : mediaFile.file_type.includes('/sql') ? (
-                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                        <i className="fa-solid fa-database"></i>
-                                        <p>{mediaFile.file_name}</p>
-                                    </div>
-                                ) : mediaFile.file_type.includes('.sheet') ? (
-                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                        <i className="fa-solid fa-file-excel"></i>
-                                        <p>{mediaFile.file_name}</p>
-                                    </div>
-                                ) : mediaFile.file_type.includes('.document') ? (
-                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                        <i className="fa-solid fa-file-word"></i>
-                                        <p>{mediaFile.file_name}</p>
-                                    </div>
-                                ) : mediaFile.file_type.includes('.presentation') ? (
-                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                        <i className="fa-solid fa-file-powerpoint"></i>
-                                        <p>{mediaFile.file_name}</p>
-                                    </div>
-                                ) : (
-                                    <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                        <i className="fa-solid fa-file"></i>
-                                        <p>{mediaFile.file_name}</p>
-                                    </div>
-                                )}
-                                <button 
-                                    type="button"
-                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-[1rem] w-6 h-6 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                    onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                                        event.stopPropagation();
-                                        removeChosenFiles(index);
-                                    }}
-                                >
-                                    <i className="fa-solid fa-xmark"></i>
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                <div className="border-dashed h-screen p-[1rem] cursor-pointer border-2 border-gray-400 rounded-lg flex flex-col" onClick={() => fileInputRef.current?.click()}>
+                    {mediaFiles.length === 0 ? (                    
+                        <div className="flex flex-col items-center justify-center text-gray-600">
+                            <span className="text-lg">Click to select images or videos</span>
+                        </div>
+                    ) : (
+                        <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[1rem] w-full p-[1rem] overflow-y-auto">
+                            {mediaFiles.map((mediaFile, index) => (
+                                <div className="relative" key={`${mediaFile.file_name}_${index}`}>
+                                    {mediaFile.file_type.startsWith('image/') ? (
+                                        <img 
+                                            src={mediaFile.preview_url} 
+                                            alt={`Preview ${index + 1}`}
+                                            className="w-full h-50 object-cover rounded-lg"
+                                        />
+                                    ) : mediaFile.file_type.startsWith('video/') ? (
+                                        <video 
+                                            src={mediaFile.preview_url}
+                                            className="w-full h-50 object-cover rounded-lg"
+                                            controls
+                                        />
+                                    ) : mediaFile.file_type.startsWith('audio/') ? (
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
+                                            <i className="fa-solid fa-file-lines"></i>
+                                            <p>{mediaFile.file_name}</p>
+                                        </div>
+                                    ) : mediaFile.file_type.startsWith('text/') ? (
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
+                                            <i className="fa-solid fa-file-lines"></i>
+                                            <p>{mediaFile.file_name}</p>
+                                        </div>
+                                    ) : mediaFile.file_type.includes('/pdf') ? (
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
+                                            <i className="fa-solid fa-file-pdf"></i>
+                                            <p>{mediaFile.file_name}</p>
+                                        </div>
+                                    ) : mediaFile.file_type.includes('/zip') ? (
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
+                                            <i className="fa-solid fa-file-zipper"></i>
+                                            <p>{mediaFile.file_name}</p>
+                                        </div>
+                                    ) : mediaFile.file_type.includes('/sql') ? (
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
+                                            <i className="fa-solid fa-database"></i>
+                                            <p>{mediaFile.file_name}</p>
+                                        </div>
+                                    ) : mediaFile.file_type.includes('.sheet') ? (
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
+                                            <i className="fa-solid fa-file-excel"></i>
+                                            <p>{mediaFile.file_name}</p>
+                                        </div>
+                                    ) : mediaFile.file_type.includes('.document') ? (
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
+                                            <i className="fa-solid fa-file-word"></i>
+                                            <p>{mediaFile.file_name}</p>
+                                        </div>
+                                    ) : mediaFile.file_type.includes('.presentation') ? (
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
+                                            <i className="fa-solid fa-file-powerpoint"></i>
+                                            <p>{mediaFile.file_name}</p>
+                                        </div>
+                                    ) : (
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
+                                            <i className="fa-solid fa-file"></i>
+                                            <p>{mediaFile.file_name}</p>
+                                        </div>
+                                    )}
+                                    <button 
+                                        type="button"
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-[1rem] w-6 h-6 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                                            event.stopPropagation();
+                                            removeChosenFiles(index);
+                                        }}
+                                    >
+                                        <i className="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.5rem]">
                     <Link className="bg-gray-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer" to={'/home'}>Back</Link>
                     <button 

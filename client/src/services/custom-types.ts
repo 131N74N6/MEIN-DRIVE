@@ -42,6 +42,14 @@ export type FilesDataProps = {
     user_id: string;
 }
 
+export type FavoriteListProps = {
+    fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>
+    favorites: FilesDataProps[];
+    isFetchingNextPage: boolean;
+    isReachedEnd: boolean;
+    deleteOne: (id: string) => void;
+}
+
 export type FileItemProps = {
     file: FilesDataProps;
     deleteOne: (id: string) => void;
