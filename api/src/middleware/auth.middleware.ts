@@ -27,7 +27,7 @@ async function verifyToken(req: AuthRequest, res: Response, next: NextFunction) 
         req.user = { user_id: decoded.user_id, token: token }
         next();
     } catch (error) {
-         if (error instanceof jwt.JsonWebTokenError) res.status(401).json({ message: 'Invalid or expired token' });
+        if (error instanceof jwt.JsonWebTokenError) res.status(401).json({ message: 'Invalid or expired token' });
         else res.status(500).json({ message: 'Internal server error' });
     }
 }

@@ -20,7 +20,7 @@ async function signIn(req: Request, res: Response): Promise<Response<any, Record
 
         const generatedToken = jwt.sign(
             { user_id: findUser._id.toString() },
-            process.env.JWT_TOKEN || 'jwt key',
+            process.env.JWT_TOKEN || 'your-jwt-key',
             { expiresIn: '1h' }
         );
 
