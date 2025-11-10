@@ -4,8 +4,8 @@ interface IFavoritedFiles {
     created_at: string;
     files: {
         public_id: string;
-        url: string;
         resource_type: string;
+        url: string;
     };
     file_id: Types.ObjectId;
     file_name: string;
