@@ -7,9 +7,9 @@ interface IFavoritedFiles {
         url: string;
         resource_type: string;
     };
+    file_id: Types.ObjectId;
     file_name: string;
     file_type: string;
-    file_id: Types.ObjectId;
     user_id: Types.ObjectId;
 }
 

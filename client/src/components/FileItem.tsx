@@ -46,7 +46,7 @@ export default function FileItem(props: FileItemProps) {
                     </div>
                     <p>{new Date(props.file.created_at).toLocaleString()} {props.file.file_name}</p>
                 </>
-            ) : props.file.file_type.includes('/zip') ? (
+            ) : props.file.file_type.includes('/x-zip') ? (
                 <>
                     <div className="flex justify-center items-center h-50 text-gray-700 text-[1.7rem] border border-gray-700">
                         <i className="fa-solid fa-file-zipper"></i>
