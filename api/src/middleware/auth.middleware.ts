@@ -5,36 +5,40 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-export interface AuthenticatedRequest extends Request {
-    user?: any;
+interface AuthRequest extends Request {
+    user?: {
+        user_id: string;
+        token: string;
+    };
 }
 
-async function verifyToken(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+interface JwtPayload {
+    user_id: string;
+    token: string;
+}
+
+async function verifyToken(req: AuthRequest, res: Response, next: NextFunction) {
     try {
         const authHeader = req.headers.authorization;
-        const token = authHeader && authHeader.split(' ')[1]; 
+        if (!authHeader || !authHeader.startsWith('Bearer ')) return res.status(401).json({ message: 'Access token required' });
 
-        if (!token) return res.status(401).json({ message: 'Access token required' });
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, process.env.JWT_TOKEN || 'your-jwt-key') as JwtPayload;
 
-        const decoded = jwt.verify(token, process.env.JWT_TOKEN || 'jwt key') as any;
-        
-        const user = await User.findById(decoded.user_id).select('-password');
-        if (!user) return res.status(401).json({ message: 'User not found' });
-
-        req.user = user;
+        req.user = { user_id: decoded.user_id, token: token }
         next();
     } catch (error) {
-        if (error instanceof jwt.JsonWebTokenError) return res.status(403).json({ message: 'Invalid or expired token' });
-        return res.status(500).json({ message: 'Token verification failed' });
+         if (error instanceof jwt.JsonWebTokenError) res.status(401).json({ message: 'Invalid or expired token' });
+        else res.status(500).json({ message: 'Internal server error' });
     }
 }
 
-async function checkOwnership(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+async function checkOwnership(req: AuthRequest, res: Response, next: NextFunction) {
     try {        
         const requestedUserId = req.params.user_id;
     
-        if (!req.user) return res.status(401).json({ message: 'User not authenticated' });
-        if (req.user._id.toString() !== requestedUserId) return res.status(403).json({ message: 'Access denied' });
+        if (!requestedUserId) return res.status(400).json({ message: 'User ID parameter required' });
+        if (req.user?.user_id !== requestedUserId) return res.status(403).json({ message: 'Access denied: You can only access your own resources' });
         
         next();
     } catch (error) {
