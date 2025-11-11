@@ -12,7 +12,7 @@ export default function FileList(props: FileListProps) {
     }
 
     return (
-        <div className="bg-white flex flex-col gap-[1rem] overflow-y-auto">
+        <div className="flex flex-col gap-[1rem] overflow-y-auto">
             <div className="grid md:grid-cols-2 grid-cols-1 gap-[1rem]">
                 {props.files.map((file) => (
                     <FileItem 
