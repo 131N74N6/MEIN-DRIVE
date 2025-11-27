@@ -1,12 +1,16 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "./custom-types";
+import useAuth from "./useAuth";
 
 export default function DataModifier() {
+    const { loading, token } = useAuth();
+    const currentUserToken = token ? token : '';
+
     const changeData = async <S>(props: ChangeDataProps<S>) => {
         const request = await fetch(props.api_url, {
             body: JSON.stringify(props.data),
             headers: {
-                'Authorization': `Bearer ${props.token}`,
+                'Authorization': `Bearer ${currentUserToken}`,
                 'Content-Type': 'application/json'
             },
             method: 'PUT'
@@ -18,7 +22,7 @@ export default function DataModifier() {
     const deleteData = async (props: DeleteDataProps) => {
         const request = await fetch(props.api_url, {
             headers: {
-                'Authorization': `Bearer ${props.token}`,
+                'Authorization': `Bearer ${currentUserToken}`,
                 'Content-Type': 'application/json'
             },
             method: 'DELETE'
@@ -29,18 +33,19 @@ export default function DataModifier() {
 
     const getData = async <V>(props: GetDataProps) => {
         const { data, error, isLoading } = useQuery<V, Error>({
-            enabled: !!props.token,
+            enabled: !!currentUserToken && !loading,
             gcTime: 600000,
             queryFn: async () => {
                 const request = await fetch(props.api_url, {
                     headers: { 
-                        'Authorization': `Bearer ${props.token}`,
+                        'Authorization': `Bearer ${currentUserToken}`,
                         'Content-Type': 'application/json' 
                     },
                     method: 'GET'
                 });
 
                 const response = await request.json();
+                console.log(currentUserToken);
                 return response;
             },
             queryKey: props.query_key,
@@ -57,13 +62,14 @@ export default function DataModifier() {
         const fetchers = async ({ pageParam = 1 }: { pageParam?: number }) => {
             const request = await fetch(`${props.api_url}?page=${pageParam}&limit=${props.limit}`, {
                 headers: {
-                    'Authorization': `Bearer ${props.token}`,
+                    'Authorization': `Bearer ${currentUserToken}`,
                     'Content-Type': 'application/json'
                 },
                 method: 'GET'
             });
 
             const response = await request.json();
+            console.log(currentUserToken);
             return response;
         }
 
@@ -75,6 +81,7 @@ export default function DataModifier() {
             isFetchingNextPage, 
             isLoading 
         } = useInfiniteQuery({
+            enabled: !!currentUserToken && !loading,
             gcTime: 600000,
             getNextPageParam: (lastPage, allPages): number | undefined => {
                 if (lastPage.length < props.limit) return;
@@ -99,7 +106,7 @@ export default function DataModifier() {
         const request = await fetch(props.api_url, {
             body: JSON.stringify(props.data),
             headers: { 
-                'Authorization': `Bearer ${props.token}`,
+                'Authorization': `Bearer ${currentUserToken}`,
                 'Content-Type': 'application/json'
             },
             method: 'POST'

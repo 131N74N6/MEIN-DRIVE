@@ -9,7 +9,8 @@ const initialState: AuthStateProps = {
     userId: '',
     username: '',
     email: '',
-    createdAt: ''
+    createdAt: '',
+    token: ''
 }
 
 const authReducer = (state: AuthStateProps, action: AuthActionProps) => {

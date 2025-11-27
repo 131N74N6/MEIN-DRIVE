@@ -9,6 +9,7 @@ export type AuthStateProps = {
     username: string;
     email: string;
     createdAt: string;
+    token: string;
 }
 
 export type AuthActionProps =
@@ -129,6 +130,7 @@ export type SignUpProps = {
 export type UserTokenProps = {
     status: string;
     user_id: string;
+    token: string;
 }
 
 export type UploadResult = {
