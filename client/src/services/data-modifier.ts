@@ -29,6 +29,7 @@ export default function DataModifier() {
 
     const getData = async <V>(props: GetDataProps) => {
         const { data, error, isLoading } = useQuery<V, Error>({
+            enabled: !!props.token,
             gcTime: 600000,
             queryFn: async () => {
                 const request = await fetch(props.api_url, {

@@ -7,7 +7,7 @@ import Loading from "../components/Loading";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Home() {
-    const { currentUserId, token } = useAuth();
+    const { currentUserId } = useAuth();
     const { deleteData, infiniteScroll, insertData } = DataModifier();
     const queryClient = useQueryClient();
     
@@ -22,8 +22,7 @@ export default function Home() {
         api_url: currentUserId ? `http://localhost:1234/files/get-all/${currentUserId}` : '',
         limit: 14,
         query_key: [`all-files-${currentUserId}`],
-        stale_time: 600000,
-        token: token
+        stale_time: 600000
     });
 
     const addToFavoriteMutation = useMutation({
@@ -42,8 +41,7 @@ export default function Home() {
                     file_name: selected_file.file_name,
                     file_type: selected_file.file_type,
                     user_id: currentUserId
-                },
-                token: token
+                }
             });
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] }),
@@ -51,20 +49,14 @@ export default function Home() {
 
     const deleteFileMutation = useMutation({
         mutationFn: async (id: string) => {
-            await deleteData({
-                api_url: `http://localhost:1234/files/erase/${id}`,
-                token: token
-            });
+            await deleteData({ api_url: `http://localhost:1234/files/erase/${id}` });
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] }),
     });
 
     const deleteAllFilesMutation = useMutation({
         mutationFn: async () => {
-            await deleteData({
-                api_url: `http://localhost:1234/files/erase-all/${currentUserId}`,
-                token: token
-            });
+            await deleteData({ api_url: `http://localhost:1234/files/erase-all/${currentUserId}` });
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] }),
     });

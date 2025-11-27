@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 
 export default function AddFiles() {
-    const { currentUserId, token } = useAuth();
+    const { currentUserId } = useAuth();
     const { insertData } = DataModifier();
     const queryClient = useQueryClient();
 
@@ -80,7 +80,6 @@ export default function AddFiles() {
                         file_type: uploadedFile.file_type,
                         user_id: currentUserId
                     },
-                    token: token
                 });
             }
         },

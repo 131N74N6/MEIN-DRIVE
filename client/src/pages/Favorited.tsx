@@ -7,7 +7,7 @@ import FavoriteList from "../components/FavoriteList";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Favorited() {
-    const { currentUserId, token } = useAuth();
+    const { currentUserId } = useAuth();
     const { deleteData, infiniteScroll } = DataModifier();
     const queryClient = useQueryClient();
 
@@ -23,25 +23,18 @@ export default function Favorited() {
         limit: 14,
         query_key: [`all-favorited-files-${currentUserId}`],
         stale_time: 600000,
-        token: token
     });
 
     const removeOneMutation = useMutation({
         mutationFn: async (id: string) => {
-            await deleteData({
-                api_url: `http://localhost:1234/favorited/erase/${id}`,
-                token: token
-            });
+            await deleteData({ api_url: `http://localhost:1234/favorited/erase/${id}` });
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] }),
     });
 
     const removeAllMutation = useMutation({
         mutationFn: async () => {
-            await deleteData({
-                api_url: `http://localhost:1234/favorited/erase-all/${currentUserId}`,
-                token: token
-            });
+            await deleteData({ api_url: `http://localhost:1234/favorited/erase-all/${currentUserId}` });
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] }),
     });
