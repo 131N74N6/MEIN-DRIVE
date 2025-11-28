@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { FilesDataProps, MediaFilesProps } from "../services/custom-types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../services/useAuth";
@@ -6,6 +6,7 @@ import DataModifier from "../services/data-modifier";
 import { uploadToCloudinary } from "../services/media-storage";
 import { Link } from "react-router-dom";
 import { Navbar1, Navbar2 } from "../components/Navbar";
+import Notification from "../components/Notification";
 
 export default function AddFiles() {
     const { currentUserId } = useAuth();
@@ -15,6 +16,19 @@ export default function AddFiles() {
     const [mediaFiles, setMediaFiles] = useState<MediaFilesProps[]>([]);
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [showErrorMsg, setShowErrorMsg] = useState<boolean>(false);
+        
+    useEffect(() => {
+        if (showErrorMsg) {
+            const timer = setTimeout(() => {
+                setShowErrorMsg(false);
+                setErrorMsg(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showErrorMsg]);
 
     const handleChosenFiles = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -83,6 +97,10 @@ export default function AddFiles() {
                 });
             }
         },
+        onError: () => {
+            setErrorMsg('Failed to upload files');
+            setShowErrorMsg(true);
+        },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] }),
         onSettled: () => setIsUploading(false)
     });
@@ -94,6 +112,7 @@ export default function AddFiles() {
 
     return (
         <section className="flex gap-[1rem] p-[1rem] md:flex-row flex-col h-screen">
+            {showErrorMsg ? <Notification message={errorMsg}/> : null}
             <form onSubmit={uploadFiles} className="flex flex-col gap-[1rem] min-h-[679px] bg-white p-[1rem] w-full md:w-3/4 shadow-[0_0_4px_#1a1a1a] rounded">
                 <input onChange={handleChosenFiles} multiple type="file" ref={fileInputRef} className="hidden"/>
                 <div className="border-dashed h-screen p-[1rem] cursor-pointer border-2 border-gray-400 rounded-lg flex flex-col" onClick={() => fileInputRef.current?.click()}>
