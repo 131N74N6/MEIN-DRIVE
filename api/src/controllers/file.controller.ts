@@ -20,15 +20,15 @@ async function getAllFiles(req: Request, res: Response): Promise<void> {
         const limit = parseInt(req.query.limit as string) || 14;
         const skip = (page - 1) * limit;
 
-        if (searched) {
+        if (searched === undefined) {
+            const getAllFiles = await File.find({ user_id: getUserId }).limit(limit).skip(skip);
+            res.json(getAllFiles);
+        } else {
             const getAllFiles = await File.find({ 
                 file_name: { $regex: new RegExp(searched, 'i') }, 
                 user_id: getUserId 
             }).limit(limit).skip(skip);
-            
-            res.json(getAllFiles);
-        } else {
-            const getAllFiles = await File.find({ user_id: getUserId }).limit(limit).skip(skip);
+
             res.json(getAllFiles);
         }
     } catch (error) {

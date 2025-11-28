@@ -6,13 +6,14 @@ import type { FavoritedFileDataProps, FilesDataProps } from "../services/custom-
 import FileList from "../components/FileList";
 import Loading from "../components/Loading";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import useDebounce from "../services/useDebounce";
 
 export default function Home() {
     const { currentUserId } = useAuth();
-    const { debounce, deleteData, infiniteScroll, insertData } = DataModifier();
+    const { deleteData, infiniteScroll, insertData } = DataModifier();
     const queryClient = useQueryClient();
     const [searchValue, setSearchValue] = useState<string>('');
-    const debouncedSearch = debounce<string>(searchValue, 500);
+    const debouncedSearch = useDebounce<string>(searchValue, 500);
     
     const { 
         error,
@@ -24,8 +25,8 @@ export default function Home() {
     } = infiniteScroll<FilesDataProps>({
         api_url: currentUserId ? `http://localhost:1234/files/get-all/${currentUserId}` : '',
         limit: 14,
-        query_key: [`all-files-${currentUserId}`],
-        searched: debouncedSearch.trim() === '' ? undefined : debouncedSearch.trim(),
+        query_key: [`all-files-${currentUserId}-${debouncedSearch}`],
+        searched: debouncedSearch.trim(),
         stale_time: 600000
     });
 
@@ -48,21 +49,21 @@ export default function Home() {
                 }
             });
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] }),
     });
 
     const deleteFileMutation = useMutation({
         mutationFn: async (id: string) => {
             await deleteData({ api_url: `http://localhost:1234/files/erase/${id}` });
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}-${debouncedSearch}`] }),
     });
 
     const deleteAllFilesMutation = useMutation({
         mutationFn: async () => {
             await deleteData({ api_url: `http://localhost:1234/files/erase-all/${currentUserId}` });
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}-${debouncedSearch}`] }),
     });
 
     const addToFavorite = (selected_file: FilesDataProps) => {
@@ -80,15 +81,15 @@ export default function Home() {
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
             <div className="flex flex-col gap-x-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white overflow-y-auto">
-                <form className="flex gap-[1rem] items-center p-[1rem]">
+                <form className="flex gap-[1rem] items-center px-[1rem] pt-[1rem]">
                     <input 
                         type="text" 
                         value={searchValue}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchValue(event.target.value)}
-                        className="border border-gray-700 p-[0.45rem] text-[0.9rem] outline-0 font-[500]"
+                        className="border rounded border-gray-700 p-[0.45rem] text-[0.9rem] outline-0 font-[500]"
                         placeholder="search file here"
                     />
-                    <button className="cursor-pointer text-gray-700 text-[0.9rem]" type="button" onClick={deleteAllFiles}>
+                    <button className="cursor-pointer outline-0 w-[60px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" type="button" onClick={deleteAllFiles}>
                         <i className="fa-solid fa-trash"></i>
                     </button>
                 </form>

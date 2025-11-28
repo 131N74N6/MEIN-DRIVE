@@ -6,13 +6,14 @@ import useAuth from "../services/useAuth";
 import Loading from "../components/Loading";
 import FavoriteList from "../components/FavoriteList";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import useDebounce from "../services/useDebounce";
 
 export default function Favorited() {
     const { currentUserId } = useAuth();
-    const { debounce, deleteData, infiniteScroll } = DataModifier();
+    const { deleteData, infiniteScroll } = DataModifier();
     const queryClient = useQueryClient();
     const [searchValue, setSearchValue] = useState<string>('');
-    const debouncedSearch = debounce<string>(searchValue, 500);
+    const debouncedSearch = useDebounce<string>(searchValue, 500);
 
     const {
         error,
@@ -24,8 +25,8 @@ export default function Favorited() {
     } = infiniteScroll<FilesDataProps>({
         api_url: currentUserId ? `http://localhost:1234/favorited/get-all/${currentUserId}` : currentUserId,
         limit: 14,
-        query_key: [`all-favorited-files-${currentUserId}`],
-        searched: debouncedSearch.trim() === '' ? undefined : debouncedSearch.trim(),
+        query_key: [`all-favorited-files-${currentUserId}-${debouncedSearch}`],
+        searched: debouncedSearch.trim(),
         stale_time: 600000
     });
 
@@ -33,14 +34,14 @@ export default function Favorited() {
         mutationFn: async (id: string) => {
             await deleteData({ api_url: `http://localhost:1234/favorited/erase/${id}` });
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] }),
     });
 
     const removeAllMutation = useMutation({
         mutationFn: async () => {
             await deleteData({ api_url: `http://localhost:1234/favorited/erase-all/${currentUserId}` });
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] }),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] }),
     });
 
     const removeOne = (id: string) => {
@@ -54,7 +55,7 @@ export default function Favorited() {
     return (
         <section className="flex gap-[1rem] md:flex-row flex-col h-screen p-[1rem]">
             <div className="flex flex-col p-[1rem] gap-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full shadow-[0_0_4px_#1a1a1a] rounded bg-white">
-                <form className="flex gap-[1rem] items-center p-[1rem]">
+                <form className="flex gap-[1rem] items-center px-[1rem] pt-[1rem]">
                     <input 
                         type="text" 
                         value={searchValue}
