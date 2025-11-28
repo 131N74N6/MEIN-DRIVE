@@ -12,7 +12,7 @@ export default function Home() {
     const { debounce, deleteData, infiniteScroll, insertData } = DataModifier();
     const queryClient = useQueryClient();
     const [searchValue, setSearchValue] = useState<string>('');
-    const debouncedSearch = debounce(searchValue, 500);
+    const debouncedSearch = debounce<string>(searchValue, 500);
     
     const { 
         error,
