@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import type { FilesDataProps } from "../services/custom-types";
 import DataModifier from "../services/data-modifier";
@@ -8,8 +9,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Favorited() {
     const { currentUserId } = useAuth();
-    const { deleteData, infiniteScroll } = DataModifier();
+    const { debounce, deleteData, infiniteScroll } = DataModifier();
     const queryClient = useQueryClient();
+    const [searchValue, setSearchValue] = useState<string>('');
+    const debouncedSearch = debounce(searchValue, 500);
 
     const {
         error,
@@ -22,7 +25,8 @@ export default function Favorited() {
         api_url: currentUserId ? `http://localhost:1234/favorited/get-all/${currentUserId}` : currentUserId,
         limit: 14,
         query_key: [`all-favorited-files-${currentUserId}`],
-        stale_time: 600000,
+        searched: debouncedSearch.trim() === '' ? undefined : debouncedSearch.trim(),
+        stale_time: 600000
     });
 
     const removeOneMutation = useMutation({
@@ -50,11 +54,18 @@ export default function Favorited() {
     return (
         <section className="flex gap-[1rem] md:flex-row flex-col h-screen p-[1rem]">
             <div className="flex flex-col p-[1rem] gap-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full shadow-[0_0_4px_#1a1a1a] rounded bg-white">
-                <div>
+                <form className="flex gap-[1rem] items-center p-[1rem]">
+                    <input 
+                        type="text" 
+                        value={searchValue}
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchValue(event.target.value)}
+                        className="border border-gray-700 p-[0.45rem] text-[0.9rem] outline-0 font-[500]"
+                        placeholder="search file here"
+                    />
                     <button className="cursor-pointer text-gray-700 text-[0.9rem]" type="button" onClick={removeAll}>
                         <i className="fa-solid fa-trash"></i>
                     </button>
-                </div>
+                </form>
                 {paginatedData ? (
                     <FavoriteList 
                         fetchNextPage={fetchNextPage} 

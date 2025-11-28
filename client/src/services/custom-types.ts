@@ -102,6 +102,7 @@ export type InfiniteScrollProps = {
     limit: number;
     stale_time: number;
     query_key: string[];
+    searched?: string;
 }
 
 export type InputDataProps<A> = {

@@ -14,13 +14,23 @@ async function addToFavorite(req: Request, res: Response) {
 async function getCurrentUserFavorite(req: Request, res: Response): Promise<void> {
     try {
         const getCurrentUserId = req.params.user_id;
+        const searched = req.query.search as string | undefined;
+
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 14;
         const skip = (page - 1) * limit
 
-        const getAllData = await Favorited.find({ user_id: getCurrentUserId }).limit(limit).skip(skip);
-
-        res.json(getAllData);
+        if (searched === undefined) {
+            const getAllData = await Favorited.find({ user_id: getCurrentUserId }).limit(limit).skip(skip);
+            res.json(getAllData);
+        } else {
+            const getAllData = await Favorited.find({ 
+                file_name: { $regex: new RegExp(searched, 'i') }, 
+                user_id: getCurrentUserId 
+            }).limit(limit).skip(skip);
+            
+            res.json(getAllData);
+        }
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }

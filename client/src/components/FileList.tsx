@@ -6,7 +6,7 @@ export default function FileList(props: FileListProps) {
     if (props.files.length === 0) {
         return (
             <section className="flex h-full items-center justify-center">
-                <span className="text-gray-700 font-[600] text-[1rem]">No files added currently...</span>
+                <span className="text-gray-700 font-[600] text-[1rem]">No files found...</span>
             </section>
         );
     }

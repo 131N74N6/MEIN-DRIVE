@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import DataModifier from "../services/data-modifier";
 import useAuth from "../services/useAuth";
@@ -8,8 +9,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Home() {
     const { currentUserId } = useAuth();
-    const { deleteData, infiniteScroll, insertData } = DataModifier();
+    const { debounce, deleteData, infiniteScroll, insertData } = DataModifier();
     const queryClient = useQueryClient();
+    const [searchValue, setSearchValue] = useState<string>('');
+    const debouncedSearch = debounce(searchValue, 500);
     
     const { 
         error,
@@ -22,6 +25,7 @@ export default function Home() {
         api_url: currentUserId ? `http://localhost:1234/files/get-all/${currentUserId}` : '',
         limit: 14,
         query_key: [`all-files-${currentUserId}`],
+        searched: debouncedSearch.trim() === '' ? undefined : debouncedSearch.trim(),
         stale_time: 600000
     });
 
@@ -76,11 +80,18 @@ export default function Home() {
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
             <div className="flex flex-col gap-x-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white overflow-y-auto">
-                <div className="flex gap-[1rem] items-center p-[1rem]">
+                <form className="flex gap-[1rem] items-center p-[1rem]">
+                    <input 
+                        type="text" 
+                        value={searchValue}
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchValue(event.target.value)}
+                        className="border border-gray-700 p-[0.45rem] text-[0.9rem] outline-0 font-[500]"
+                        placeholder="search file here"
+                    />
                     <button className="cursor-pointer text-gray-700 text-[0.9rem]" type="button" onClick={deleteAllFiles}>
                         <i className="fa-solid fa-trash"></i>
                     </button>
-                </div>
+                </form>
                 {isLoading ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>

@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "./custom-types";
 import useAuth from "./useAuth";
+import { useEffect, useState } from "react";
 
 export default function DataModifier() {
     const { loading, token } = useAuth();
@@ -17,6 +18,17 @@ export default function DataModifier() {
         });
 
         await request.json();
+    }
+
+    const debounce = <E>(value: E, delay: number): E => {
+        const [debouncedValue, setDebouncedValue] = useState<E>(value);
+
+        useEffect(() => {
+            const handler = setTimeout(() => setDebouncedValue(value), delay);
+            return () => clearTimeout(handler);
+        }, [value, delay]);
+
+        return debouncedValue;
     }
 
     const deleteData = async (props: DeleteDataProps) => {
@@ -60,17 +72,31 @@ export default function DataModifier() {
 
     const infiniteScroll = <X>(props: InfiniteScrollProps) => {
         const fetchers = async ({ pageParam = 1 }: { pageParam?: number }) => {
-            const request = await fetch(`${props.api_url}?page=${pageParam}&limit=${props.limit}`, {
-                headers: {
-                    'Authorization': `Bearer ${currentUserToken}`,
-                    'Content-Type': 'application/json'
-                },
-                method: 'GET'
-            });
+            if (props.searched === undefined) {
+                const request1 = await fetch(`${props.api_url}?page=${pageParam}&limit=${props.limit}`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentUserToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    method: 'GET'
+                });
 
-            const response = await request.json();
-            console.log(currentUserToken);
-            return response;
+                const response = await request1.json();
+                console.log(currentUserToken);
+                return response;
+            } else {
+                const request2 = await fetch(`${props.api_url}?searched=${props.searched}&page=${pageParam}&limit=${props.limit}`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentUserToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    method: 'GET'
+                });
+                
+                const response = await request2.json();
+                console.log(currentUserToken);
+                return response;
+            }
         }
 
         const { 
@@ -115,5 +141,5 @@ export default function DataModifier() {
         await request.json();
     }
 
-    return { changeData, deleteData, getData, infiniteScroll, insertData }
+    return { changeData, debounce, deleteData, getData, infiniteScroll, insertData }
 };
