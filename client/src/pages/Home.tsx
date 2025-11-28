@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import DataModifier from "../services/data-modifier";
 import useAuth from "../services/useAuth";
@@ -7,6 +7,7 @@ import FileList from "../components/FileList";
 import Loading from "../components/Loading";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useDebounce from "../services/useDebounce";
+import Notification from "../components/Notification";
 
 export default function Home() {
     const { currentUserId } = useAuth();
@@ -14,6 +15,19 @@ export default function Home() {
     const queryClient = useQueryClient();
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearch = useDebounce<string>(searchValue, 500);
+    
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [showErrorMsg, setShowErrorMsg] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (showErrorMsg) {
+            const timer = setTimeout(() => {
+                setShowErrorMsg(false);
+                setErrorMsg(null);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [showErrorMsg]);
     
     const { 
         error,
@@ -49,6 +63,10 @@ export default function Home() {
                 }
             });
         },
+        onError: () => {
+            setErrorMsg('Failed to add to favorite');
+            setShowErrorMsg(true);
+        },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] }),
     });
 
@@ -56,12 +74,20 @@ export default function Home() {
         mutationFn: async (id: string) => {
             await deleteData({ api_url: `http://localhost:1234/files/erase/${id}` });
         },
+        onError: () => {
+            setErrorMsg('Failed to delete file');
+            setShowErrorMsg(true);
+        },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}-${debouncedSearch}`] }),
     });
 
     const deleteAllFilesMutation = useMutation({
         mutationFn: async () => {
             await deleteData({ api_url: `http://localhost:1234/files/erase-all/${currentUserId}` });
+        },
+        onError: () => {
+            setErrorMsg('Failed to delete all files');
+            setShowErrorMsg(true);
         },
         onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}-${debouncedSearch}`] }),
     });
@@ -80,6 +106,7 @@ export default function Home() {
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
+            {showErrorMsg ? <Notification message={errorMsg}/> : null}
             <div className="flex flex-col gap-x-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white overflow-y-auto">
                 <form className="flex gap-[1rem] items-center px-[1rem] pt-[1rem]">
                     <input 
