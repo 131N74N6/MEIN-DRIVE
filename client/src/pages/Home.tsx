@@ -39,7 +39,7 @@ export default function Home() {
     } = infiniteScroll<FilesDataProps>({
         api_url: currentUserId ? `http://localhost:1234/files/get-all/${currentUserId}` : '',
         limit: 14,
-        query_key: [`all-files-${currentUserId}-${debouncedSearch}`],
+        query_key: debouncedSearch ? [`all-files-${currentUserId}-${debouncedSearch}`] : [`all-files-${currentUserId}`],
         searched: debouncedSearch.trim(),
         stale_time: 600000
     });
