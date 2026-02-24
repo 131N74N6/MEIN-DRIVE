@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
-import type { FilesDataProps } from "../services/custom-types";
-import DataModifier from "../services/data-modifier";
-import useAuth from "../services/useAuth";
+import type { FilesDataProps } from "../services/type.service";
+import DataModifier from "../services/data.service";
+import useAuth from "../services/auth.service";
 import Loading from "../components/Loading";
 import FavoriteList from "../components/FavoriteList";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -37,7 +37,7 @@ export default function Favorited() {
         isReachedEnd,
         paginatedData,
     } = infiniteScroll<FilesDataProps>({
-        api_url: currentUserId ? `http://localhost:1234/favorited/get-all/${currentUserId}` : currentUserId,
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/get-all/${currentUserId}`,
         limit: 14,
         query_key: [`all-favorited-files-${currentUserId}-${debouncedSearch}`],
         searched: debouncedSearch.trim(),
@@ -46,24 +46,30 @@ export default function Favorited() {
 
     const removeOneMutation = useMutation({
         mutationFn: async (id: string) => {
-            await deleteData({ api_url: `http://localhost:1234/favorited/erase/${id}` });
+            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/erase/${id}` });
         },
         onError: () => {
             setErrorMsg('Failed to remove favorite file');
             setShowErrorMsg(true);
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] });
+        },
     });
 
     const removeAllMutation = useMutation({
         mutationFn: async () => {
-            await deleteData({ api_url: `http://localhost:1234/favorited/erase-all/${currentUserId}` });
+            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/erase-all/${currentUserId}` });
         },
         onError: () => {
             setErrorMsg('Failed to remove all favorite files');
             setShowErrorMsg(true);
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] });
+        },
     });
 
     const removeOne = (id: string) => {
@@ -78,15 +84,15 @@ export default function Favorited() {
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
             {showErrorMsg ? <Notification message={errorMsg}/> : null}
             <div className="flex flex-col gap-x-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white overflow-y-auto">
-                <form className="flex gap-[1rem] items-center px-[1rem] pt-[1rem]">
+                <form className="flex gap-[1rem] items-center p-[1rem]">
                     <input 
                         type="text" 
                         value={searchValue}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchValue(event.target.value)}
-                        className="border border-gray-700 p-[0.45rem] text-[0.9rem] outline-0 font-[500]"
+                        className="border border-gray-700 w-[80%] p-[0.45rem] text-[0.9rem] outline-0 font-[500]"
                         placeholder="search file here"
                     />
-                    <button className="cursor-pointer text-gray-700 text-[0.9rem]" type="button" onClick={removeAll}>
+                    <button className="cursor-pointer outline-0 w-[20%] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" type="button" onClick={removeAll}>
                         <i className="fa-solid fa-trash"></i>
                     </button>
                 </form>

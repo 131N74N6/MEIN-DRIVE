@@ -1,17 +1,19 @@
 import { useEffect, useRef, useState } from "react"
-import type { FilesDataProps, MediaFilesProps } from "../services/custom-types";
+import type { FilesDataProps, MediaFilesProps } from "../services/type.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import useAuth from "../services/useAuth";
-import DataModifier from "../services/data-modifier";
+import useAuth from "../services/auth.service";
+import DataModifier from "../services/data.service";
 import { uploadToCloudinary } from "../services/media-storage";
 import { Link } from "react-router-dom";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import Notification from "../components/Notification";
+import { useNavigate } from 'react-router-dom';
 
 export default function AddFiles() {
     const { currentUserId } = useAuth();
     const { insertData } = DataModifier();
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const [mediaFiles, setMediaFiles] = useState<MediaFilesProps[]>([]);
     const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -19,7 +21,7 @@ export default function AddFiles() {
     
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [showErrorMsg, setShowErrorMsg] = useState<boolean>(false);
-        
+
     useEffect(() => {
         if (showErrorMsg) {
             const timer = setTimeout(() => {
@@ -82,7 +84,7 @@ export default function AddFiles() {
 
             for (const uploadedFile of uploadedFiles) {
                 await insertData<FilesDataProps>({
-                    api_url: `http://localhost:1234/files/add`,
+                    api_url: `http://localhost:1234/api/files/add`,
                     data: {
                         created_at: getCurrentDate.toISOString(),
                         files: {
@@ -101,7 +103,10 @@ export default function AddFiles() {
             setErrorMsg('Failed to upload files');
             setShowErrorMsg(true);
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            navigate('/home')
+        },
         onSettled: () => setIsUploading(false)
     });
 

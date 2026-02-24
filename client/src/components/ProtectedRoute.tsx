@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
-import type { ProtectedRouteProps } from "../services/custom-types";
-import useAuth from "../services/useAuth";
+import type { ProtectedRouteProps } from "../services/type.service";
+import useAuth from "../services/auth.service";
 
 export default function ProtectedRoute(props: ProtectedRouteProps) {
     const { loading, currentUserId } = useAuth();

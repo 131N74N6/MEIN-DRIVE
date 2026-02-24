@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import useAuth from "../services/useAuth";
+import useAuth from "../services/auth.service";
 import Loading from "../components/Loading";
 
 export default function SignIn() {
@@ -18,7 +18,7 @@ export default function SignIn() {
 
     useEffect(() => {
         if (showError) {
-             const timer = setTimeout(() => setShowError(false), 3000);
+            const timer = setTimeout(() => setShowError(false), 3000);
             return () => clearTimeout(timer);
         }
     }, [loading, navigate, currentUserId]);

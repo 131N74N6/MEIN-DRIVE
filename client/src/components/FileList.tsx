@@ -1,4 +1,4 @@
-import type { FileListProps } from "../services/custom-types";
+import type { FileListProps } from "../services/type.service";
 import FileItem from "./FileItem";
 import Loading from "./Loading";
 
@@ -12,14 +12,14 @@ export default function FileList(props: FileListProps) {
     }
 
     return (
-        <div className="flex flex-col gap-[1rem] p-[1rem] overflow-y-auto">
-            <div className="grid md:grid-cols-2 grid-cols-1 gap-[1rem]">
+        <div className="flex flex-col gap-[1rem] px-4 pt-4 overflow-y-auto">
+            <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-[1rem]">
                 {props.files.map((file) => (
                     <FileItem 
-                        addToFavorite={props.addToFavorite}
                         deleteOne={props.deleteOne}
-                        file={file} 
+                        file={file}
                         key={`file_${file._id}`}
+                        removeOneFavoriteMt={props.removeOneFavoriteMt}
                     />
                 ))}
             </div>

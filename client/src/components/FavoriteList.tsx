@@ -1,4 +1,4 @@
-import type { FavoriteListProps } from "../services/custom-types";
+import type { FavoriteListProps } from "../services/type.service";
 import FavoriteFile from "./FavoriteFile";
 import Loading from "./Loading";
 
@@ -12,8 +12,8 @@ export default function FavoriteList(props: FavoriteListProps) {
     }
 
     return (
-        <div className="bg-white flex flex-col gap-[1rem] overflow-y-auto">
-            <div className="grid md:grid-cols-2 grid-cols-1 gap-[1rem]">
+        <div className="bg-white flex flex-col gap-[1rem] px-4 pt-4 overflow-y-auto">
+            <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-[1rem]">
                 {props.favorites.map((favorite) => (
                     <FavoriteFile 
                         key={`file_${favorite._id}`}

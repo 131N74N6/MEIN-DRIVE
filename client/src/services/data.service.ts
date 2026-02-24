@@ -1,6 +1,6 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "./custom-types";
-import useAuth from "./useAuth";
+import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "./type.service";
+import useAuth from "./auth.service";
 
 export default function DataModifier() {
     const { loading, token } = useAuth();
@@ -31,28 +31,26 @@ export default function DataModifier() {
         await request.json();
     }
 
-    const getData = async <V>(props: GetDataProps) => {
-        const { data, error, isLoading } = useQuery<V, Error>({
-            enabled: !!currentUserToken && !loading,
-            gcTime: 600000,
+    function getData<BIN1999>(props: GetDataProps) {
+        const { data, error, isLoading } = useQuery<BIN1999, Error>({
+            enabled: !!token && !loading,
             queryFn: async () => {
                 const request = await fetch(props.api_url, {
-                    headers: { 
-                        'Authorization': `Bearer ${currentUserToken}`,
-                        'Content-Type': 'application/json' 
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
                     },
                     method: 'GET'
                 });
 
                 const response = await request.json();
-                console.log(currentUserToken);
                 return response;
             },
             queryKey: props.query_key,
             refetchOnMount: true,
             refetchOnReconnect: true,
             refetchOnWindowFocus: false,
-            staleTime: props.stale_time,
+            staleTime: props.stale_time
         });
 
         return { data, error, isLoading }

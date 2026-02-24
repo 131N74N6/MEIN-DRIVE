@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useCallback } from "react"
-import type { AuthActionProps, AuthStateProps, GetCurrentUserProps, SignUpProps, UserTokenProps } from "./custom-types";
+import type { AuthActionProps, AuthStateProps, GetCurrentUserProps, SignUpProps, UserTokenProps } from "./type.service";
 import { useNavigate } from "react-router-dom";
 
 const initialState: AuthStateProps = {
@@ -44,7 +44,7 @@ export default function useAuth() {
         if (!userId || !token) return;
         
         try {
-            const request = await fetch(`http://localhost:1234/users/user-data/${userId}`, {
+            const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/user-data/${userId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -97,7 +97,7 @@ export default function useAuth() {
         dispatch({ type: 'SET_ERROR', payload: null });
         
         try {
-            const request = await fetch(`http://localhost:1234/users/sign-in`, {
+            const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/sign-in`, {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
                 method: 'POST'
@@ -132,7 +132,7 @@ export default function useAuth() {
         dispatch({ type: 'SET_ERROR', payload: null });
         
         try {
-            const request = await fetch(`http://localhost:1234/users/sign-up`, {
+            const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/sign-up`, {
                 body: JSON.stringify(props),
                 headers: { 'Content-Type': 'application/json' },
                 method: 'POST'
