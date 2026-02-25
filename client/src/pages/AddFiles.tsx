@@ -4,33 +4,27 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../services/auth.service";
 import DataModifier from "../services/data.service";
 import { uploadToCloudinary } from "../services/media-storage";
-import { Link } from "react-router-dom";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import Notification from "../components/Notification";
 import { useNavigate } from 'react-router-dom';
+import { Database, FolderArchive, X, File, Notebook, AudioLines, Sheet, FileChartColumn, FileText, FileTypeCorner } from "lucide-react";
 
 export default function AddFiles() {
     const { currentUserId } = useAuth();
-    const { insertData } = DataModifier();
+    const { insertData, message, setMessage } = DataModifier();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
     const [mediaFiles, setMediaFiles] = useState<MediaFilesProps[]>([]);
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [showErrorMsg, setShowErrorMsg] = useState<boolean>(false);
 
     useEffect(() => {
-        if (showErrorMsg) {
-            const timer = setTimeout(() => {
-                setShowErrorMsg(false);
-                setErrorMsg(null);
-            }, 3000);
+        if (message) {
+            const timer = setTimeout(() => setMessage(null), 3000);
             return () => clearTimeout(timer);
         }
-    }, [showErrorMsg]);
+    }, [message]);
 
     const handleChosenFiles = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -38,12 +32,12 @@ export default function AddFiles() {
 
         if (!files || files.length === 0) return;
 
-        for (const file of files) {
+        for (let x = 0; x < files.length; x++) {
             chosenFiles.push({
-                file: file,
-                file_name: file.name,
-                file_type: file.type,
-                preview_url: URL.createObjectURL(file)
+                file: files[x],
+                file_name: files[x].name,
+                file_type: files[x].type,
+                preview_url: URL.createObjectURL(files[x])
             });
         }
 
@@ -51,7 +45,7 @@ export default function AddFiles() {
         if (fileInputRef.current) fileInputRef.current.value = '';
     }
 
-    const removeChosenFiles = (index: number) => {
+    function removeChosenFiles(index: number) {
         const file = mediaFiles[index];
         URL.revokeObjectURL(file.preview_url);
         setMediaFiles(prev => prev.filter((_, i) => i !== index));
@@ -70,6 +64,10 @@ export default function AddFiles() {
             const getCurrentDate = new Date();
             const uploadedFiles: { file_name: string; file_type: string; url: string; public_id: string; resource_type: string; }[] = [];
 
+            if (mediaFiles.length === 0) {
+                setMessage('Please select at least one file');
+            }
+
             for (const mediaFile of mediaFiles) {
                 const result = await uploadToCloudinary(mediaFile.file, folderName);
                 const resourceType = getResourceType(mediaFile.file_type);
@@ -84,7 +82,7 @@ export default function AddFiles() {
 
             for (const uploadedFile of uploadedFiles) {
                 await insertData<FilesDataProps>({
-                    api_url: `http://localhost:1234/api/files/add`,
+                    api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add`,
                     data: {
                         created_at: getCurrentDate.toISOString(),
                         files: {
@@ -99,15 +97,16 @@ export default function AddFiles() {
                 });
             }
         },
-        onError: () => {
-            setErrorMsg('Failed to upload files');
-            setShowErrorMsg(true);
-        },
+        onError: () => {},
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             navigate('/home')
         },
-        onSettled: () => setIsUploading(false)
+        onSettled: () => {
+            setIsUploading(false);
+            setMediaFiles([]);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
     });
 
     const uploadFiles = (event: React.FormEvent) => {
@@ -117,16 +116,16 @@ export default function AddFiles() {
 
     return (
         <section className="flex gap-[1rem] p-[1rem] md:flex-row flex-col h-screen">
-            {showErrorMsg ? <Notification message={errorMsg}/> : null}
-            <form onSubmit={uploadFiles} className="flex flex-col gap-[1rem] min-h-[679px] bg-white p-[1rem] w-full md:w-3/4 shadow-[0_0_4px_#1a1a1a] rounded">
+            {message ? Notification(message) : null}
+            <form onSubmit={uploadFiles} className="flex gap-[1.3rem] md:w-3/4 w-full p-4 flex-col bg-white backdrop-blur-lg overflow-y-auto shadow-[0_0_4px_#1a1a1a] rounded">
                 <input onChange={handleChosenFiles} multiple type="file" ref={fileInputRef} className="hidden"/>
-                <div className="border-dashed h-screen p-[1rem] cursor-pointer border-2 border-gray-400 rounded-lg flex flex-col" onClick={() => fileInputRef.current?.click()}>
+                <div className="border-dashed h-screen p-4 cursor-pointer border-2 border-gray-400 rounded-lg overflow-x-auto flex flex-col" onClick={() => fileInputRef.current?.click()}>
                     {mediaFiles.length === 0 ? (                    
                         <div className="flex flex-col items-center justify-center text-gray-600">
                             <span className="text-lg">Click to select images or videos</span>
                         </div>
                     ) : (
-                        <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[1rem] w-full p-[1rem] overflow-y-auto">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full relative group">
                             {mediaFiles.map((mediaFile, index) => (
                                 <div className="relative" key={`${mediaFile.file_name}_${index}`}>
                                     {mediaFile.file_type.startsWith('image/') ? (
@@ -143,59 +142,60 @@ export default function AddFiles() {
                                         />
                                     ) : mediaFile.file_type.startsWith('audio/') ? (
                                         <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <i className="fa-solid fa-file-lines"></i>
+                                            <AudioLines></AudioLines>
                                             <p>{mediaFile.file_name}</p>
                                         </div>
                                     ) : mediaFile.file_type.startsWith('text/') ? (
                                         <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <i className="fa-solid fa-file-lines"></i>
+                                            <Notebook></Notebook>
                                             <p>{mediaFile.file_name}</p>
                                         </div>
                                     ) : mediaFile.file_type.includes('/pdf') ? (
                                         <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <i className="fa-solid fa-file-pdf"></i>
+                                            <FileTypeCorner></FileTypeCorner>
                                             <p>{mediaFile.file_name}</p>
                                         </div>
                                     ) : mediaFile.file_type.includes('/zip') ? (
                                         <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <i className="fa-solid fa-file-zipper"></i>
+                                            <FolderArchive></FolderArchive>
                                             <p>{mediaFile.file_name}</p>
                                         </div>
                                     ) : mediaFile.file_type.includes('/sql') ? (
                                         <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <i className="fa-solid fa-database"></i>
+                                            <Database></Database>
                                             <p>{mediaFile.file_name}</p>
                                         </div>
                                     ) : mediaFile.file_type.includes('.sheet') ? (
                                         <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <i className="fa-solid fa-file-excel"></i>
+                                            <Sheet></Sheet>
                                             <p>{mediaFile.file_name}</p>
                                         </div>
                                     ) : mediaFile.file_type.includes('.document') ? (
                                         <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <i className="fa-solid fa-file-word"></i>
+                                            <FileText></FileText>
                                             <p>{mediaFile.file_name}</p>
                                         </div>
                                     ) : mediaFile.file_type.includes('.presentation') ? (
                                         <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <i className="fa-solid fa-file-powerpoint"></i>
+                                            <FileChartColumn></FileChartColumn>
                                             <p>{mediaFile.file_name}</p>
                                         </div>
                                     ) : (
                                         <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <i className="fa-solid fa-file"></i>
+                                            <File></File>
                                             <p>{mediaFile.file_name}</p>
                                         </div>
                                     )}
-                                    <button 
+                                    <button
                                         type="button"
-                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-[1rem] w-6 h-6 flex justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                        onClick={(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                                            event.stopPropagation();
+                                        disabled={isUploading}
+                                        onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+                                            e.stopPropagation();
                                             removeChosenFiles(index);
                                         }}
+                                        className="cursor-pointer absolute top-1 right-1 bg-[rgba(0,0,0,0.55)] text-white rounded-full w-6 h-6 flex justify-center items-center disabled:opacity-0 opacity-0 group-hover:opacity-100 transition-opacity"
                                     >
-                                        <i className="fa-solid fa-xmark"></i>
+                                        <X size={14} color="white"/>
                                     </button>
                                 </div>
                             ))}
@@ -203,13 +203,20 @@ export default function AddFiles() {
                     )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.5rem]">
-                    <Link className="bg-gray-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer" to={'/home'}>Back</Link>
+                    <button 
+                        type="button" 
+                        disabled={isUploading}
+                        className="rounded-md bg-gray-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50" 
+                        onClick={() => navigate('/home')}
+                    >
+                        {isUploading ? 'Uploading' : 'Back'}
+                    </button>
                     <button 
                         type="submit" 
-                        disabled={isUploading}
-                        className="bg-blue-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
+                        disabled={isUploading || mediaFiles.length === 0}
+                        className="rounded-md bg-blue-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                     >
-                        Upload
+                        {isUploading ? 'Uploading' : 'Upload'}
                     </button>
                 </div>
             </form>

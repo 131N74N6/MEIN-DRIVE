@@ -4,11 +4,9 @@ import useAuth from "../services/auth.service";
 import Loading from "../components/Loading";
 
 export default function SignIn() {
-    const { error, loading, currentUserId, signIn } = useAuth();
+    const { currentUserId, dispatch, loading, signIn, state } = useAuth();
     const navigate = useNavigate();
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    
-    const [showError, setShowError] = useState<boolean>(false);
+
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     
@@ -17,21 +15,15 @@ export default function SignIn() {
     }, [loading, currentUserId, navigate]);
 
     useEffect(() => {
-        if (showError) {
-            const timer = setTimeout(() => setShowError(false), 3000);
+        if (state.error) {
+            const timer = setTimeout(() => dispatch({ type: 'SET_ERROR', payload: null }), 3000);
             return () => clearTimeout(timer);
         }
-    }, [loading, navigate, currentUserId]);
+    }, [state.error]);
 
     const signInButton = async (event: React.FormEvent) => {
         event.preventDefault();
-        try {
-            if (error) throw new Error(error);
-            await signIn(email, password);
-        } catch (error: any) {
-            setErrorMsg(error.message);
-            setShowError(true);
-        }
+        await signIn(email.trim(), password.trim());
     }
 
     if (loading) {
@@ -68,7 +60,7 @@ export default function SignIn() {
                 </div>
                 <p className="text-center text-white">Don't have account? <Link className="text-purple-400" to={'/sign-up'}>Sign Up</Link></p>
                 <button type="submit" className="bg-purple-400 cursor-pointer text-purple-950 font-[500] text-[0.9rem] p-[0.4rem]">Sign In</button>
-                {showError ? <p className="bg-gray-400 text-red-500 p-[0.5rem]">{errorMsg}</p> : null}
+                {state.error ? <p className="text-amber-300 font-medium text-center">{state.error}</p> : null}
             </form>
         </section>
     );

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "./type.service";
 import useAuth from "./auth.service";
@@ -5,30 +6,57 @@ import useAuth from "./auth.service";
 export default function DataModifier() {
     const { loading, token } = useAuth();
     const currentUserToken = token ? token : '';
+    const [message, setMessage] = useState<string | null>(null);
 
     const changeData = async <S>(props: ChangeDataProps<S>) => {
-        const request = await fetch(props.api_url, {
-            body: JSON.stringify(props.data),
-            headers: {
-                'Authorization': `Bearer ${currentUserToken}`,
-                'Content-Type': 'application/json'
-            },
-            method: 'PUT'
-        });
+        try {
+            const request = await fetch(props.api_url, {
+                body: JSON.stringify(props.data),
+                headers: {
+                    'Authorization': `Bearer ${currentUserToken}`,
+                    'Content-Type': 'application/json'
+                },
+                method: 'PUT'
+            });
 
-        await request.json();
+            const response = await request.json();
+
+            if (request.ok) {
+                setMessage(null);
+                return response;
+            } else {
+                setMessage(response.message);
+                throw new Error(response.message);
+            }
+        } catch (error: any) {
+            setMessage(error.message || 'Check your internet connection');
+            throw error;
+        }
     }
 
     const deleteData = async (props: DeleteDataProps) => {
-        const request = await fetch(props.api_url, {
-            headers: {
-                'Authorization': `Bearer ${currentUserToken}`,
-                'Content-Type': 'application/json'
-            },
-            method: 'DELETE'
-        });
+        try {
+            const request = await fetch(props.api_url, {
+                headers: {
+                    'Authorization': `Bearer ${currentUserToken}`,
+                    'Content-Type': 'application/json'
+                },
+                method: 'DELETE'
+            });
 
-        await request.json();
+            const response = await request.json();
+            
+            if (request.ok) {
+                setMessage(null);
+                    return response;
+            } else {
+                setMessage(response.message);
+                throw new Error(response.message);
+            }
+        } catch (error: any) {
+            setMessage(error.message || 'Check your internet connection');
+            throw error;
+        }
     }
 
     function getData<BIN1999>(props: GetDataProps) {
@@ -68,7 +96,6 @@ export default function DataModifier() {
                 });
 
                 const response = await request1.json();
-                console.log(currentUserToken);
                 return response;
             } else {
                 const request2 = await fetch(`${props.api_url}?search=${props.searched}&page=${pageParam}&limit=${props.limit}`, {
@@ -80,7 +107,6 @@ export default function DataModifier() {
                 });
                 
                 const response = await request2.json();
-                console.log(currentUserToken);
                 return response;
             }
         }
@@ -115,17 +141,30 @@ export default function DataModifier() {
     }
 
     const insertData = async <S>(props: InputDataProps<S>) => {
-        const request = await fetch(props.api_url, {
-            body: JSON.stringify(props.data),
-            headers: { 
-                'Authorization': `Bearer ${currentUserToken}`,
-                'Content-Type': 'application/json'
-            },
-            method: 'POST'
-        });
+        try {
+            const request = await fetch(props.api_url, {
+                body: JSON.stringify(props.data),
+                headers: { 
+                    'Authorization': `Bearer ${currentUserToken}`,
+                    'Content-Type': 'application/json'
+                },
+                method: 'POST'
+            });
 
-        await request.json();
+            const response = await request.json();
+            
+            if (!request.ok) {
+                setMessage(response.message);
+                throw new Error(response.message);
+            } else {
+                setMessage(null);
+                return response;
+            }
+        } catch (error: any) {
+            setMessage(error.message || 'Check your internet connection');
+            throw error;
+        }
     }
 
-    return { changeData, deleteData, getData, infiniteScroll, insertData }
+    return { changeData, deleteData, getData, infiniteScroll, insertData, message, setMessage }
 };

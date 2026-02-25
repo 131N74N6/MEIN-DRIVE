@@ -1,5 +1,6 @@
-import { Request, Response } from 'express';
+import { Request, response, Response } from 'express';
 import { Favorited } from '../models/favorited.model';
+import { File } from '../models/file.model';
 
 export async function addToFavorite(req: Request, res: Response) {
     try {
@@ -11,7 +12,7 @@ export async function addToFavorite(req: Request, res: Response) {
     }
 }
 
-export async function getCurrentUserFavorite(req: Request, res: Response): Promise<void> {
+export async function getCurrentUserFavorite(req: Request, res: Response) {
     try {
         const getCurrentUserId = req.params.user_id;
         const searched = req.query.search as string | undefined;
@@ -36,8 +37,11 @@ export async function getCurrentUserFavorite(req: Request, res: Response): Promi
     }
 }
 
-export async function deleteAllFavoriteFiles(req: Request, res: Response): Promise<void> {
+export async function deleteAllFavoriteFiles(req: Request, res: Response) {
     try {
+        const favoriteFiles = await File.find({ user_id: req.params.user_id });
+        if (favoriteFiles.length < 1) return response.status(400).json({ message: 'no files added' });
+
         await Favorited.deleteMany({ user_id: req.params.user_id });
         res.status(200).json({ message: 'erase from favorited' });
     } catch (error) {
@@ -45,7 +49,7 @@ export async function deleteAllFavoriteFiles(req: Request, res: Response): Promi
     }
 }
 
-export async function deleteFavoriteFile(req: Request, res: Response): Promise<void> {
+export async function deleteFavoriteFile(req: Request, res: Response) {
     try {
         await Favorited.deleteOne({ file_id: req.params.id });
         res.status(200).json({ message: 'erase from favorited' });

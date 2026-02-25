@@ -9,24 +9,26 @@ dotenv.config();
 async function signIn(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined> {
     try {
         const { email, password } = req.body;
-        const findUser = await User.findOne({ email });
-
+        
+        if (!password || !email) return res.status(400).json({ message: "email and password is required" });
         if (!email) return res.status(400).json({ message: 'email is required' });
         if (!password) return res.status(400).json({ message: 'password is required' });
-        if (!findUser) return res.status(401).json({ message: 'Invalid data. Try again later' });
 
-        const isPasswordMatch = await bcrypt.compare(password, findUser.password);
-        if (!isPasswordMatch) return res.status(404).json({ message: 'incorrect password' });
+        const findEmail = await User.findOne({ email });
+        if (!findEmail) return res.status(400).json({ message: 'email not found' });
+        
+        const isPasswordMatch = await bcrypt.compare(password, findEmail.password);
+        if (!isPasswordMatch) return res.status(400).json({ message: 'incorrect password' });
 
         const generatedToken = jwt.sign(
-            { user_id: findUser._id.toString() },
+            { user_id: findEmail._id.toString() },
             process.env.JWT_TOKEN || 'your-jwt-key',
         );
 
         res.status(200).json({
             status: 'ok',
             token: generatedToken,
-            user_id: findUser._id
+            user_id: findEmail._id
         });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
@@ -36,13 +38,17 @@ async function signIn(req: Request, res: Response): Promise<Response<any, Record
 async function signUp(req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined> {
     try {
         const { created_at, email, password, username } = req.body;
-        const findUser = await User.findOne({ email });
-
+        
+        if (!password || !email || !username) return res.status(400).json({ message: "email, username, and password is required" });
         if (!email) return res.status(400).send({ message: 'email is required' });
         if (!password) return res.status(400).send({ message: 'password is required' });
         if (!username) return res.status(400).send({ message: 'username is required' });
+        
+        const findEmail = await User.findOne({ email: email });
+        if (findEmail) return res.status(400).send({ message: 'this email already exist' });
 
-        if (findUser) return res.status(409).send({ message: 'User already exist' });
+        const findUser = await User.findOne({ username: username });
+        if (findUser) return res.status(400).send({ message: 'this username already exist' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ created_at, email, password: hashedPassword, username });

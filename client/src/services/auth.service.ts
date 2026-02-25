@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useCallback } from "react"
-import type { AuthActionProps, AuthStateProps, GetCurrentUserProps, SignUpProps, UserTokenProps } from "./type.service";
+import type { AuthActionProps, AuthStateProps, GetCurrentUserProps, SignUpProps } from "./type.service";
 import { useNavigate } from "react-router-dom";
 
 const initialState: AuthStateProps = {
@@ -39,7 +39,6 @@ export default function useAuth() {
     const [state, dispatch] = useReducer(authReducer, initialState);
     const navigate = useNavigate();
 
-    // Use useCallback to prevent unnecessary recreations
     const getCurrentUserData = useCallback(async (userId: string, token: string) => {
         if (!userId || !token) return;
         
@@ -67,9 +66,8 @@ export default function useAuth() {
                     username: response.username
                 }
             });
-        } catch (error) {
-            console.error('Failed to get user data:', error);
-            // Don't set error here to avoid blocking navigation
+        } catch (error: any) {
+            dispatch({ type: 'SET_ERROR', payload: error });
         }
     }, []);
 
@@ -82,8 +80,9 @@ export default function useAuth() {
                     dispatch({ type: 'SET_USER', payload: userData });
                     getCurrentUserData(userData.user_id, userData.token);
                 }
-            } catch (error) {
-                console.error('Init app error:', error);
+            } catch (error: any) {
+                dispatch({ type: 'SET_ERROR', payload: error });
+                localStorage.removeItem('user');
             } finally {
                 dispatch({ type: 'SET_LOADING', payload: false });
             }
@@ -103,23 +102,23 @@ export default function useAuth() {
                 method: 'POST'
             });
 
-            if (!request.ok) {
-                const errorRequest = await request.json();
-                throw new Error(errorRequest.message);
-            }
+            const response = await request.json();
 
-            const response: UserTokenProps = await request.json();
-            const currentUserToken = {
-                status: response.status,
-                user_id: response.user_id,
-                token: response.token
+            if (!request.ok) {
+                const errorMessage = response.error || response.message || 'Gagal sign-in! Coba lagi nanti';
+                dispatch({ type: 'SET_ERROR', payload: errorMessage });
+            } else {
+                const currentUserToken = {
+                    status: response.status,
+                    user_id: response.user_id,
+                    token: response.token
+                }
+                
+                dispatch({ type: 'SET_USER', payload: currentUserToken });
+                localStorage.setItem('user', JSON.stringify(currentUserToken));
+                
+                getCurrentUserData(response.user_id, response.token);
             }
-            
-            dispatch({ type: 'SET_USER', payload: currentUserToken });
-            localStorage.setItem('user', JSON.stringify(currentUserToken));
-            
-            getCurrentUserData(response.user_id, response.token);
-            
         } catch (error: any) {
             dispatch({ type: 'SET_ERROR', payload: error.message || 'Failed to sign in' });
         } finally {
@@ -138,12 +137,15 @@ export default function useAuth() {
                 method: 'POST'
             });
 
+            const response = await request.json();
+
             if (!request.ok) {
-                const errorRequest = await request.json();
-                throw new Error(errorRequest.message);
+                const errorMessage = response.error || response.message || 'Gagal sign-up! Coba lagi nanti';
+                dispatch({ type: 'SET_ERROR', payload: errorMessage });
+            } else {
+                navigate('/sign-in');
             }
 
-            navigate('/sign-in');
         } catch (error: any) {
             dispatch({ type: 'SET_ERROR', payload: error.message || 'Failed to sign up' });
         } finally {
@@ -174,6 +176,8 @@ export default function useAuth() {
         created_at: state.createdAt,
         signOut, 
         signUp, 
-        token: state.user?.token || ''
+        token: state.user?.token || '',
+        state,
+        dispatch
     }
 }
