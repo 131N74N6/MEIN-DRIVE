@@ -39,17 +39,6 @@ export default function Home() {
         stale_time: 600000
     });
 
-    const removeOneFavoriteMutation = useMutation({
-        mutationFn: async (_id: string) => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/erase/${_id}` });
-        },
-        onError: () => {},
-        onSuccess: (variables) => {
-            queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}-${variables}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] });
-        }
-    });
-
     const deleteFileMutation = useMutation({
         mutationFn: async (id: string) => {
             await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase/${id}` });
@@ -104,7 +93,6 @@ export default function Home() {
                     </div>
                 ) : paginatedData ? (
                     <FileList 
-                        removeOneFavoriteMt={removeOneFavoriteMutation}
                         deleteOne={deleteOneFile}
                         fetchNextPage={fetchNextPage} 
                         files={paginatedData} 

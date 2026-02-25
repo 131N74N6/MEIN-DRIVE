@@ -5,7 +5,7 @@ import { Star, Trash, Database, FolderArchive, File, Notebook, AudioLines, Sheet
 
 export default function FileItem(props: FileItemProps) {
     const queryClient = useQueryClient();
-    const { getData, insertData } = DataModifier();
+    const { deleteData, getData, insertData } = DataModifier();
 
     const { data: isFavorited } = getData<boolean>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/is-favorite?user_id=${props.file.user_id}&file_id=${props.file._id}`,
@@ -39,8 +39,20 @@ export default function FileItem(props: FileItemProps) {
         }
     });
 
+    
+    const removeOneFavoriteMutation = useMutation({
+        mutationFn: async (_id: string) => {
+            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/erase/${_id}` });
+        },
+        onError: () => {},
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`is-favorited-${[props.file.user_id]}-${props.file._id}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${props.file.user_id}`] });
+        }
+    });
+
     function handleFavoriteButton() {
-        if (isFavorited) props.removeOneFavoriteMt.mutate(props.file._id);
+        if (isFavorited) removeOneFavoriteMutation.mutate(props.file._id);
         else addToFavoriteMutation.mutate();
     }
 

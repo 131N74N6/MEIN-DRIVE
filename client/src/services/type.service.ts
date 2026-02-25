@@ -1,4 +1,4 @@
-import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, UseMutationResult } from "@tanstack/react-query";
+import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
 export type AuthStateProps = {
@@ -71,7 +71,6 @@ export type FavoriteItemProps = {
 export type FileItemProps = {
     file: FilesDataProps;
     deleteOne: (id: string) => void;
-    removeOneFavoriteMt: UseMutationResult<void, Error, string, unknown>;
 }
 
 export type FileListProps = {
@@ -80,7 +79,6 @@ export type FileListProps = {
     isFetchingNextPage: boolean;
     isReachedEnd: boolean;
     deleteOne: (id: string) => void;
-    removeOneFavoriteMt: UseMutationResult<void, Error, string, unknown>;
 }
 
 export type GetDataProps = {

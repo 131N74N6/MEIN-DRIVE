@@ -19,7 +19,6 @@ export default function FileList(props: FileListProps) {
                         deleteOne={props.deleteOne}
                         file={file}
                         key={`file_${file._id}`}
-                        removeOneFavoriteMt={props.removeOneFavoriteMt}
                     />
                 ))}
             </div>
