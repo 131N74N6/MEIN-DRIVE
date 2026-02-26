@@ -3,8 +3,7 @@ import type { FilesDataProps, MediaFilesProps } from "../services/type.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../services/auth.service";
 import DataModifier from "../services/data.service";
-import { uploadToCloudinary } from "../services/media-storage";
-import { Navbar1, Navbar2 } from "../components/Navbar";
+import { uploadToCloudinary } from "../services/cloudinary.service";
 import Notification from "../components/Notification";
 import { useNavigate } from 'react-router-dom';
 import { Database, FolderArchive, X, File, Notebook, AudioLines, Sheet, FileChartColumn, FileText, FileTypeCorner } from "lucide-react";
@@ -61,12 +60,9 @@ export default function AddFiles() {
         onMutate: () => setIsUploading(true),
         mutationFn: async () => {
             const folderName = 'drive_files';
-            const getCurrentDate = new Date();
-            const uploadedFiles: { file_name: string; file_type: string; url: string; public_id: string; resource_type: string; }[] = [];
+            if (mediaFiles.length === 0) throw new Error('Please select at least one file');
 
-            if (mediaFiles.length === 0) {
-                setMessage('Please select at least one file');
-            }
+            const uploadedFiles: { file_name: string; file_type: string; url: string; public_id: string; resource_type: string; }[] = [];
 
             for (const mediaFile of mediaFiles) {
                 const result = await uploadToCloudinary(mediaFile.file, folderName);
@@ -80,24 +76,26 @@ export default function AddFiles() {
                 });
             }
 
-            for (const uploadedFile of uploadedFiles) {
+            for (let y = 0; y < uploadedFiles.length; y++) {
                 await insertData<FilesDataProps>({
                     api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add`,
                     data: {
-                        created_at: getCurrentDate.toISOString(),
+                        created_at: new Date().toISOString(),
                         files: {
-                            public_id: uploadedFile.public_id,
-                            resource_type: uploadedFile.resource_type,
-                            url: uploadedFile.url
+                            public_id: uploadedFiles[y].public_id,
+                            resource_type: uploadedFiles[y].resource_type,
+                            url: uploadedFiles[y].url
                         },
-                        file_name: uploadedFile.file_name,
-                        file_type: uploadedFile.file_type,
+                        file_name: uploadedFiles[y].file_name,
+                        file_type: uploadedFiles[y].file_type,
                         user_id: currentUserId
                     },
                 });
             }
         },
-        onError: () => {},
+        onError: (error) => {
+            setMessage(error.message || 'Check your internet connection');
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             navigate('/home')
@@ -117,11 +115,11 @@ export default function AddFiles() {
     return (
         <section className="flex gap-[1rem] p-[1rem] md:flex-row flex-col h-screen">
             {message ? Notification(message) : null}
-            <form onSubmit={uploadFiles} className="flex gap-[1.3rem] md:w-3/4 w-full p-4 flex-col bg-white backdrop-blur-lg overflow-y-auto shadow-[0_0_4px_#1a1a1a] rounded">
+            <form onSubmit={uploadFiles} className="flex gap-[1.3rem] w-full p-4 flex-col bg-white backdrop-blur-lg overflow-y-auto shadow-[0_0_4px_#1a1a1a] rounded">
                 <input onChange={handleChosenFiles} multiple type="file" ref={fileInputRef} className="hidden"/>
                 <div className="border-dashed h-screen p-4 cursor-pointer border-2 border-gray-400 rounded-lg overflow-x-auto flex flex-col" onClick={() => fileInputRef.current?.click()}>
                     {mediaFiles.length === 0 ? (                    
-                        <div className="flex flex-col items-center justify-center text-gray-600">
+                        <div className="flex flex-col items-center h-full justify-center text-gray-600">
                             <span className="text-lg">Click to select images or videos</span>
                         </div>
                     ) : (
@@ -141,49 +139,67 @@ export default function AddFiles() {
                                             controls
                                         />
                                     ) : mediaFile.file_type.startsWith('audio/') ? (
-                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <AudioLines></AudioLines>
-                                            <p>{mediaFile.file_name}</p>
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700 w-full h-50 rounded-lg">
+                                            <div className="flex flex-col gap-4 items-center">
+                                                <AudioLines></AudioLines>
+                                                <p>{mediaFile.file_name}</p>
+                                            </div>
                                         </div>
                                     ) : mediaFile.file_type.startsWith('text/') ? (
-                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <Notebook></Notebook>
-                                            <p>{mediaFile.file_name}</p>
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700 w-full h-50 rounded-lg">
+                                            <div className="flex flex-col gap-4 items-center">
+                                                <Notebook></Notebook>
+                                                <p>{mediaFile.file_name}</p>
+                                            </div>
                                         </div>
                                     ) : mediaFile.file_type.includes('/pdf') ? (
-                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <FileTypeCorner></FileTypeCorner>
-                                            <p>{mediaFile.file_name}</p>
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700 w-full h-50 rounded-lg">
+                                            <div className="flex flex-col gap-4 items-center">
+                                                <FileTypeCorner></FileTypeCorner>
+                                                <p>{mediaFile.file_name}</p>
+                                            </div>
                                         </div>
                                     ) : mediaFile.file_type.includes('/zip') ? (
-                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <FolderArchive></FolderArchive>
-                                            <p>{mediaFile.file_name}</p>
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700 w-full h-50 rounded-lg">
+                                            <div className="flex flex-col gap-4 items-center">
+                                                <FolderArchive></FolderArchive>
+                                                <p>{mediaFile.file_name}</p>
+                                            </div>
                                         </div>
                                     ) : mediaFile.file_type.includes('/sql') ? (
-                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <Database></Database>
-                                            <p>{mediaFile.file_name}</p>
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700 w-full h-50 rounded-lg">
+                                            <div className="flex flex-col gap-4 items-center">
+                                                <Database></Database>
+                                                <p>{mediaFile.file_name}</p>
+                                            </div>
                                         </div>
                                     ) : mediaFile.file_type.includes('.sheet') ? (
-                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <Sheet></Sheet>
-                                            <p>{mediaFile.file_name}</p>
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700 w-full h-50 rounded-lg">
+                                            <div className="flex flex-col gap-4 items-center">
+                                                <Sheet></Sheet>
+                                                <p>{mediaFile.file_name}</p>
+                                            </div>
                                         </div>
                                     ) : mediaFile.file_type.includes('.document') ? (
-                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <FileText></FileText>
-                                            <p>{mediaFile.file_name}</p>
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700 w-full h-50 rounded-lg">
+                                            <div className="flex flex-col gap-4 items-center">
+                                                <FileText></FileText>
+                                                <p>{mediaFile.file_name}</p>
+                                            </div>
                                         </div>
                                     ) : mediaFile.file_type.includes('.presentation') ? (
-                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <FileChartColumn></FileChartColumn>
-                                            <p>{mediaFile.file_name}</p>
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700 w-full h-50 rounded-lg">
+                                            <div className="flex flex-col gap-4 items-center">
+                                                <FileChartColumn></FileChartColumn>
+                                                <p>{mediaFile.file_name}</p>
+                                            </div>
                                         </div>
                                     ) : (
-                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700">
-                                            <File></File>
-                                            <p>{mediaFile.file_name}</p>
+                                        <div className="flex justify-center items-center text-gray-700 border border-gray-700 w-full h-50 rounded-lg">
+                                            <div className="flex flex-col gap-4 items-center">
+                                                <File></File>
+                                                <p>{mediaFile.file_name}</p>
+                                            </div>
                                         </div>
                                     )}
                                     <button
@@ -213,15 +229,13 @@ export default function AddFiles() {
                     </button>
                     <button 
                         type="submit" 
-                        disabled={isUploading || mediaFiles.length === 0}
+                        disabled={isUploading}
                         className="rounded-md bg-blue-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                     >
                         {isUploading ? 'Uploading' : 'Upload'}
                     </button>
                 </div>
             </form>
-            <Navbar1/>
-            <Navbar2/>
         </section>
     );
 }

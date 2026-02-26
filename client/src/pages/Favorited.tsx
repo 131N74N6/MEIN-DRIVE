@@ -44,7 +44,7 @@ export default function Favorited() {
             await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/erase/${id}` });
         },
         onError: () => {},
-        onSuccess: (variables) => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}-${variables}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] });
         },
@@ -56,7 +56,13 @@ export default function Favorited() {
         },
         onError: () => {},
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}`] });
+            queryClient.invalidateQueries({
+                predicate: (query) => {
+                    // Cek apakah queryKey adalah array dan elemen pertamanya cocok dengan pola
+                    const key = query.queryKey;
+                    return Array.isArray(key) &&  key[0]?.toString().startsWith(`is-favorited-${[currentUserId]}`) && key.length === 3; // Pastikan panjangnya sesuai (is-favorited, [userId], fileId)
+                }
+            });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] });
         },
     });
@@ -73,12 +79,12 @@ export default function Favorited() {
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
             {message ? Notification(message) : null}
             <div className="flex flex-col gap-x-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white overflow-y-auto">
-                <form className="flex gap-[1rem] items-center  pt-[1rem] px-[1rem]">
+                <form className="flex gap-[1rem] items-center pt-[1rem] px-[1rem]">
                     <input 
                         type="text" 
                         value={searchValue}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchValue(event.target.value)}
-                        className="border border-gray-700 w-[100%] p-[0.45rem] text-[0.9rem] outline-0 font-[500]"
+                        className="rounded border border-gray-700 w-[100%] p-[0.45rem] text-[0.9rem] outline-0 font-[500]"
                         placeholder="search file here"
                     />
                     <button className="cursor-pointer flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" type="button" onClick={removeAll}>

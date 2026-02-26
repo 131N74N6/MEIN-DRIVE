@@ -87,10 +87,8 @@ export async function deleteSelectedFile(req: Request, res: Response): Promise<R
 
 export async function insertNewFile(req: Request, res: Response) {
     try {
-        const { files } = req.body;
+        if (!req.body.files) return res.status(400).json({ message: 'Please select at least one file' });
         const newFile = new File(req.body);
-
-        if (!files || files.length === 0) return res.status(400).json({ message: 'Please select at least one file' });
 
         await newFile.save();
         res.status(201).json({ message: 'new file added' });

@@ -8,53 +8,53 @@ export default function DataModifier() {
     const currentUserToken = token ? token : '';
     const [message, setMessage] = useState<string | null>(null);
 
-    const changeData = async <S>(props: ChangeDataProps<S>) => {
+    async function changeData<R>(props: ChangeDataProps<R>) {
         try {
             const request = await fetch(props.api_url, {
                 body: JSON.stringify(props.data),
                 headers: {
-                    'Authorization': `Bearer ${currentUserToken}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                method: 'PUT'
+                method: 'PUT',
             });
 
             const response = await request.json();
 
-            if (request.ok) {
-                setMessage(null);
-                return response;
-            } else {
+            if (!request.ok) {
                 setMessage(response.message);
                 throw new Error(response.message);
+            } else {
+                setMessage(null);
+                return response;
             }
         } catch (error: any) {
-            setMessage(error.message || 'Check your internet connection');
+            setMessage(error.message || 'Check Your Network Connection');
             throw error;
         }
     }
 
-    const deleteData = async (props: DeleteDataProps) => {
+    async function deleteData(props: DeleteDataProps) {
         try {
             const request = await fetch(props.api_url, {
                 headers: {
-                    'Authorization': `Bearer ${currentUserToken}`,
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 method: 'DELETE'
             });
 
             const response = await request.json();
-            
-            if (request.ok) {
-                setMessage(null);
-                    return response;
-            } else {
+
+            if (!request.ok) {
                 setMessage(response.message);
                 throw new Error(response.message);
+            } else {
+                setMessage(null);
+                return response;
             }
         } catch (error: any) {
-            setMessage(error.message || 'Check your internet connection');
+            setMessage(error.message || 'Check Your Network Connection');
             throw error;
         }
     }
@@ -140,15 +140,15 @@ export default function DataModifier() {
         return { error, fetchNextPage, isFetchingNextPage, isReachedEnd, isLoading, paginatedData }
     }
 
-    const insertData = async <S>(props: InputDataProps<S>) => {
+    async function insertData<R>(props: InputDataProps<R>) {
         try {
             const request = await fetch(props.api_url, {
                 body: JSON.stringify(props.data),
-                headers: { 
-                    'Authorization': `Bearer ${currentUserToken}`,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                method: 'POST'
+                method: 'POST',
             });
 
             const response = await request.json();
@@ -161,7 +161,7 @@ export default function DataModifier() {
                 return response;
             }
         } catch (error: any) {
-            setMessage(error.message || 'Check your internet connection');
+            setMessage(error.message || 'Check Your Network Connection');
             throw error;
         }
     }

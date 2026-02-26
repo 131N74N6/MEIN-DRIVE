@@ -43,11 +43,13 @@ export default function Home() {
         mutationFn: async (id: string) => {
             await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase/${id}` });
         },
-        onError: () => {},
+        onError: (error) => {
+            setMessage(error.message || 'Failed to delete or chech your internet connection.');
+        },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}-${debouncedSearch}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
         }
     });
 
@@ -55,11 +57,13 @@ export default function Home() {
         mutationFn: async () => {
             await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all/${currentUserId}` });
         },
-        onError: () => {},
+        onError: (error) => {
+            setMessage(error.message || 'Failed to delete or chech your internet connection.');
+        },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}-${debouncedSearch}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
         },
     });
 

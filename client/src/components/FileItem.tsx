@@ -2,10 +2,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { FavoritedFileDataProps, FileItemProps } from "../services/type.service";
 import DataModifier from "../services/data.service";
 import { Star, Trash, Database, FolderArchive, File, Notebook, AudioLines, Sheet, FileChartColumn, FileText, FileTypeCorner } from "lucide-react";
+import { useState } from "react";
 
 export default function FileItem(props: FileItemProps) {
     const queryClient = useQueryClient();
     const { deleteData, getData, insertData } = DataModifier();
+    const [isFavoriting, setIsFavoriting] = useState<boolean>(false);
 
     const { data: isFavorited } = getData<boolean>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/is-favorite?user_id=${props.file.user_id}&file_id=${props.file._id}`,
@@ -14,6 +16,7 @@ export default function FileItem(props: FileItemProps) {
     });
 
     const addToFavoriteMutation = useMutation({
+        onMutate: () => setIsFavoriting(true),
         mutationFn: async () => {
             const getCurrentDate = new Date();
             await insertData<FavoritedFileDataProps>({
@@ -36,11 +39,13 @@ export default function FileItem(props: FileItemProps) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${props.file.user_id}`] });
             queryClient.invalidateQueries({ queryKey: [`is-favorited-${[props.file.user_id]}-${props.file._id}`] });
-        }
+        },
+        onSettled: () => setIsFavoriting(false)
     });
 
     
     const removeOneFavoriteMutation = useMutation({
+        onMutate: () => setIsFavoriting(true),
         mutationFn: async (_id: string) => {
             await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/erase/${_id}` });
         },
@@ -48,7 +53,8 @@ export default function FileItem(props: FileItemProps) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`is-favorited-${[props.file.user_id]}-${props.file._id}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${props.file.user_id}`] });
-        }
+        },
+        onSettled: () => setIsFavoriting(false)
     });
 
     function handleFavoriteButton() {
@@ -159,8 +165,9 @@ export default function FileItem(props: FileItemProps) {
             <div className="flex gap-[0.5rem] opacity-0 hover:opacity-100 transition-opacity">
                 <button 
                     type="button" 
+                    disabled={isFavoriting}
                     onClick={handleFavoriteButton}
-                    className={`cursor-pointer font-[500] text-[1rem] ${isFavorited ? 'text-blue-600' : 'text-gray-500'}`}
+                    className={`cursor-pointer font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed ${isFavorited ? 'text-blue-600' : 'text-gray-500'}`}
                 >
                     <Star></Star>
                 </button>
