@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
-import type { FilesDataProps } from "../services/type.service";
-import DataModifier from "../services/data.service";
-import useAuth from "../services/auth.service";
+import type { FilesDataProps } from "../models/fileModel";
+import DataModifier from "../services/dataService";
+import useAuth from "../services/authService";
 import Loading from "../components/Loading";
 import FavoriteList from "../components/FavoriteList";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

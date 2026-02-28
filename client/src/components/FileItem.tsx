@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { FavoritedFileDataProps, FileItemProps } from "../services/type.service";
-import DataModifier from "../services/data.service";
+import type { FavoritedFileDataProps } from "../models/favoriteModel"
+import type { FileItemProps } from "../models/fileModel";
+import DataModifier from "../services/dataService";
 import { Star, Trash, Database, FolderArchive, File, Notebook, AudioLines, Sheet, FileChartColumn, FileText, FileTypeCorner } from "lucide-react";
 import { useState } from "react";
 

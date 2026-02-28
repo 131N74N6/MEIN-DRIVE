@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useCallback } from "react"
-import type { AuthActionProps, AuthStateProps, GetCurrentUserProps, SignUpProps } from "./type.service";
+import type { AuthActionProps, AuthStateProps, GetCurrentUserProps, SignUpProps } from "../models/userModel";
 import { useNavigate } from "react-router-dom";
 
 const initialState: AuthStateProps = {

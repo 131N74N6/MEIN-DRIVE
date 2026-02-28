@@ -1,4 +1,4 @@
-import type { FavoriteItemProps } from "../services/type.service";
+import type { FavoriteItemProps } from "../models/favoriteModel";
 import { Trash, Database, FolderArchive, File, Notebook, AudioLines, Sheet, FileChartColumn, FileText, FileTypeCorner } from "lucide-react";
 
 export default function FavoriteFile(props: FavoriteItemProps) {

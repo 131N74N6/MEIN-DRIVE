@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react"
-import type { FilesDataProps, MediaFilesProps } from "../services/type.service";
+import type { FilesDataProps, MediaFilesProps } from "../models/fileModel";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import useAuth from "../services/auth.service";
-import DataModifier from "../services/data.service";
-import { uploadToCloudinary } from "../services/cloudinary.service";
+import useAuth from "../services/authService";
+import DataModifier from "../services/dataService";
+import { uploadToCloudinary } from "../services/cloudinaryService";
 import Notification from "../components/Notification";
 import { useNavigate } from 'react-router-dom';
 import { Database, FolderArchive, X, File, Notebook, AudioLines, Sheet, FileChartColumn, FileText, FileTypeCorner } from "lucide-react";

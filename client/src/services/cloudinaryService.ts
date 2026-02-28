@@ -1,4 +1,4 @@
-import type { UploadResult } from "./type.service";
+import type { UploadResult } from "../models/fileModel";
 
 const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;

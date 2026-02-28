@@ -1,4 +1,4 @@
-import type { FavoriteListProps } from "../services/type.service";
+import type { FavoriteListProps } from "../models/favoriteModel";
 import FavoriteFile from "./FavoriteFile";
 import Loading from "./Loading";
 

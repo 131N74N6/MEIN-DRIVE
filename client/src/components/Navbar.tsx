@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import useAuth from "../services/auth.service";
+import useAuth from "../services/authService";
 import { CircleUser, DoorOpen, FileHeart, FilePlusCorner, Home } from "lucide-react";
 
 export function Navbar1() {

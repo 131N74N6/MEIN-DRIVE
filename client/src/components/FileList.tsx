@@ -1,4 +1,4 @@
-import type { FileListProps } from "../services/type.service";
+import type { FileListProps } from "../models/fileModel";
 import FileItem from "./FileItem";
 import Loading from "./Loading";
 
