@@ -40,7 +40,7 @@ export async function getCurrentUserFavorite(req: Request, res: Response) {
 export async function deleteAllFavoriteFiles(req: Request, res: Response) {
     try {
         const favoriteFiles = await File.find({ user_id: req.params.user_id });
-        if (favoriteFiles.length < 1) return response.status(400).json({ message: 'no files added' });
+        if (favoriteFiles.length === 0) return response.status(400).json({ message: 'no files added' });
 
         await Favorited.deleteMany({ user_id: req.params.user_id });
         res.status(200).json({ message: 'erase from favorited' });

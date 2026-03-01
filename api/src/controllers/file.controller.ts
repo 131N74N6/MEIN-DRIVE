@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { File } from "../models/file.model";
-import dotenv from 'dotenv';
-import { v2 } from "cloudinary";
 import { Favorited } from "../models/favorited.model";
+import { v2 } from "cloudinary";
+import dotenv from 'dotenv';
 
 dotenv.config();
 

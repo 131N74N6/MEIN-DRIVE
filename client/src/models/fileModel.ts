@@ -9,7 +9,6 @@ export type MediaFilesProps = {
 
 export type FileItemProps = {
     file: FilesDataProps;
-    deleteOne: (id: string) => void;
 }
 
 export type UploadResult = {
@@ -25,7 +24,6 @@ export type FileListProps = {
     files: FilesDataProps[];
     isFetchingNextPage: boolean;
     isReachedEnd: boolean;
-    deleteOne: (id: string) => void;
 }
 
 export type FilesDataProps = {

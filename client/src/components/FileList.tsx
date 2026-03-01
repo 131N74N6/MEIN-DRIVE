@@ -15,11 +15,7 @@ export default function FileList(props: FileListProps) {
         <div className="flex flex-col gap-[1rem] px-4 pt-4 overflow-y-auto">
             <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-[1rem]">
                 {props.files.map((file) => (
-                    <FileItem 
-                        deleteOne={props.deleteOne}
-                        file={file}
-                        key={`file_${file._id}`}
-                    />
+                    <FileItem file={file} key={`file_${file._id}`}/>
                 ))}
             </div>
             <div className="flex justify-center">

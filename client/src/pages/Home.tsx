@@ -39,20 +39,6 @@ export default function Home() {
         stale_time: 600000
     });
 
-    const deleteFileMutation = useMutation({
-        mutationFn: async (id: string) => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase/${id}` });
-        },
-        onError: (error) => {
-            setMessage(error.message || 'Failed to delete or chech your internet connection.');
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-        }
-    });
-
     const deleteAllFilesMutation = useMutation({
         mutationFn: async () => {
             await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all/${currentUserId}` });
@@ -62,14 +48,20 @@ export default function Home() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.removeQueries({
+                predicate: (query) => {
+                    const queryKey = query.queryKey;
+                    // Pastikan query key adalah array dan elemen pertama adalah string
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        // Cocokkan apakah elemen pertama dimulai dengan pola 'is-favorited-{currentUserId}-'
+                        return queryKey[0].startsWith(`is-favorited-${currentUserId}-`);
+                    }
+                    return false; // Abaikan jika format tidak sesuai
+                }
+            });
         },
     });
-
-    const deleteOneFile = (id: string) => {
-        deleteFileMutation.mutate(id);
-    }
 
     const deleteAllFiles = () => {
         deleteAllFilesMutation.mutate();
@@ -97,7 +89,6 @@ export default function Home() {
                     </div>
                 ) : paginatedData ? (
                     <FileList 
-                        deleteOne={deleteOneFile}
                         fetchNextPage={fetchNextPage} 
                         files={paginatedData} 
                         isFetchingNextPage={isFetchingNextPage}
