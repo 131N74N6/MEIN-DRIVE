@@ -1,22 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-interface AuthRequest extends Request {
-    user?: {
-        user_id: string;
-        token: string;
-    };
-}
 
 interface JwtPayload {
     user_id: string;
     token: string;
 }
 
-async function verifyToken(req: AuthRequest, res: Response, next: NextFunction) {
+async function verifyToken(req: Request, res: Response, next: NextFunction) {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) return res.status(401).json({ message: 'Access token required' });
@@ -32,12 +22,14 @@ async function verifyToken(req: AuthRequest, res: Response, next: NextFunction) 
     }
 }
 
-async function checkOwnership(req: AuthRequest, res: Response, next: NextFunction) {
+async function checkOwnership(req: Request, res: Response, next: NextFunction) {
     try {        
         const requestedUserId = req.params.user_id;
+
+        if (!req.user) return res.status(401).json({ message: 'Authentication required' });
     
         if (!requestedUserId) return res.status(400).json({ message: 'User ID parameter required' });
-        if (req.user?.user_id !== requestedUserId) return res.status(403).json({ message: 'Access denied: You can only access your own resources' });
+        if (req.user.user_id !== requestedUserId) return res.status(403).json({ message: 'Access denied: You can only access your own resources' });
         
         next();
     } catch (error) {

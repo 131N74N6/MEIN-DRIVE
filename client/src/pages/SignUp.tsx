@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../services/authService";
-import Loading from "../components/Loading";
 
 export default function SignUp() {
-    const { dispatch, loading, currentUserId, signUp, state } = useAuth();
+    const { currentUserId, setUserError, signUp, userError, userLoading } = useAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState<string>('');
@@ -12,15 +11,15 @@ export default function SignUp() {
     const [username, setUsername] = useState<string>('');
 
     useEffect(() => {
-        if (currentUserId && !loading) navigate('/home', { replace:true });
-    }, [loading, navigate, currentUserId]);
+        if (currentUserId && !userLoading) navigate('/home', { replace:true });
+    }, [userLoading, navigate, currentUserId]);
 
     useEffect(() => {
-        if (state.error) {
-            const timer = setTimeout(() => dispatch({ type: 'SET_ERROR', payload: null }), 3000);
+        if (userError) {
+            const timer = setTimeout(() => setUserError(null), 3000);
             return () => clearTimeout(timer);
         }
-    }, [state.error]);
+    }, [userError]);
 
     const signUpButton = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -31,14 +30,6 @@ export default function SignUp() {
             password: password, 
             username: username 
         });
-    }
-    
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <Loading/>
-            </div>
-        );
     }
 
     return (
@@ -76,8 +67,14 @@ export default function SignUp() {
                     />
                 </div>
                 <p className="text-center text-white">Already have account? <Link className="text-purple-400" to={'/sign-in'}>Sign In</Link></p>
-                <button type="submit" className="bg-purple-400 text-purple-950 cursor-pointer font-[500] text-[0.9rem] p-[0.4rem]">Sign Up</button>
-                {state.error ? <p className="text-amber-300 font-medium text-center">{state.error}</p> : null}
+                <button 
+                    type="submit" 
+                    disabled={userLoading}
+                    className="bg-blue-400 text-purple-950 cursor-pointer font-[500] text-[0.9rem] p-[0.4rem] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Sign Up
+                </button>
+                {userError ? <p className="text-amber-300 font-medium text-center">{userError}</p> : null}
             </form>
         </section>
     );

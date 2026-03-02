@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Favorited from "./pages/Favorited";
 import AddFiles from "./pages/AddFiles";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -16,6 +17,7 @@ export default function App() {
                 <Routes>
                     <Route path='/sign-in' element={<SignIn/>}/>
                     <Route path='/sign-up' element={<SignUp/>}/>
+                    <Route path='/profile/:user_id' element={<ProtectedRoute><Profile/></ProtectedRoute>}/>
                     <Route path='/home' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
                     <Route path='/favorite' element={<ProtectedRoute><Favorited/></ProtectedRoute>}/>
                     <Route path='/add-file' element={<ProtectedRoute><AddFiles/></ProtectedRoute>}/>

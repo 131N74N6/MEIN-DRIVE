@@ -1,37 +1,28 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../services/authService";
-import Loading from "../components/Loading";
 
 export default function SignIn() {
-    const { currentUserId, dispatch, loading, signIn, state } = useAuth();
+    const { currentUserId, setUserError, userError, userLoading, signIn } = useAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     
     useEffect(() => {
-        if (currentUserId && !loading) navigate('/home', { replace: true });
-    }, [loading, currentUserId, navigate]);
+        if (currentUserId && !userLoading) navigate('/home', { replace: true });
+    }, [userLoading, currentUserId, navigate]);
 
     useEffect(() => {
-        if (state.error) {
-            const timer = setTimeout(() => dispatch({ type: 'SET_ERROR', payload: null }), 3000);
+        if (userError) {
+            const timer = setTimeout(() => setUserError(null), 3000);
             return () => clearTimeout(timer);
         }
-    }, [state.error]);
+    }, [userError]);
 
     const signInButton = async (event: React.FormEvent) => {
         event.preventDefault();
         await signIn(email.trim(), password.trim());
-    }
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <Loading/>
-            </div>
-        );
     }
 
     return (
@@ -59,8 +50,14 @@ export default function SignIn() {
                     />
                 </div>
                 <p className="text-center text-white">Don't have account? <Link className="text-purple-400" to={'/sign-up'}>Sign Up</Link></p>
-                <button type="submit" className="bg-purple-400 cursor-pointer text-purple-950 font-[500] text-[0.9rem] p-[0.4rem]">Sign In</button>
-                {state.error ? <p className="text-amber-300 font-medium text-center">{state.error}</p> : null}
+                <button 
+                    type="submit" 
+                    disabled={userLoading}
+                    className="bg-blue-400 cursor-pointer text-purple-950 font-[500] text-[0.9rem] p-[0.4rem] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Sign In
+                </button>
+                {userError ? <p className="text-amber-300 font-medium text-center">{userError}</p> : null}
             </form>
         </section>
     );

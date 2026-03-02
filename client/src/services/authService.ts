@@ -1,99 +1,36 @@
-import { useEffect, useReducer, useCallback } from "react"
-import type { AuthActionProps, AuthStateProps, GetCurrentUserProps, SignUpProps } from "../models/userModel";
+import { useEffect, useState } from "react"
+import type { SignUpProps } from "../models/userModel";
 import { useNavigate } from "react-router-dom";
 
-const initialState: AuthStateProps = {
-    user: null,
-    loading: true, // Set initial loading to true
-    error: null,
-    userId: '',
-    username: '',
-    email: '',
-    createdAt: '',
-    token: ''
-}
-
-const authReducer = (state: AuthStateProps, action: AuthActionProps) => {
-    switch (action.type) {
-        case "SET_LOADING": return { ...state, loading: action.payload }
-        case "SET_ERROR": return { ...state, error: action.payload, loading: false }
-        case "SET_USER": 
-            return { 
-                ...state, 
-                user: action.payload, 
-                userId: action.payload?.user_id || '', // Ensure userId is set
-                error: null 
-            };
-        case "SET_USER_DATA": 
-            return { 
-                ...state, 
-                ...action.payload, 
-                error: null 
-            };
-        case "RESET_STATE": return initialState;
-        default: return state;
-    }
-}
-
 export default function useAuth() {
-    const [state, dispatch] = useReducer(authReducer, initialState);
+    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [userLoading, setUserLoading] = useState<boolean>(false);
+    const [userError, setUserError] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    const getCurrentUserData = useCallback(async (userId: string, token: string) => {
-        if (!userId || !token) return;
-        
-        try {
-            const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/user-data/${userId}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                method: 'GET'
-            });
-
-            if (!request.ok) {
-                throw new Error('Failed to get user data');
-            }
-
-            const response: GetCurrentUserProps = await request.json();
-
-            dispatch({ 
-                type: 'SET_USER_DATA', 
-                payload: {
-                    createdAt: new Date(response.created_at).toLocaleString(),
-                    email: response.email,
-                    userId: response.user_id,
-                    username: response.username
-                }
-            });
-        } catch (error: any) {
-            dispatch({ type: 'SET_ERROR', payload: error });
-        }
-    }, []);
-
     useEffect(() => {
-        const initApp = async () => {            
+        function initApp() {            
             try {
                 const existedUser = localStorage.getItem('user');
                 if (existedUser) {
                     const userData = JSON.parse(existedUser);
-                    dispatch({ type: 'SET_USER', payload: userData });
-                    getCurrentUserData(userData.user_id, userData.token);
+                    setCurrentUserId(userData);
                 }
             } catch (error: any) {
-                dispatch({ type: 'SET_ERROR', payload: error });
+                setCurrentUserId(null);
+                setUserError(error.message);
                 localStorage.removeItem('user');
             } finally {
-                dispatch({ type: 'SET_LOADING', payload: false });
+                setUserLoading(false);
             }
         };
 
         initApp();
-    }, [getCurrentUserData]);
+    }, []);
 
-    const signIn = async (email: string, password: string): Promise<void> => {
-        dispatch({ type: 'SET_LOADING', payload: true });
-        dispatch({ type: 'SET_ERROR', payload: null });
+    async function signIn(email: string, password: string): Promise<void> {
+        setUserLoading(true);
+        setUserError(null);
         
         try {
             const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/sign-in`, {
@@ -105,8 +42,8 @@ export default function useAuth() {
             const response = await request.json();
 
             if (!request.ok) {
-                const errorMessage = response.error || response.message || 'Gagal sign-in! Coba lagi nanti';
-                dispatch({ type: 'SET_ERROR', payload: errorMessage });
+                const errorMessage = response.error || response.message || 'Failed to sign in. Try again later';
+                setUserError(errorMessage);
             } else {
                 const currentUserToken = {
                     status: response.status,
@@ -114,21 +51,19 @@ export default function useAuth() {
                     token: response.token
                 }
                 
-                dispatch({ type: 'SET_USER', payload: currentUserToken });
                 localStorage.setItem('user', JSON.stringify(currentUserToken));
-                
-                getCurrentUserData(response.user_id, response.token);
+                setCurrentUserId(currentUserToken.user_id);
             }
         } catch (error: any) {
-            dispatch({ type: 'SET_ERROR', payload: error.message || 'Failed to sign in' });
+            setUserError(error.message || 'Failed to sign in' );
         } finally {
-            dispatch({ type: 'SET_LOADING', payload: false });
+            setUserLoading(false);
         }
     }
 
-    const signUp = async (props: SignUpProps): Promise<void> => {
-        dispatch({ type: 'SET_LOADING', payload: true });
-        dispatch({ type: 'SET_ERROR', payload: null });
+    async function signUp (props: SignUpProps): Promise<void> {
+        setUserLoading(true);
+        setUserError(null);
         
         try {
             const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/sign-up`, {
@@ -140,44 +75,35 @@ export default function useAuth() {
             const response = await request.json();
 
             if (!request.ok) {
-                const errorMessage = response.error || response.message || 'Gagal sign-up! Coba lagi nanti';
-                dispatch({ type: 'SET_ERROR', payload: errorMessage });
+                const errorMessage = response.error || response.message || 'Failed to sign up. Try again later';
+                setUserError(errorMessage);
             } else {
                 navigate('/sign-in');
             }
 
         } catch (error: any) {
-            dispatch({ type: 'SET_ERROR', payload: error.message || 'Failed to sign up' });
+            setUserError(error.message || 'Failed to sign up' );
         } finally {
-            dispatch({ type: 'SET_LOADING', payload: false });
+            setUserLoading(false);
         }
     }
 
-    const signOut = async () => {
-        dispatch({ type: 'SET_LOADING', payload: true });
+    async function signOut() {
+        setUserLoading(true);
+        setUserError(null);
+
         try {
             localStorage.removeItem('user');
-            dispatch({ type: 'RESET_STATE' });
+            setCurrentUserId(null);
             navigate('/sign-in');
-        } catch (error) {
-            dispatch({ type: 'SET_ERROR', payload: 'Failed to sign out' });
+        } catch (error: any) {
+            setUserError(error.message || 'Failed to sign out' );
         } finally {
-            dispatch({ type: 'SET_LOADING', payload: false });
+            setUserLoading(false);
         }
     }
 
     return { 
-        currentUserId: state.userId, 
-        loading: state.loading, 
-        username: state.username,
-        error: state.error, 
-        email: state.email, 
-        signIn, 
-        created_at: state.createdAt,
-        signOut, 
-        signUp, 
-        token: state.user?.token || '',
-        state,
-        dispatch
+        currentUserId: currentUserId ? currentUserId : '', signIn, signOut, signUp, setUserError, setUserLoading, userError, userLoading 
     }
 }

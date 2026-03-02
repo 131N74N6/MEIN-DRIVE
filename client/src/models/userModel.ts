@@ -1,22 +1,4 @@
-export type AuthStateProps = {
-    user: UserTokenProps | null;
-    loading: boolean;
-    error: string | null;
-    userId: string;
-    username: string;
-    email: string;
-    createdAt: string;
-    token: string;
-}
-
-export type AuthActionProps =
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SET_USER'; payload: UserTokenProps | null }
-  | { type: 'SET_USER_DATA'; payload: Partial<Pick<AuthStateProps, 'userId' | 'username' | 'email' | 'createdAt'>> }
-  | { type: 'RESET_STATE' };
-
-export type GetCurrentUserProps = {
+export type CurrentUserIntrf = {
     created_at: string;
     email: string;
     user_id: string;

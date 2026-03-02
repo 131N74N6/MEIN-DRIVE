@@ -1,15 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../services/authService";
 import { CircleUser, DoorOpen, FileHeart, FilePlusCorner, Home } from "lucide-react";
 
 export function Navbar1() {
-    const { username, signOut } = useAuth();
+    const { currentUserId, signOut } = useAuth();
+    const navigate = useNavigate();
 
     return (
         <nav className="md:w-1/4 md:flex flex-col gap-[1rem] rounded p-[1rem] hidden shrink-0 shadow-[0_0_4px_#1a1a1a] bg-white">
-            <div className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem]">
+            <div className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem]" onClick={() => navigate(`/profile/${currentUserId}`)}>
                 <CircleUser></CircleUser>
-                <span>{username}</span>
+                <span>Your Profile</span>
             </div>
             <Link to={'/add-file'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
                 <FilePlusCorner></FilePlusCorner>
@@ -23,7 +24,7 @@ export function Navbar1() {
                 <FileHeart></FileHeart>
                 <span>Favorite Files</span>
             </Link>
-            <button onClick={async () => await signOut()} className="cursor-pointer flex gap-[0.7rem] items-center text-gray-700 font-[500] text-[1rem] text-left">
+            <button onClick={signOut} className="cursor-pointer flex gap-[0.7rem] items-center text-gray-700 font-[500] text-[1rem] text-left">
                 <DoorOpen></DoorOpen>
                 <span>Sign Out</span>
             </button>
@@ -32,7 +33,9 @@ export function Navbar1() {
 }
 
 export function Navbar2() {
-    const { signOut, username } = useAuth();
+    const { signOut, currentUserId } = useAuth();
+    const navigate = useNavigate();
+
     return (
         <nav className="md:hidden flex justify-center rounded gap-[1rem] shrink-0 shadow-[0_0_4px_#1a1a1a] bg-white p-[1rem]">
             <Link to={'/home'} className="text-gray-700 font-[500] text-[1rem]">
@@ -44,8 +47,10 @@ export function Navbar2() {
             <Link to={'/add-file'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
                 <FilePlusCorner></FilePlusCorner>
             </Link>
-            <div className="text-gray-700 font-[500] text-[1rem]">{username[0]}</div>
-            <button onClick={async () => await signOut()} className="cursor-pointer text-gray-700 font-[500] text-[1rem]">
+            <div className="text-gray-700 font-[500] text-[1rem]" onClick={() => navigate(`/profile/${currentUserId}`)}>
+                <CircleUser></CircleUser>
+            </div>
+            <button onClick={signOut} className="cursor-pointer text-gray-700 font-[500] text-[1rem]">
                 <DoorOpen></DoorOpen>
             </button>
         </nav>
