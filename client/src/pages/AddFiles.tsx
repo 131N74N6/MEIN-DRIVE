@@ -9,7 +9,8 @@ import { useNavigate } from 'react-router-dom';
 import { Database, FolderArchive, X, File, Notebook, AudioLines, Sheet, FileChartColumn, FileText, FileTypeCorner } from "lucide-react";
 
 export default function AddFiles() {
-    const { currentUserId } = useAuth();
+    const { currentToken } = useAuth();
+    const currentUserId = currentToken ? currentToken.user_id : '';
     const { insertData, message, setMessage } = DataModifier();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
@@ -98,7 +99,7 @@ export default function AddFiles() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            navigate('/home')
+            navigate(`/home/${currentUserId}`);
         },
         onSettled: () => {
             if (fileInputRef.current) fileInputRef.current.value = '';

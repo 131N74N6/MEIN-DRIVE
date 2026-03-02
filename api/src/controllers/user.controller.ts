@@ -2,9 +2,6 @@ import { Request, Response } from "express";
 import { User } from "../models/user.model";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 async function signIn(req: Request, res: Response) {
     try {
@@ -27,10 +24,8 @@ async function signIn(req: Request, res: Response) {
 
         res.status(200).json({
             status: 'ok',
-            info: {
-                token: generatedToken,
-                user_id: findEmail._id
-            }
+            token: generatedToken,
+            user_id: findEmail._id
         });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });

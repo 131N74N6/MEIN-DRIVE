@@ -4,8 +4,8 @@ import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProp
 import useAuth from "./authService";
 
 export default function DataModifier() {
-    const { loading, token } = useAuth();
-    const currentUserToken = token ? token : '';
+    const { userLoading, currentToken } = useAuth();
+    const token = currentToken ? currentToken.token : '';
     const [message, setMessage] = useState<string | null>(null);
 
     async function changeData<R>(props: ChangeDataProps<R>) {
@@ -61,7 +61,7 @@ export default function DataModifier() {
 
     function getData<BIN1999>(props: GetDataProps) {
         const { data, error, isLoading } = useQuery<BIN1999, Error>({
-            enabled: !!token && !loading,
+            enabled: !!token && userLoading,
             queryFn: async () => {
                 const request = await fetch(props.api_url, {
                     headers: {
@@ -89,7 +89,7 @@ export default function DataModifier() {
             if (props.searched === undefined) {
                 const request1 = await fetch(`${props.api_url}?page=${pageParam}&limit=${props.limit}`, {
                     headers: {
-                        'Authorization': `Bearer ${currentUserToken}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
                     method: 'GET'
@@ -100,7 +100,7 @@ export default function DataModifier() {
             } else {
                 const request2 = await fetch(`${props.api_url}?search=${props.searched}&page=${pageParam}&limit=${props.limit}`, {
                     headers: {
-                        'Authorization': `Bearer ${currentUserToken}`,
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
                     method: 'GET'
@@ -119,7 +119,7 @@ export default function DataModifier() {
             isFetchingNextPage, 
             isLoading 
         } = useInfiniteQuery({
-            enabled: !!currentUserToken && !loading,
+            enabled: !!token && userLoading,
             gcTime: 600000,
             getNextPageParam: (lastPage, allPages): number | undefined => {
                 if (lastPage.length < props.limit) return;

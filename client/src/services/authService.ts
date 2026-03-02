@@ -1,29 +1,29 @@
 import { useEffect, useState } from "react"
-import type { SignUpProps } from "../models/userModel";
+import type { SignUpProps, CurrentUserTokenIntrf } from "../models/userModel";
 import { useNavigate } from "react-router-dom";
 
 export default function useAuth() {
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    const [currentToken, setCurrentToken] = useState<CurrentUserTokenIntrf | null>(null);
     const [userLoading, setUserLoading] = useState<boolean>(false);
     const [userError, setUserError] = useState<string | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        function initApp() {            
+        function initApp() {
             try {
                 const existedUser = localStorage.getItem('user');
                 if (existedUser) {
-                    const userData = JSON.parse(existedUser);
-                    setCurrentUserId(userData);
+                    const userData: CurrentUserTokenIntrf = JSON.parse(existedUser);
+                    setCurrentToken(userData);
                 }
             } catch (error: any) {
-                setCurrentUserId(null);
+                setCurrentToken(null);
                 setUserError(error.message);
                 localStorage.removeItem('user');
             } finally {
                 setUserLoading(false);
             }
-        };
+        }
 
         initApp();
     }, []);
@@ -31,7 +31,7 @@ export default function useAuth() {
     async function signIn(email: string, password: string): Promise<void> {
         setUserLoading(true);
         setUserError(null);
-        
+
         try {
             const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/sign-in`, {
                 headers: { 'Content-Type': 'application/json' },
@@ -45,17 +45,17 @@ export default function useAuth() {
                 const errorMessage = response.error || response.message || 'Failed to sign in. Try again later';
                 setUserError(errorMessage);
             } else {
-                const currentUserToken = {
+                const currentUserToken: CurrentUserTokenIntrf = {
                     status: response.status,
-                    user_id: response.user_id,
-                    token: response.token
-                }
-                
+                    token: response.token,
+                    user_id: response.user_id
+                };
+
                 localStorage.setItem('user', JSON.stringify(currentUserToken));
-                setCurrentUserId(currentUserToken.user_id);
+                setCurrentToken(currentUserToken); 
             }
         } catch (error: any) {
-            setUserError(error.message || 'Failed to sign in' );
+            setUserError(error.message || 'Failed to sign in');
         } finally {
             setUserLoading(false);
         }
@@ -94,7 +94,7 @@ export default function useAuth() {
 
         try {
             localStorage.removeItem('user');
-            setCurrentUserId(null);
+            setCurrentToken(null);
             navigate('/sign-in');
         } catch (error: any) {
             setUserError(error.message || 'Failed to sign out' );
@@ -104,6 +104,13 @@ export default function useAuth() {
     }
 
     return { 
-        currentUserId: currentUserId ? currentUserId : '', signIn, signOut, signUp, setUserError, setUserLoading, userError, userLoading 
+        currentToken, 
+        signIn, 
+        signOut, 
+        signUp, 
+        setUserError, 
+        setUserLoading, 
+        userError, 
+        userLoading 
     }
 }

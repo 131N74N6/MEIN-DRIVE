@@ -1,3 +1,9 @@
+export type CurrentUserTokenIntrf = {
+    status: string;
+    token: string;
+    user_id: string;
+}
+
 export type CurrentUserIntrf = {
     created_at: string;
     email: string;
@@ -10,12 +16,6 @@ export type SignUpProps = {
     email: string;
     password: string;
     username: string;
-}
-
-export type UserTokenProps = {
-    status: string;
-    user_id: string;
-    token: string;
 }
 
 export type UserFilesProps = {

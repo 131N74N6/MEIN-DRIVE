@@ -14,9 +14,7 @@ export default function Profile() {
     });
 
     return (
-        <div className="h-screen flex md:flex-row flex-col gap-4 p-4">
-            <Navbar1/>
-            <Navbar2/>
+        <div className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
             {isLoading ? (
                 <div className="flex w-full md:w-3/4 h-full justify-center items-center">
                     <Loading/>
@@ -26,12 +24,14 @@ export default function Profile() {
                     <p className="text-blue-300 font-medium text-[1rem]">{error.message}</p>
                 </div>
             ) : (
-                <div className="p-4 md:w-3/4 w-full">
+                <div className="flex flex-col gap-x-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white">
                     <span>{currentUserData?.user_id}</span>
                     <span>{currentUserData?.email}</span>
                     <span>{currentUserData?.username}</span>
                 </div>
             )}
+            <Navbar1/>
+            <Navbar2/>
         </div>
     );
 }

@@ -11,7 +11,8 @@ import Notification from "../components/Notification";
 import { Trash } from "lucide-react";
 
 export default function Home() {
-    const { currentUserId } = useAuth();
+    const { currentToken } = useAuth();
+    const currentUserId = currentToken ? currentToken.user_id : '';
     const { deleteData, infiniteScroll, message, setMessage } = DataModifier();
     const queryClient = useQueryClient();
     const [searchValue, setSearchValue] = useState<string>('');
@@ -70,7 +71,7 @@ export default function Home() {
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
             {message ? Notification(message) : null}
-            <div className="flex flex-col gap-x-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white overflow-y-auto">
+            <div className="flex flex-col gap-x-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white">
                 <form className="flex gap-[1rem] items-center pt-[1rem] px-[1rem]">
                     <input 
                         type="text" 

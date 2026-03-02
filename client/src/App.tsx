@@ -18,8 +18,8 @@ export default function App() {
                     <Route path='/sign-in' element={<SignIn/>}/>
                     <Route path='/sign-up' element={<SignUp/>}/>
                     <Route path='/profile/:user_id' element={<ProtectedRoute><Profile/></ProtectedRoute>}/>
-                    <Route path='/home' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
-                    <Route path='/favorite' element={<ProtectedRoute><Favorited/></ProtectedRoute>}/>
+                    <Route path='/home/:user_id' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
+                    <Route path='/favorite/:user_id' element={<ProtectedRoute><Favorited/></ProtectedRoute>}/>
                     <Route path='/add-file' element={<ProtectedRoute><AddFiles/></ProtectedRoute>}/>
                     <Route path="/" element={<Navigate to="/home" replace/>}/>
                     <Route path="*" element={<Navigate to="/sign-in" replace/>}/>

@@ -11,9 +11,10 @@ import { Trash } from "lucide-react";
 import type { FavoritedFileDataProps } from "../models/favoriteModel";
 
 export default function Favorited() {
-    const { currentUserId } = useAuth();
+    const { currentToken } = useAuth();
     const { deleteData, infiniteScroll, message, setMessage } = DataModifier();
     const queryClient = useQueryClient();
+    const currentUserId = currentToken ? currentToken.user_id : '';
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearch = useDebounce<string>(searchValue, 500);
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
