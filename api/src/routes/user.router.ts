@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { getUserData, signIn, signUp } from "../controllers/user.controller";
+import { changeUserInfo, deleteCurrentUser, getUserData } from "../controllers/user.controller";
 import { checkOwnership, verifyToken } from "../middleware/auth.middleware";
 
 const userRoutes = Router();
 
-userRoutes.post('/sign-in', signIn);
-userRoutes.post('/sign-up', signUp);
-userRoutes.get('/user-data', verifyToken, getUserData);
+userRoutes.delete('/delete-myself/:user_id', verifyToken, checkOwnership, deleteCurrentUser);
+userRoutes.get('/user-data/:user-id', verifyToken, checkOwnership, getUserData);
+userRoutes.put('/change/:user-id', verifyToken, checkOwnership, changeUserInfo);
 
 export default userRoutes;

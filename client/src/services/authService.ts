@@ -6,7 +6,10 @@ export default function useAuth() {
     const [currentToken, setCurrentToken] = useState<CurrentUserTokenIntrf | null>(null);
     const [userLoading, setUserLoading] = useState<boolean>(false);
     const [userError, setUserError] = useState<string | null>(null);
+
     const navigate = useNavigate();
+    const currentUserId = currentToken ? currentToken.user_id : '';
+    const token = currentToken ? currentToken.token : '';
 
     useEffect(() => {
         function initApp() {
@@ -33,7 +36,7 @@ export default function useAuth() {
         setUserError(null);
 
         try {
-            const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/sign-in`, {
+            const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/sign-in`, {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
                 method: 'POST'
@@ -52,7 +55,8 @@ export default function useAuth() {
                 };
 
                 localStorage.setItem('user', JSON.stringify(currentUserToken));
-                setCurrentToken(currentUserToken); 
+                setCurrentToken(currentUserToken);
+                navigate(`/home/${currentUserToken.user_id}`);
             }
         } catch (error: any) {
             setUserError(error.message || 'Failed to sign in');
@@ -66,7 +70,7 @@ export default function useAuth() {
         setUserError(null);
         
         try {
-            const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/users/sign-up`, {
+            const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/sign-up`, {
                 body: JSON.stringify(props),
                 headers: { 'Content-Type': 'application/json' },
                 method: 'POST'
@@ -104,12 +108,13 @@ export default function useAuth() {
     }
 
     return { 
-        currentToken, 
+        currentUserId,
         signIn, 
         signOut, 
         signUp, 
         setUserError, 
         setUserLoading, 
+        token,
         userError, 
         userLoading 
     }

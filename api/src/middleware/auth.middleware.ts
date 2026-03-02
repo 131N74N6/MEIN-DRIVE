@@ -1,12 +1,19 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-interface JwtPayload {
+export interface AuthRequest extends Request {
+    user?: {
+        user_id: string;
+        token: string;
+    };
+}
+
+export interface JwtPayload {
     user_id: string;
     token: string;
 }
 
-async function verifyToken(req: Request, res: Response, next: NextFunction) {
+export async function verifyToken(req: AuthRequest, res: Response, next: NextFunction) {
     try {
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) return res.status(401).json({ message: 'Access token required' });
@@ -22,7 +29,7 @@ async function verifyToken(req: Request, res: Response, next: NextFunction) {
     }
 }
 
-async function checkOwnership(req: Request, res: Response, next: NextFunction) {
+export async function checkOwnership(req: AuthRequest, res: Response, next: NextFunction) {
     try {        
         const requestedUserId = req.params.user_id;
 
@@ -36,5 +43,3 @@ async function checkOwnership(req: Request, res: Response, next: NextFunction) {
         res.status(500).json({ message: 'Ownership verification failed' })
     }
 }
-
-export { checkOwnership, verifyToken }

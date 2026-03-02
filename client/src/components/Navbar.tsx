@@ -3,9 +3,8 @@ import useAuth from "../services/authService";
 import { CircleUser, DoorOpen, FileHeart, FilePlusCorner, Home } from "lucide-react";
 
 export function Navbar1() {
-    const { currentToken, signOut } = useAuth();
+    const { currentUserId, signOut } = useAuth();
     const navigate = useNavigate();
-    const currentUserId = currentToken? currentToken.user_id : '';
 
     return (
         <nav className="md:w-1/4 md:flex flex-col gap-[1rem] rounded p-[1rem] hidden shrink-0 shadow-[0_0_4px_#1a1a1a] bg-white">
@@ -34,9 +33,8 @@ export function Navbar1() {
 }
 
 export function Navbar2() {
-    const { signOut, currentToken } = useAuth();
+    const { signOut, currentUserId } = useAuth();
     const navigate = useNavigate();
-    const currentUserId = currentToken? currentToken.user_id : '';
 
     return (
         <nav className="md:hidden flex justify-center rounded gap-[1rem] shrink-0 shadow-[0_0_4px_#1a1a1a] bg-white p-[1rem]">

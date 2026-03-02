@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
-import type { FilesDataProps } from "../models/fileModel";
 import DataModifier from "../services/dataService";
 import useAuth from "../services/authService";
 import Loading from "../components/Loading";
@@ -9,14 +8,15 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useDebounce from "../services/useDebounce";
 import Notification from "../components/Notification";
 import { Trash } from "lucide-react";
+import type { FavoritedFileDataProps } from "../models/favoriteModel";
 
 export default function Favorited() {
-    const { currentToken } = useAuth();
+    const { currentUserId } = useAuth();
     const { deleteData, infiniteScroll, message, setMessage } = DataModifier();
     const queryClient = useQueryClient();
-    const currentUserId = currentToken ? currentToken.user_id : '';
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearch = useDebounce<string>(searchValue, 500);
+    const [isDeleting, setIsDeleting] = useState<boolean>(false);
     
     useEffect(() => {
         if (message) {
@@ -32,7 +32,7 @@ export default function Favorited() {
         isLoading,
         isReachedEnd,
         paginatedData,
-    } = infiniteScroll<FilesDataProps>({
+    } = infiniteScroll<FavoritedFileDataProps>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/get-all/${currentUserId}`,
         limit: 14,
         query_key: debouncedSearch ? [`all-favorited-files-${currentUserId}-${debouncedSearch}`] : [`all-favorited-files-${currentUserId}`],
@@ -40,41 +40,28 @@ export default function Favorited() {
         stale_time: 600000
     });
 
-    const removeOneMutation = useMutation({
-        mutationFn: async (id: string) => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/erase/${id}` });
-        },
-        onError: () => {},
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}-${variables}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] });
-        },
-    });
-
     const removeAllMutation = useMutation({
+        onMutate: () => setIsDeleting(true),
         mutationFn: async () => {
             await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/erase-all/${currentUserId}` });
         },
         onError: () => {},
         onSuccess: () => {
-            queryClient.invalidateQueries({
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.removeQueries({
                 predicate: (query) => {
-                    // Cek apakah queryKey adalah array dan elemen pertamanya cocok dengan pola
-                    const key = query.queryKey;
-                    return Array.isArray(key) &&  key[0]?.toString().startsWith(`is-favorited-${[currentUserId]}`) && key.length === 3; // Pastikan panjangnya sesuai (is-favorited, [userId], fileId)
+                    const queryKey = query.queryKey;
+                    // Pastikan query key adalah array dan elemen pertama adalah string
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        // Cocokkan apakah elemen pertama dimulai dengan pola 'is-favorited-{currentUserId}-'
+                        return queryKey[0].startsWith(`is-favorited-${currentUserId}-`);
+                    }
+                    return false; // Abaikan jika format tidak sesuai
                 }
             });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}-${debouncedSearch}`] });
         },
+        onSettled: () => setIsDeleting(false)
     });
-
-    const removeOne = (id: string) => {
-        removeOneMutation.mutate(id);
-    }
-
-    const removeAll = () => {
-        removeAllMutation.mutate();
-    }
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
@@ -88,7 +75,12 @@ export default function Favorited() {
                         className="rounded border border-gray-700 w-[100%] p-[0.45rem] text-[0.9rem] outline-0 font-[500]"
                         placeholder="search file here"
                     />
-                    <button className="cursor-pointer flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" type="button" onClick={removeAll}>
+                    <button 
+                        type="button" 
+                        onClick={() => removeAllMutation.mutate()}
+                        disabled={isDeleting}
+                        className="cursor-pointer flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                         <Trash size={22}></Trash>
                     </button>
                 </form>
@@ -98,7 +90,6 @@ export default function Favorited() {
                         favorites={paginatedData} 
                         isFetchingNextPage={isFetchingNextPage}
                         isReachedEnd={isReachedEnd} 
-                        deleteOne={removeOne}
                     />
                 ) : isLoading ? (
                     <div className="flex justify-center items-center h-[100%]">

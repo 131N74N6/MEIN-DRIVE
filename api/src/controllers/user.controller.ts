@@ -1,65 +1,47 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
-import bcrypt from 'bcrypt';
-import jwt from "jsonwebtoken";
+import { File } from "../models/file.model";
+import { v2 } from "cloudinary";
+import { Favorited } from "../models/favorited.model";
 
-async function signIn(req: Request, res: Response) {
+export async function changeUserInfo(req: Request, res: Response) {
     try {
-        const { email, password } = req.body;
-        const findEmail = await User.findOne({ email });
-        
-        if (!password || !email) return res.status(400).json({ message: "email and password is required" });
-        if (!email) return res.status(400).json({ message: 'email is required' });
-        if (!password) return res.status(400).json({ message: 'password is required' });
-
-        if (!findEmail) return res.status(400).json({ message: 'email not found' });
-        
-        const isPasswordMatch = await bcrypt.compare(password, findEmail.password);
-        if (!isPasswordMatch) return res.status(400).json({ message: 'incorrect password' });
-
-        const generatedToken = jwt.sign(
-            { user_id: findEmail._id.toString() },
-            process.env.JWT_TOKEN || 'your-jwt-key',
-        );
-
-        res.status(200).json({
-            status: 'ok',
-            token: generatedToken,
-            user_id: findEmail._id
+        await User.updateOne({ _id: req.params.user_id }, {
+            $set: {
+                email: req.body.email,
+                username: req.body.username
+            }
         });
+        res.status(200).json({ message: 'user info updated' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }
 }
 
-async function signUp(req: Request, res: Response) {
+export async function deleteCurrentUser(req: Request, res: Response) {
     try {
-        const { created_at, email, password, username } = req.body;
-        
-        if (!password || !email || !username) return res.status(400).json({ message: "email, username, and password is required" });
-        if (!email) return res.status(400).send({ message: 'email is required' });
-        if (!password) return res.status(400).send({ message: 'password is required' });
-        if (!username) return res.status(400).send({ message: 'username is required' });
-        
-        const findEmail = await User.findOne({ email: email });
-        if (findEmail) return res.status(400).send({ message: 'this email already exist' });
+        const currentUserId = req.params.user_id;
+        const getCurrentUserFiles = await File.find({ user_id: currentUserId });
 
-        const findUser = await User.findOne({ username: username });
-        if (findUser) return res.status(400).send({ message: 'this username already exist' });
+        const deletePromise = getCurrentUserFiles.map(userFile => {
+            return v2.uploader.destroy(userFile.files.public_id, { resource_type: userFile.files.resource_type });
+        });
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ created_at, email, password: hashedPassword, username });
-        await newUser.save();
-        res.status(201).json({ message: 'user added' });
+        await Promise.all(deletePromise);
+        await Promise.all([
+            await File.deleteMany({ user_id: currentUserId }),
+            await Favorited.deleteMany({ user_id: currentUserId })
+        ]);
+
+        res.status(200).json({ message: 'your account and files have been deleted' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }
 }
 
-async function getUserData(req: Request, res: Response) {
+export async function getUserData(req: Request, res: Response) {
     try {
-        if (!req.user) return res.status(401).json({ message: 'Authentication required' });
-        const findUser = await User.find({ _id: req.user.user_id });
+        const findUser = await User.find({ _id: req.params.user_id });
 
         if (!findUser) return res.status(404).json({ message: 'User not found' });
 
@@ -73,5 +55,3 @@ async function getUserData(req: Request, res: Response) {
         res.status(500).json({ message: 'internal server error' });
     }
 }
-
-export { getUserData, signIn, signUp }

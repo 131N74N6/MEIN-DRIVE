@@ -4,8 +4,7 @@ import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProp
 import useAuth from "./authService";
 
 export default function DataModifier() {
-    const { userLoading, currentToken } = useAuth();
-    const token = currentToken ? currentToken.token : '';
+    const { userLoading, token } = useAuth();
     const [message, setMessage] = useState<string | null>(null);
 
     async function changeData<R>(props: ChangeDataProps<R>) {
@@ -63,16 +62,28 @@ export default function DataModifier() {
         const { data, error, isLoading } = useQuery<BIN1999, Error>({
             enabled: !!token && userLoading,
             queryFn: async () => {
-                const request = await fetch(props.api_url, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    method: 'GET'
-                });
+                try {
+                    const request = await fetch(props.api_url, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        method: 'GET'
+                    });
 
-                const response = await request.json();
-                return response;
+                    const response = await request.json();
+
+                    if (!request.ok) {
+                        setMessage(response.message);
+                        throw new Error(response.message);
+                    } else {
+                        setMessage(null);
+                        return response;
+                    }
+                } catch (error: any) {
+                    setMessage(error.message || 'Check Your Network Connection');
+                    throw error;
+                }
             },
             queryKey: props.query_key,
             refetchOnMount: true,
@@ -86,28 +97,47 @@ export default function DataModifier() {
 
     const infiniteScroll = <X>(props: InfiniteScrollProps) => {
         const fetchers = async ({ pageParam = 1 }: { pageParam?: number }) => {
-            if (props.searched === undefined) {
-                const request1 = await fetch(`${props.api_url}?page=${pageParam}&limit=${props.limit}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    method: 'GET'
-                });
+            try {
+                if (props.searched === undefined) {
+                    const request1 = await fetch(`${props.api_url}?page=${pageParam}&limit=${props.limit}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        method: 'GET'
+                    });
+    
+                    const response = await request1.json();
 
-                const response = await request1.json();
-                return response;
-            } else {
-                const request2 = await fetch(`${props.api_url}?search=${props.searched}&page=${pageParam}&limit=${props.limit}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    method: 'GET'
-                });
-                
-                const response = await request2.json();
-                return response;
+                    if (!request1.ok) {
+                        setMessage(response.message);
+                        throw new Error(response.message);
+                    } else {
+                        setMessage(null);
+                        return response;
+                    }
+                } else {
+                    const request2 = await fetch(`${props.api_url}?search=${props.searched}&page=${pageParam}&limit=${props.limit}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        method: 'GET'
+                    });
+                    
+                    const response = await request2.json();
+
+                    if (!request2.ok) {
+                        setMessage(response.message);
+                        throw new Error(response.message);
+                    } else {
+                        setMessage(null);
+                        return response;
+                    }
+                }
+            } catch (error: any) {
+                setMessage(error.message || 'Check Your Network Connection');
+                throw error;
             }
         }
 

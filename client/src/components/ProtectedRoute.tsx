@@ -7,7 +7,7 @@ type ProtectedRouteProps = {
 }
 
 export default function ProtectedRoute(props: ProtectedRouteProps) {
-    const { userLoading, currentToken } = useAuth();
+    const { userLoading, currentUserId } = useAuth();
 
     if (userLoading) return (
         <div className="flex justify-center items-center h-screen bg-[#1a1a1a]">
@@ -15,5 +15,5 @@ export default function ProtectedRoute(props: ProtectedRouteProps) {
         </div>
     );
 
-    return currentToken ? <>{props.children}</> : <Navigate to={'/sign-in'} replace/>
+    return currentUserId ? <>{props.children}</> : <Navigate to={'/sign-in'} replace/>
 }

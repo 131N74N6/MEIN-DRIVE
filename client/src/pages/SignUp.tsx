@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../services/authService";
 
 export default function SignUp() {
-    const { currentToken, setUserError, signUp, userError, userLoading } = useAuth();
+    const { currentUserId, setUserError, signUp, userError, userLoading } = useAuth();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState<string>('');
@@ -11,8 +11,8 @@ export default function SignUp() {
     const [username, setUsername] = useState<string>('');
 
     useEffect(() => {
-        if (currentToken && !userLoading) navigate('/home', { replace:true });
-    }, [userLoading, navigate, currentToken]);
+        if (currentUserId) navigate(`/home/${currentUserId}`, { replace:true });
+    }, [navigate, currentUserId]);
 
     useEffect(() => {
         if (userError) {
@@ -21,7 +21,7 @@ export default function SignUp() {
         }
     }, [userError, setUserError]);
 
-    const signUpButton = async (event: React.FormEvent) => {
+    async function signUpButton(event: React.FormEvent) {
         event.preventDefault();
 
         await signUp({ 

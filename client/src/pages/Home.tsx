@@ -11,10 +11,10 @@ import Notification from "../components/Notification";
 import { Trash } from "lucide-react";
 
 export default function Home() {
-    const { currentToken } = useAuth();
-    const currentUserId = currentToken ? currentToken.user_id : '';
+    const { currentUserId } = useAuth();
     const { deleteData, infiniteScroll, message, setMessage } = DataModifier();
     const queryClient = useQueryClient();
+    
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearch = useDebounce<string>(searchValue, 500);
 
@@ -40,20 +40,6 @@ export default function Home() {
         stale_time: 600000
     });
 
-    const deleteFileMutation = useMutation({
-        mutationFn: async (id: string) => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase/${id}` });
-        },
-        onError: (error) => {
-            setMessage(error.message || 'Failed to delete or chech your internet connection.');
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-        }
-    });
-
     const deleteAllFilesMutation = useMutation({
         mutationFn: async () => {
             await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all/${currentUserId}` });
@@ -63,18 +49,20 @@ export default function Home() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`is-favorited-${[currentUserId]}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.removeQueries({
+                predicate: (query) => {
+                    const queryKey = query.queryKey;
+                    // Pastikan query key adalah array dan elemen pertama adalah string
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        // Cocokkan apakah elemen pertama dimulai dengan pola 'is-favorited-{currentUserId}-'
+                        return queryKey[0].startsWith(`is-favorited-${currentUserId}-`);
+                    }
+                    return false; // Abaikan jika format tidak sesuai
+                }
+            });
         },
     });
-
-    const deleteOneFile = (id: string) => {
-        deleteFileMutation.mutate(id);
-    }
-
-    const deleteAllFiles = () => {
-        deleteAllFilesMutation.mutate();
-    }
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
@@ -88,7 +76,7 @@ export default function Home() {
                         className="border rounded border-gray-700 p-[0.45rem] w-full text-[0.9rem] outline-0 font-[500]"
                         placeholder="search file here"
                     />
-                    <button className="cursor-pointer flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" type="button" onClick={deleteAllFiles}>
+                    <button className="cursor-pointer flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" type="button" onClick={() => deleteAllFilesMutation.mutate()}>
                         <Trash size={22}></Trash>
                     </button>
                 </form>
@@ -98,7 +86,6 @@ export default function Home() {
                     </div>
                 ) : paginatedData ? (
                     <FileList 
-                        deleteOne={deleteOneFile}
                         fetchNextPage={fetchNextPage} 
                         files={paginatedData} 
                         isFetchingNextPage={isFetchingNextPage}

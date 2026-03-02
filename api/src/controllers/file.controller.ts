@@ -1,21 +1,7 @@
 import { Request, Response } from "express";
 import { File } from "../models/file.model";
-<<<<<<< HEAD
 import { Favorited } from "../models/favorited.model";
 import { v2 } from "cloudinary";
-=======
-import dotenv from 'dotenv';
-import { v2 } from "cloudinary";
-import { Favorited } from "../models/favorited.model";
-
-dotenv.config();
-
-v2.config({
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-});
->>>>>>> parent of a43e2b9 (>_<)
 
 export async function getAllFiles(req: Request, res: Response) {
     try {
@@ -45,20 +31,12 @@ export async function getAllFiles(req: Request, res: Response) {
 export async function deleteAllFiles(req: Request, res: Response) {
     try {
         const getUserId = req.params.user_id;
-        const currentUserfiles: { public_id: string; resource_type: string }[] = [];
         const findUserFiles = await File.find({ user_id: getUserId });
 
         if (findUserFiles.length === 0) return res.status(400).json({ message: "no files added" });
 
-        findUserFiles.forEach((user_file) => {
-            currentUserfiles.push({ 
-                public_id: user_file.files.public_id, 
-                resource_type: user_file.files.resource_type 
-            });
-        });
-
-        const deletePromise = currentUserfiles.map((userFile) => {
-            return v2.uploader.destroy(userFile.public_id, { resource_type: userFile.resource_type });
+        const deletePromise = findUserFiles.map((userFile) => {
+            return v2.uploader.destroy(userFile.files.public_id, { resource_type: userFile.files.resource_type });
         });
 
         await Promise.all(deletePromise);
