@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react"
 import type { SignUpProps, CurrentUserTokenIntrf } from "../models/userModel";
-import { useNavigate } from "react-router-dom";
 
 export default function useAuth() {
     const [currentToken, setCurrentToken] = useState<CurrentUserTokenIntrf | null>(null);
     const [userLoading, setUserLoading] = useState<boolean>(false);
     const [userError, setUserError] = useState<string | null>(null);
 
-    const navigate = useNavigate();
     const currentUserId = currentToken ? currentToken.user_id : '';
     const token = currentToken ? currentToken.token : '';
 
@@ -31,7 +29,7 @@ export default function useAuth() {
         initApp();
     }, []);
 
-    async function signIn(email: string, password: string): Promise<void> {
+    async function signIn(email: string, password: string, callback: (path: string) => void): Promise<void> {
         setUserLoading(true);
         setUserError(null);
 
@@ -56,7 +54,7 @@ export default function useAuth() {
 
                 localStorage.setItem('user', JSON.stringify(currentUserToken));
                 setCurrentToken(currentUserToken);
-                navigate(`/home/${currentUserToken.user_id}`);
+                callback(`/home/${currentUserToken.user_id}`);
             }
         } catch (error: any) {
             setUserError(error.message || 'Failed to sign in');
@@ -82,7 +80,7 @@ export default function useAuth() {
                 const errorMessage = response.error || response.message || 'Failed to sign up. Try again later';
                 setUserError(errorMessage);
             } else {
-                navigate('/sign-in');
+                props.callback('/sign-in');
             }
 
         } catch (error: any) {
@@ -92,14 +90,14 @@ export default function useAuth() {
         }
     }
 
-    async function signOut() {
+    function signOut(callback: (path: string) => void) {
         setUserLoading(true);
         setUserError(null);
 
         try {
             localStorage.removeItem('user');
             setCurrentToken(null);
-            navigate('/sign-in');
+            callback('/sign-in');
         } catch (error: any) {
             setUserError(error.message || 'Failed to sign out' );
         } finally {

@@ -3,16 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../services/authService";
 
 export default function SignUp() {
-    const { currentUserId, setUserError, signUp, userError, userLoading } = useAuth();
     const navigate = useNavigate();
+    const { setUserError, signUp, userError, userLoading } = useAuth();
 
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [username, setUsername] = useState<string>('');
-
-    useEffect(() => {
-        if (currentUserId) navigate(`/home/${currentUserId}`, { replace:true });
-    }, [navigate, currentUserId]);
 
     useEffect(() => {
         if (userError) {
@@ -25,6 +21,7 @@ export default function SignUp() {
         event.preventDefault();
 
         await signUp({ 
+            callback: navigate,
             created_at: new Date().toISOString(), 
             email: email, 
             password: password, 

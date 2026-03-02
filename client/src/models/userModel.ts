@@ -12,6 +12,7 @@ export type CurrentUserIntrf = {
 }
 
 export type SignUpProps = {
+    callback: (path: string) => void;
     created_at: string;
     email: string;
     password: string;

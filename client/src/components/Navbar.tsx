@@ -24,7 +24,7 @@ export function Navbar1() {
                 <FileHeart></FileHeart>
                 <span>Favorite Files</span>
             </Link>
-            <button onClick={signOut} className="cursor-pointer flex gap-[0.7rem] items-center text-gray-700 font-[500] text-[1rem] text-left">
+            <button onClick={() => signOut(navigate)} className="cursor-pointer flex gap-[0.7rem] items-center text-gray-700 font-[500] text-[1rem] text-left">
                 <DoorOpen></DoorOpen>
                 <span>Sign Out</span>
             </button>
@@ -50,7 +50,7 @@ export function Navbar2() {
             <div className="text-gray-700 font-[500] text-[1rem] cursor-pointer" onClick={() => navigate(`/profile/${currentUserId}`)}>
                 <CircleUser></CircleUser>
             </div>
-            <button onClick={signOut} className="cursor-pointer text-gray-700 font-[500] text-[1rem]">
+            <button onClick={() => signOut(navigate)} className="cursor-pointer text-gray-700 font-[500] text-[1rem]">
                 <DoorOpen></DoorOpen>
             </button>
         </nav>

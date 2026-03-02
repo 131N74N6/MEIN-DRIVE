@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../services/authService";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SignIn() {
+    const navigate = useNavigate();
     const { setUserError, userError, userLoading, signIn } = useAuth();
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -19,7 +20,7 @@ export default function SignIn() {
 
     async function signInButton(event: React.FormEvent) {
         event.preventDefault();
-        await signIn(email.trim(), password.trim());
+        await signIn(email.trim(), password.trim(), navigate);
     }
 
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
