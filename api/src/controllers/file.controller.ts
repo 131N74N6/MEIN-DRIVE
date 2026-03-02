@@ -1,7 +1,21 @@
 import { Request, Response } from "express";
 import { File } from "../models/file.model";
+<<<<<<< HEAD
 import { Favorited } from "../models/favorited.model";
 import { v2 } from "cloudinary";
+=======
+import dotenv from 'dotenv';
+import { v2 } from "cloudinary";
+import { Favorited } from "../models/favorited.model";
+
+dotenv.config();
+
+v2.config({
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+});
+>>>>>>> parent of a43e2b9 (>_<)
 
 export async function getAllFiles(req: Request, res: Response) {
     try {

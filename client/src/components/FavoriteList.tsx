@@ -15,7 +15,11 @@ export default function FavoriteList(props: FavoriteListProps) {
         <div className="bg-white flex flex-col gap-[1rem] px-4 pt-4 overflow-y-auto">
             <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-[1rem]">
                 {props.favorites.map((favorite) => (
-                    <FavoriteFile key={`file_${favorite._id}`} file={favorite}/>
+                    <FavoriteFile 
+                        key={`file_${favorite._id}`}
+                        file={favorite} 
+                        deleteOne={props.deleteOne}
+                    />
                 ))}
             </div>
             <div className="flex justify-center">

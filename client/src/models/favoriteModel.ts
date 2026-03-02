@@ -1,14 +1,17 @@
 import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
+import type { FilesDataProps } from "./fileModel";
 
 export type FavoriteListProps = {
     fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>
-    favorites: FavoritedFileDataProps[];
+    favorites: FilesDataProps[];
     isFetchingNextPage: boolean;
     isReachedEnd: boolean;
+    deleteOne: (id: string) => void;
 }
 
 export type FavoriteItemProps = {
-    file: FavoritedFileDataProps;
+    file: FilesDataProps;
+    deleteOne: (id: string) => void;
 }
 
 export type FavoritedFileDataProps = {
