@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { FavoritedFileDataProps } from "../models/favoriteModel"
 import type { FileItemProps } from "../models/fileModel";
 import DataModifier from "../services/dataService";
-import { Star, Trash } from "lucide-react";
+import { FolderUp, Star, Trash } from "lucide-react";
 import { useState } from "react";
 import { FileIcon } from "./FileIcon";
 
@@ -75,6 +75,15 @@ export default function FileItem(props: FileItemProps) {
         else addToFavoriteMutation.mutate();
     }
 
+    const chosenFile = {
+        file_id: props.file._id,
+        file_name: props.file.file_name,
+        file_type: props.file.file_type,
+        public_id: props.file.files.public_id,
+        resource_type: props.file.files.resource_type,
+        url: props.file.files.url
+    }
+
     return (
         <div className="border-gray-500 border rounded-md p-[0.7rem] flex flex-col gap-[0.5rem]">
             <FileIcon key={props.file._id} {...props.file}/>
@@ -90,6 +99,9 @@ export default function FileItem(props: FileItemProps) {
                 </button>
                 <button type="button" onClick={() => deleteOneFileMutation.mutate()} className="cursor-pointer text-gray-500 font-[500] text-[1rem]">
                     <Trash></Trash>
+                </button>
+                <button type="button" onClick={() => props.showFolderList(chosenFile)} className="cursor-pointer text-gray-500 font-[500] text-[1rem]">
+                    <FolderUp></FolderUp>
                 </button>
             </div>
         </div>

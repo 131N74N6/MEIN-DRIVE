@@ -17,7 +17,7 @@ export function FileIcon(props: FilesDataProps) {
                     <p className="line-clamp-1">{props.file_name}</p>
                 </div>
             ) : props.file_type.startsWith('video/') ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                     <div className="relative">
                         <video 
                             src={props.files.url} 
@@ -29,7 +29,7 @@ export function FileIcon(props: FilesDataProps) {
                     <p className="line-clamp-1">{props.file_name}</p>
                 </div>
             ) : props.file_type.startsWith('audio/') ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                     <div className="flex justify-center items-center h-50 text-gray-500 text-[1.7rem] border border-gray-500 rounded">
                         <AudioLines></AudioLines>
                     </div>
@@ -37,7 +37,7 @@ export function FileIcon(props: FilesDataProps) {
                     <p className="line-clamp-1">{props.file_name}</p>
                 </div>
             ) : props.file_type.startsWith('text/') ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                     <div className="flex justify-center items-center h-50 text-gray-500 text-[1.7rem] border border-gray-500 rounded">
                         <Notebook></Notebook>
                     </div>
@@ -45,7 +45,7 @@ export function FileIcon(props: FilesDataProps) {
                     <p className="line-clamp-1">{props.file_name}</p>
                 </div>
             ) : props.file_type.includes('/pdf') ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                     <div className="flex justify-center items-center h-50 text-gray-500 text-[1.7rem] border border-gray-500 rounded">
                         <FileTypeCorner></FileTypeCorner>
                     </div>
@@ -53,7 +53,7 @@ export function FileIcon(props: FilesDataProps) {
                     <p className="line-clamp-1">{props.file_name}</p>
                 </div>
             ) : props.file_type.includes('/zip') ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                     <div className="flex justify-center items-center h-50 text-gray-500 text-[1.7rem] border border-gray-500 rounded">
                         <FolderArchive></FolderArchive>
                     </div>
@@ -61,7 +61,7 @@ export function FileIcon(props: FilesDataProps) {
                     <p className="line-clamp-1">{props.file_name}</p>
                 </div>
             ) : props.file_type.includes('/sql') ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                     <div className="flex justify-center items-center h-50 text-gray-500 border text-[1.7rem] border-gray-500 rounded">
                         <Database></Database>
                     </div>
@@ -69,7 +69,7 @@ export function FileIcon(props: FilesDataProps) {
                     <p className="line-clamp-1">{props.file_name}</p>
                 </div>
             ) : props.file_type.includes('.sheet') ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                     <div className="flex justify-center items-center h-50 text-gray-500 text-[1.7rem] border border-gray-500 rounded">
                         <Sheet></Sheet>
                     </div>
@@ -77,7 +77,7 @@ export function FileIcon(props: FilesDataProps) {
                     <p className="line-clamp-1">{props.file_name}</p>
                 </div>
             ) : props.file_type.includes('.document') ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                     <div className="flex justify-center items-center h-50 text-gray-500 text-[1.7rem] border border-gray-500 rounded">
                         <FileText></FileText>
                     </div>
@@ -85,7 +85,7 @@ export function FileIcon(props: FilesDataProps) {
                     <p className="line-clamp-1">{props.file_name}</p>
                 </div>
             ) : props.file_type.includes('.presentation') ? (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                     <div className="flex justify-center items-center h-50 text-gray-500 text-[1.7rem] border border-gray-500 rounded">
                         <FileChartColumn></FileChartColumn>
                     </div>
@@ -93,7 +93,7 @@ export function FileIcon(props: FilesDataProps) {
                     <p className="line-clamp-1">{props.file_name}</p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                     <div className="flex justify-center items-center h-50 text-gray-500 text-[1.7rem] border border-gray-500 rounded">
                         <File></File>
                     </div>

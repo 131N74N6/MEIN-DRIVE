@@ -9,6 +9,7 @@ export type MediaFilesProps = {
 
 export type FileItemProps = {
     file: FilesDataProps;
+    showFolderList: (props: FileInFolderIntrf) => void;
 }
 
 export type UploadResult = {
@@ -24,6 +25,7 @@ export type FileListProps = {
     files: FilesDataProps[];
     isFetchingNextPage: boolean;
     isReachedEnd: boolean;
+    showFolderList: (props: FileInFolderIntrf) => void;
 }
 
 export type FilesDataProps = {
@@ -37,4 +39,13 @@ export type FilesDataProps = {
     file_name: string;
     file_type: string;
     user_id: string;
+}
+
+export type FileInFolderIntrf = {
+    file_id: string;
+    file_name: string;
+    file_type: string;
+    public_id: string;
+    resource_type: string;
+    url: string;
 }

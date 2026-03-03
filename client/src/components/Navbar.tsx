@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../services/authService";
-import { CircleUser, DoorOpen, FileHeart, FilePlusCorner, Home } from "lucide-react";
+import { CircleUser, DoorOpen, FileHeart, FilePlusCorner, Folder, Home } from "lucide-react";
 
 export function Navbar1() {
     const { currentUserId, signOut } = useAuth();
@@ -19,6 +19,10 @@ export function Navbar1() {
             <Link to={'/home'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
                 <Home></Home>
                 <span>Home</span>
+            </Link>
+            <Link to={`/folders/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
+                <Folder></Folder>
+                <span>Folder</span>
             </Link>
             <Link to={`/favorite/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
                 <FileHeart></FileHeart>
@@ -44,7 +48,10 @@ export function Navbar2() {
             <Link to={`/favorite/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem]">
                 <FileHeart></FileHeart>
             </Link>
-            <Link to={'/add-file'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
+            <Link to={`/folders/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem]">
+                <Folder></Folder>
+            </Link>
+            <Link to={'/add-file'} className="text-gray-700 font-[500] text-[1rem]">
                 <FilePlusCorner></FilePlusCorner>
             </Link>
             <div className="text-gray-700 font-[500] text-[1rem] cursor-pointer" onClick={() => navigate(`/profile/${currentUserId}`)}>

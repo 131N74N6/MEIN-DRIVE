@@ -7,6 +7,8 @@ import Home from "./pages/Home";
 import Favorited from "./pages/Favorited";
 import AddFiles from "./pages/AddFiles";
 import Profile from "./pages/Profile";
+import Folders from "./pages/Folders";
+import Files from "./pages/Files";
 
 const queryClient = new QueryClient();
 
@@ -20,7 +22,8 @@ export default function App() {
                     <Route path='/profile/:user_id' element={<ProtectedRoute><Profile/></ProtectedRoute>}/>
                     <Route path='/home/:user_id' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
                     <Route path='/favorite/:user_id' element={<ProtectedRoute><Favorited/></ProtectedRoute>}/>
-                    <Route path='/folders/:user_id' element={<ProtectedRoute><Favorited/></ProtectedRoute>}/>
+                    <Route path='/folders/:user_id' element={<ProtectedRoute><Folders/></ProtectedRoute>}/>
+                    <Route path='/folder-files/:file_id' element={<ProtectedRoute><Files/></ProtectedRoute>}/>
                     <Route path='/add-file' element={<ProtectedRoute><AddFiles/></ProtectedRoute>}/>
                     <Route path="/" element={<Navigate to="/home" replace/>}/>
                     <Route path="*" element={<Navigate to="/sign-in" replace/>}/>

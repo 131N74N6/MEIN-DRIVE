@@ -4,9 +4,12 @@ export type IFolder = {
     created_at: string;
     folder_name: string;
     files: {
+        file_id: Types.ObjectId;
+        file_name: string;
+        file_type: string;
         public_id: string;
-        url: string;
         resource_type: string;
+        url: string;
     }[];
     user_id: Types.ObjectId;
 }
@@ -15,9 +18,12 @@ const folderSchema = new Schema<IFolder>({
     created_at: { type: String, required: true },
     folder_name: { type: String, required: true },
     files: [{
+        file_id: { type: Schema.Types.ObjectId },
+        file_name: { type: String },
+        file_type: { type: String },
         public_id: { type: String },
-        url: { type: String },
-        resource_type: { type: String }
+        resource_type: { type: String },
+        url: { type: String }
     }],
     user_id: { type: Schema.Types.ObjectId, required: true }
 });

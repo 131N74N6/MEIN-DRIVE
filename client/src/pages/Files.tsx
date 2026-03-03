@@ -4,18 +4,19 @@ import Loading from "../components/Loading";
 import DataModifier from "../services/dataService";
 import type { FolderIntrf } from "../models/folderModel";
 import { useParams } from "react-router-dom";
-import { FolderList } from "../components/FolderList";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import FolderForm from "../components/FolderForm";
+import type { FileInFolderIntrf } from "../models/fileModel";
+import FileList from "../components/FileList";
 
-export default function Folders() {
+export default function Files() {
     const { user_id } = useParams();
     const currentUserId = user_id ? user_id : '';
     const queryQlient = useQueryClient();
 
     const { infiniteScroll, insertData } = DataModifier();
-    const { fetchNextPage, isLoading, isFetchingNextPage, isReachedEnd, error, paginatedData } = infiniteScroll<FolderIntrf>({
+    const { fetchNextPage, isLoading, isFetchingNextPage, isReachedEnd, error, paginatedData } = infiniteScroll<FileInFolderIntrf>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/get/${currentUserId}`,
         limit: 14,
         query_key: [`all-folders-${currentUserId}`],
@@ -87,9 +88,9 @@ export default function Folders() {
                         <Loading/>
                     </div>
                 ) : paginatedData ? (
-                    <FolderList 
+                    <FileList 
                         fetchNextPage={fetchNextPage} 
-                        folders={paginatedData} 
+                        files={paginatedData} 
                         isFetchingNextPage={isFetchingNextPage}
                         isReachedEnd={isReachedEnd} 
                     />

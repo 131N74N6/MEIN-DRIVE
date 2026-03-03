@@ -17,6 +17,9 @@ export async function changeFolderName(req: Request, res: Response) {
 
 export async function deleteAllFolders(req: Request, res: Response) {
     try {
+        await Folder.updateOne({ user_id: req.params.user_id }, {
+            $set: { files: [] }
+        });
         await Folder.deleteMany({ user_id: req.params.user_id });
         res.status(200).json({ message: 'all folders deleted' });
     } catch (error) {
@@ -26,6 +29,9 @@ export async function deleteAllFolders(req: Request, res: Response) {
 
 export async function deleteOneFolder(req: Request, res: Response) {
     try {
+        await Folder.updateOne({ _id: req.params._id }, {
+            $set: { files: [] }
+        });
         await Folder.deleteOne({ _id: req.params._id });
         res.status(200).json({ message: 'one folder deleted' });
     } catch (error) {
@@ -43,10 +49,9 @@ export async function getCurrentUserFolder(req: Request, res: Response) {
         const skip = (page - 1) * limit;
 
         if (searched) {
-            const getFolders = await Folder.find({ 
-                user_id: getUserId, 
-                folder_name: new RegExp(searched, 'i') 
-            }).limit(limit).skip(skip);
+            const getFolders = await Folder.find(
+                { user_id: getUserId, folder_name: new RegExp(searched, 'i')}
+            ).limit(limit).skip(skip);
             res.status(200).json(getFolders);
         } else {
             const getFolders = await Folder.find({ user_id: getUserId }).limit(limit).skip(skip);
@@ -59,9 +64,10 @@ export async function getCurrentUserFolder(req: Request, res: Response) {
 
 export async function insertFileToFolder(req: Request, res: Response) {
     try {
-        await Folder.updateOne({ _id: req.params._id }, {
-            $push:
+        await Folder.updateOne({ _id: req.params._id }, { 
+            $push: { files: req.body.files }
         });
+        res.status(200).json({ message: 'added 1 file' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }

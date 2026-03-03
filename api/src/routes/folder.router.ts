@@ -1,6 +1,6 @@
 import express from 'express';
 import { checkOwnership, verifyToken } from '../middleware/auth.middleware';
-import { changeFolderName, deleteAllFolders, deleteOneFolder, getCurrentUserFolder, makeNewFolder } from '../controllers/folder.controller';
+import { changeFolderName, deleteAllFolders, deleteOneFolder, getCurrentUserFolder, insertFileToFolder, makeNewFolder } from '../controllers/folder.controller';
 
 const folderRouter = express.Router();
 
@@ -9,5 +9,6 @@ folderRouter.delete('/delete/:user_id', verifyToken, checkOwnership, deleteAllFo
 folderRouter.get('/get/:user_id', verifyToken, checkOwnership, getCurrentUserFolder);
 folderRouter.post('/make', verifyToken, makeNewFolder);
 folderRouter.put('/change/:_id', verifyToken, changeFolderName);
+folderRouter.put('/insert-to/:_id', verifyToken, insertFileToFolder);
 
 export default folderRouter;
