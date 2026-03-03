@@ -16,6 +16,7 @@ import fileRoutes from "./routes/file.router";
 import favoriteRoutes from "./routes/favorited.router";
 import { v2 } from "cloudinary";
 import authRoutes from './routes/auth.router';
+import folderRouter from './routes/folder.router';
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use('/api/files', fileRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/favorited', favoriteRoutes);
+app.use('/api/folder', folderRouter);
 
 if (process.env.NODE_ENV !== 'production') {
     db.then(() => {

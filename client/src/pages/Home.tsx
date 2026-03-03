@@ -37,7 +37,7 @@ export default function Home() {
         limit: 14,
         query_key: debouncedSearch ? [`all-files-${currentUserId}-${debouncedSearch}`] : [`all-files-${currentUserId}`],
         searched: debouncedSearch.trim(),
-        stale_time: 600000
+        stale_time: 1200000
     });
 
     const deleteAllFilesMutation = useMutation({

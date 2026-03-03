@@ -124,7 +124,7 @@ export default function AddFiles() {
                             <span className="text-lg">Click to select images or videos</span>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full overflow-y-auto max-h-75 relative group">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 md:grid-cols-3 gap-4 w-full overflow-y-auto max-h-75 relative group">
                             {mediaFiles.map((mediaFile, index) => (
                                 <div className="relative" key={`${mediaFile.file_name}_${index}`}>
                                     <FileIconPreview {...mediaFile}/>

@@ -5,7 +5,7 @@ import { checkOwnership, verifyToken } from "../middleware/auth.middleware";
 const userRoutes = Router();
 
 userRoutes.delete('/delete-myself/:user_id', verifyToken, checkOwnership, deleteCurrentUser);
-userRoutes.get('/user-data/:user-id', verifyToken, checkOwnership, getUserData);
-userRoutes.put('/change/:user-id', verifyToken, checkOwnership, changeUserInfo);
+userRoutes.get('/user-data/:user_id', verifyToken, checkOwnership, getUserData);
+userRoutes.put('/change/:user_id', verifyToken, checkOwnership, changeUserInfo);
 
 export default userRoutes;

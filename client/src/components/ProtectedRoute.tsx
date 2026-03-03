@@ -9,11 +9,13 @@ type ProtectedRouteProps = {
 export default function ProtectedRoute(props: ProtectedRouteProps) {
     const { userLoading, currentUserId } = useAuth();
 
-    if (userLoading) return (
-        <div className="flex justify-center items-center h-screen bg-[#1a1a1a]">
-            <div className="animate-spin rounded w-[48px] h-[48px] border-purple-400"></div>
-        </div>
-    );
+    if (userLoading) {
+        return (
+            <div className="flex justify-center items-center h-screen bg-[#1a1a1a]">
+                <div className="animate-spin rounded w-[48px] h-[48px] border-purple-400"></div>
+            </div>
+        );
+    }
 
     return currentUserId ? <>{props.children}</> : <Navigate to={'/sign-in'} replace/>
 }

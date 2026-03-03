@@ -5,11 +5,15 @@ import { Eye, EyeOff } from "lucide-react";
 
 export default function SignIn() {
     const navigate = useNavigate();
-    const { setUserError, userError, userLoading, signIn } = useAuth();
+    const { currentUserId, setUserError, userError, userLoading, signIn } = useAuth();
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+
+    useEffect(() => {
+        if (currentUserId) navigate(`/home/${currentUserId}`);
+    }, [currentUserId, navigate]);
 
     useEffect(() => {
         if (userError) {

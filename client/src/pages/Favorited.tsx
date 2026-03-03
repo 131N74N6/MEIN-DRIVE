@@ -37,7 +37,7 @@ export default function Favorited() {
         limit: 14,
         query_key: debouncedSearch ? [`all-favorited-files-${currentUserId}-${debouncedSearch}`] : [`all-favorited-files-${currentUserId}`],
         searched: debouncedSearch.trim(),
-        stale_time: 600000
+        stale_time: 1200000
     });
 
     const removeAllMutation = useMutation({

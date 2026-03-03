@@ -60,7 +60,7 @@ export default function DataModifier() {
 
     function getData<BIN1999>(props: GetDataProps) {
         const { data, error, isLoading } = useQuery<BIN1999, Error>({
-            enabled: !!token && userLoading,
+            enabled: !!token && !userLoading,
             queryFn: async () => {
                 try {
                     const request = await fetch(props.api_url, {
@@ -149,7 +149,7 @@ export default function DataModifier() {
             isFetchingNextPage, 
             isLoading 
         } = useInfiniteQuery({
-            enabled: !!token && userLoading,
+            enabled: !!token && !userLoading,
             gcTime: 600000,
             getNextPageParam: (lastPage, allPages): number | undefined => {
                 if (lastPage.length < props.limit) return;

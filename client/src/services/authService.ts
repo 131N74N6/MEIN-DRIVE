@@ -3,7 +3,7 @@ import type { SignUpProps, CurrentUserTokenIntrf } from "../models/userModel";
 
 export default function useAuth() {
     const [currentToken, setCurrentToken] = useState<CurrentUserTokenIntrf | null>(null);
-    const [userLoading, setUserLoading] = useState<boolean>(false);
+    const [userLoading, setUserLoading] = useState<boolean>(true);
     const [userError, setUserError] = useState<string | null>(null);
 
     const currentUserId = currentToken ? currentToken.user_id : '';

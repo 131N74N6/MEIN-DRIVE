@@ -17,7 +17,7 @@ export default function FavoriteFile(props: FavoriteItemProps) {
         },
         onError: () => {},
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`is-favorited-${props.file.user_id}-${props.file._id}`] });
+            queryClient.invalidateQueries({ queryKey: [`is-favorited-${props.file.user_id}-${props.file.file_id}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${props.file.user_id}`] });
         },
         onSettled: () => setIsDeleting(false)

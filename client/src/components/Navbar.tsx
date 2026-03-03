@@ -12,7 +12,7 @@ export function Navbar1() {
                 <CircleUser></CircleUser>
                 <span>Your Profile</span>
             </div>
-            <Link to={`/add-file/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
+            <Link to={`/add-file`} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
                 <FilePlusCorner></FilePlusCorner>
                 <span>Add Files</span>
             </Link>
