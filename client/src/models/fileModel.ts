@@ -7,25 +7,12 @@ export type MediaFilesProps = {
     preview_url: string;
 }
 
-export type FileItemProps = {
-    file: FilesDataProps;
-    showFolderList: (props: FileInFolderIntrf) => void;
-}
-
 export type UploadResult = {
     file_name: string;
     file_type: string;
     url: string;
     public_id: string;
     resource_type: string;
-}
-
-export type FileListProps = {
-    fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>;
-    files: FilesDataProps[];
-    isFetchingNextPage: boolean;
-    isReachedEnd: boolean;
-    showFolderList: (props: FileInFolderIntrf) => void;
 }
 
 export type FilesDataProps = {
@@ -38,30 +25,22 @@ export type FilesDataProps = {
     }
     file_name: string;
     file_type: string;
+    folder_name: string;
+    is_favorited: boolean;
     user_id: string;
 }
 
-export type FileInFolderIntrf = {
-    file_id: string;
-    file_name: string;
-    file_type: string;
-    public_id: string;
-    resource_type: string;
-    url: string;
-}
+export type FilesFormIntrf = Omit<FilesDataProps, "folder_name" | "is_favorited">;
 
-export type FileListInFolderIntrf = {
+export type FileListProps = {
     fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>;
-    file_list:FileInFolderIntrf[];
+    files: FilesDataProps[];
     isFetchingNextPage: boolean;
     isReachedEnd: boolean;
+    showFolderList: (_id: string) => void;
 }
 
-export type FileItemInFolderIntrf = {
-    file_id: string;
-    file_name: string;
-    file_type: string;
-    public_id: string;
-    resource_type: string;
-    url: string;
+export type FileItemProps = {
+    file: FilesDataProps;
+    showFolderList: (_id: string) => void;
 }

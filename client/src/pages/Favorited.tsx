@@ -2,102 +2,167 @@ import { useEffect, useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import DataModifier from "../services/dataService";
 import useAuth from "../services/authService";
+import type { FilesDataProps } from "../models/fileModel";
+import FileList from "../components/FileList";
 import Loading from "../components/Loading";
-import FavoriteList from "../components/FavoriteList";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
 import useDebounce from "../services/useDebounce";
 import Notification from "../components/Notification";
 import { Trash } from "lucide-react";
-import type { FavoritedFileDataProps } from "../models/favoriteModel";
+import { FolderListPreview } from "../components/FolderList";
+import type { FolderIntrf } from "../models/folderModel";
 
 export default function Favorited() {
-    const { currentUserId } = useAuth();
-    const { deleteData, infiniteScroll, message, setMessage } = DataModifier();
     const queryClient = useQueryClient();
+    const { currentUserId } = useAuth();
+    const { changeData, deleteData, infiniteScroll, message, setMessage } = DataModifier();
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearch = useDebounce<string>(searchValue, 500);
-    const [isDeleting, setIsDeleting] = useState<boolean>(false);
-    
+
+    const [chosenFileId, setChosenFileId] = useState<string | null>(null);
+    const [chosenFolder, setChosenFolder] = useState<string | null>(null);
+    const [openFolderList, setOpenFolderList] = useState<boolean>(false);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
     useEffect(() => {
         if (message) {
             const timer = setTimeout(() => setMessage(null), 3000);
             return () => clearTimeout(timer);
         }
     }, [message, setMessage]);
-
-    const {
-        error,
-        fetchNextPage,
-        isFetchingNextPage,
-        isLoading,
-        isReachedEnd,
-        paginatedData,
-    } = infiniteScroll<FavoritedFileDataProps>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/get-all/${currentUserId}`,
+    
+    const { error: aa, fetchNextPage: ab, isFetchingNextPage: ac, isLoading: ad, isReachedEnd: ae, paginatedData: af } = infiniteScroll<FilesDataProps>({
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/favorited/${currentUserId}`,
         limit: 14,
         query_key: debouncedSearch ? [`all-favorited-files-${currentUserId}-${debouncedSearch}`] : [`all-favorited-files-${currentUserId}`],
         searched: debouncedSearch.trim(),
         stale_time: 1200000
     });
 
-    const removeAllMutation = useMutation({
-        onMutate: () => setIsDeleting(true),
+    const { error: ba, fetchNextPage: bb, isFetchingNextPage: bc, isLoading: bd, isReachedEnd: be, paginatedData: bf } = infiniteScroll<FolderIntrf>({
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
+        limit: 14,
+        query_key: [`all-folder-prev-${currentUserId}`],
+        stale_time: 1200000
+    });
+
+    const deleteAllFilesMt = useMutation({
+        onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/favorited/erase-all/${currentUserId}` });
+            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all/${currentUserId}` });
         },
-        onError: () => {},
+        onError: (error) => {
+            setMessage(error.message || 'Failed to delete or chech your internet connection.');
+        },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
             queryClient.removeQueries({
-                predicate: (query) => {
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
-                    // Pastikan query key adalah array dan elemen pertama adalah string
                     if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        // Cocokkan apakah elemen pertama dimulai dengan pola 'is-favorited-{currentUserId}-'
+                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
+                    }
+                    return false; 
+                }
+            });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
                         return queryKey[0].startsWith(`is-favorited-${currentUserId}-`);
                     }
-                    return false; // Abaikan jika format tidak sesuai
+                    return false;
                 }
             });
         },
-        onSettled: () => setIsDeleting(false)
+        onSettled: () => setIsProcessing(false)
     });
 
+    const insertFileToFolderMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (_id: string) => {
+            if (!chosenFolder || !chosenFileId) return;
+            await changeData<FilesDataProps>({
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-folder/${chosenFileId}`,
+                data: { folder_name: chosenFolder.trim() }
+            });
+        },
+        onError: (error) => {
+            setMessage(error.message || 'Failed to move to folder or chech your internet connection.');
+        },
+        onSuccess: () => {
+            setOpenFolderList(false);
+            setChosenFileId(null);
+            setChosenFolder(null);
+            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
+        },
+        onSettled: () => {
+            setIsProcessing(false);
+        }
+    });
+
+    function closeFolderList() {
+        setOpenFolderList(false);
+        setChosenFileId(null);
+        setChosenFolder(null);
+    }
+
+    function showFolderList(_id: string) {
+        setChosenFileId(_id);
+        setOpenFolderList(true);
+    }
+
     return (
-        <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
+        <section className="flex md:flex-row flex-col h-screen gap-4 p-4 bg-white z-10 relative">
             {message ? Notification(message) : null}
-            <div className="flex flex-col gap-x-[1rem] md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white overflow-y-auto">
-                <form className="flex gap-[1rem] items-center pt-[1rem] px-[1rem]">
+            {openFolderList ? (
+                <FolderListPreview 
+                    error={ba}
+                    fetchNextPage={bb} 
+                    folder_prev={bf} 
+                    isLoading={bd}
+                    isFetchingNextPage={bc} 
+                    isReachedEnd={be}
+                    move={insertFileToFolderMt}
+                    toggle={closeFolderList}
+                    set_chosen_folder={setChosenFolder}
+                /> 
+            ) : null}
+            <div className="flex flex-col gap-4 md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white">
+                <form className="flex gap-4 items-center pt-4 px-4">
                     <input 
                         type="text" 
                         value={searchValue}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchValue(event.target.value)}
-                        className="rounded border border-gray-700 w-[100%] p-[0.45rem] text-[0.9rem] outline-0 font-[500]"
+                        className="border rounded border-gray-700 p-[0.45rem] w-full text-[0.9rem] outline-0 font-[500]"
                         placeholder="search file here"
                     />
                     <button 
                         type="button" 
-                        onClick={() => removeAllMutation.mutate()}
-                        disabled={isDeleting}
-                        className="cursor-pointer flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isProcessing}
+                        className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" 
+                        onClick={() => deleteAllFilesMt.mutate()}
                     >
                         <Trash size={22}></Trash>
                     </button>
                 </form>
-                {paginatedData ? (
-                    <FavoriteList 
-                        fetchNextPage={fetchNextPage} 
-                        favorites={paginatedData} 
-                        isFetchingNextPage={isFetchingNextPage}
-                        isReachedEnd={isReachedEnd} 
-                    />
-                ) : isLoading ? (
-                    <div className="flex justify-center items-center h-[100%]">
+                {ad ? (
+                    <div className="flex justify-center items-center h-full">
                         <Loading/>
                     </div>
-                ) : error ? (
+                ) : af ? (
+                    <FileList 
+                        fetchNextPage={ab} 
+                        files={af} 
+                        isFetchingNextPage={ac}
+                        isReachedEnd={ae} 
+                        showFolderList={showFolderList}
+                    />
+                ) : aa ? (
                     <div className="flex justify-center items-center h-full bg-white">
-                        <span className="text-[2rem] font-[600] text-gray-700">{error.message}</span>
+                        <span className="text-[2rem] font-[600] text-gray-700">{aa.message}</span>
                     </div>
                 ) : (
                     <div className="flex justify-center items-center h-full bg-white">

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
 import { File } from "../models/file.model";
+import { Folder } from "../models/folder.model";
 import { v2 } from "cloudinary";
-import { Favorited } from "../models/favorited.model";
 
 export async function changeUserInfo(req: Request, res: Response) {
     try {
@@ -30,7 +30,7 @@ export async function deleteCurrentUser(req: Request, res: Response) {
         await Promise.all(deletePromise);
         await Promise.all([
             await File.deleteMany({ user_id: currentUserId }),
-            await Favorited.deleteMany({ user_id: currentUserId })
+            await Folder.deleteMany({ user_id: currentUserId })
         ]);
 
         res.status(200).json({ message: 'your account and files have been deleted' });

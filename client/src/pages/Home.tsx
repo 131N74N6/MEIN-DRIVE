@@ -2,24 +2,26 @@ import { useEffect, useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import DataModifier from "../services/dataService";
 import useAuth from "../services/authService";
-import type { FileInFolderIntrf, FilesDataProps } from "../models/fileModel";
+import type { FilesDataProps } from "../models/fileModel";
 import FileList from "../components/FileList";
 import Loading from "../components/Loading";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
 import useDebounce from "../services/useDebounce";
 import Notification from "../components/Notification";
 import { Trash } from "lucide-react";
 import { FolderListPreview } from "../components/FolderList";
-import type { FolderDetailIntrf, FolderIntrf } from "../models/folderModel";
+import type { FolderIntrf } from "../models/folderModel";
 
 export default function Home() {
+    const queryClient = useQueryClient();
     const { currentUserId } = useAuth();
     const { changeData, deleteData, infiniteScroll, message, setMessage } = DataModifier();
-    const queryClient = useQueryClient();
-    const [chosenFile, setChosenFile] = useState<FileInFolderIntrf | null>(null);
-    const [openFolderList, setOpenFolderList] = useState<boolean>(false);
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearch = useDebounce<string>(searchValue, 500);
+
+    const [chosenFileId, setChosenFileId] = useState<string | null>(null);
+    const [chosenFolder, setChosenFolder] = useState<string | null>(null);
+    const [openFolderList, setOpenFolderList] = useState<boolean>(false);
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
     useEffect(() => {
@@ -38,7 +40,7 @@ export default function Home() {
     });
 
     const { error: ba, fetchNextPage: bb, isFetchingNextPage: bc, isLoading: bd, isReachedEnd: be, paginatedData: bf } = infiniteScroll<FolderIntrf>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/get/${currentUserId}`,
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
         limit: 14,
         query_key: [`all-folder-prev-${currentUserId}`],
         stale_time: 1200000
@@ -56,9 +58,18 @@ export default function Home() {
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
             queryClient.removeQueries({
-                predicate: (query) => {
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
-                    // Pastikan query key adalah array dan elemen pertama adalah string
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
+                    }
+                    return false; 
+                }
+            });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    // Memastikan query key adalah array dan elemen pertama adalah string
                     if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
                         // Cocokkan apakah elemen pertama dimulai dengan pola 'is-favorited-{currentUserId}-'
                         return queryKey[0].startsWith(`is-favorited-${currentUserId}-`);
@@ -70,33 +81,35 @@ export default function Home() {
         onSettled: () => setIsProcessing(false)
     });
 
-    const insertToFolderMt = useMutation({
+    const insertFileToFolderMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async (_id: string) => {
-            if (!chosenFile) return;
-            await changeData<FolderDetailIntrf>({
-                api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/insert-to/${_id}`,
-                data: { files: chosenFile }
+            if (!chosenFolder || !chosenFileId) return;
+            await changeData<FilesDataProps>({
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-folder/${chosenFileId}`,
+                data: { folder_name: chosenFolder.trim() }
             });
         },
         onSuccess: () => {
             setOpenFolderList(false);
+            setChosenFileId(null);
+            setChosenFolder(null);
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
         },
         onSettled: () => {
-            setChosenFile(null);
             setIsProcessing(false);
         }
     });
 
     function closeFolderList() {
         setOpenFolderList(false);
-        setChosenFile(null);
+        setChosenFileId(null);
+        setChosenFolder(null);
     }
 
-    function showFolderList(props: FileInFolderIntrf) {
-        setChosenFile(props);
+    function showFolderList(_id: string) {
+        setChosenFileId(_id);
         setOpenFolderList(true);
     }
 
@@ -111,8 +124,9 @@ export default function Home() {
                     isLoading={bd}
                     isFetchingNextPage={bc} 
                     isReachedEnd={be}
-                    move={insertToFolderMt}
+                    move={insertFileToFolderMt}
                     toggle={closeFolderList}
+                    set_chosen_folder={setChosenFolder}
                 /> 
             ) : null}
             <div className="flex flex-col gap-4 md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white">

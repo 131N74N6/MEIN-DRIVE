@@ -1,52 +1,159 @@
-import { Trash } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
-import Loading from "../components/Loading";
 import DataModifier from "../services/dataService";
+import useAuth from "../services/authService";
+import type { FilesDataProps } from "../models/fileModel";
+import FileList from "../components/FileList";
+import Loading from "../components/Loading";
+import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
+import useDebounce from "../services/useDebounce";
+import Notification from "../components/Notification";
+import { Trash } from "lucide-react";
+import { FolderListPreview } from "../components/FolderList";
+import type { FolderIntrf } from "../models/folderModel";
 import { useParams } from "react-router-dom";
-import FileListInFolder from "../components/FileListInFolder";
-import type { FolderDetailIntrf } from "../models/folderModel";
 
 export default function Files() {
-    const { file_id } = useParams();
+    const { folder_name } = useParams();
+    const queryClient = useQueryClient();
+    const { currentUserId } = useAuth();
+    const { changeData, deleteData, infiniteScroll, message, setMessage } = DataModifier();
+    const [searchValue, setSearchValue] = useState<string>('');
+    const debouncedSearch = useDebounce<string>(searchValue, 500);
 
-    const { infiniteScroll } = DataModifier();
-    const { fetchNextPage, isLoading, isFetchingNextPage, isReachedEnd, error, paginatedData } = infiniteScroll<FolderDetailIntrf>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/get/${file_id}`,
+    const [chosenFileId, setChosenFileId] = useState<string | null>(null);
+    const [chosenFolder, setChosenFolder] = useState<string | null>(null);
+    const [openFolderList, setOpenFolderList] = useState<boolean>(false);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => setMessage(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [message, setMessage]);
+    
+    const { error: aa, fetchNextPage: ab, isFetchingNextPage: ac, isLoading: ad, isReachedEnd: ae, paginatedData: af } = infiniteScroll<FilesDataProps>({
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/files-in-folder/${folder_name}/${currentUserId}`,
         limit: 14,
-        query_key: [`file-in-folder-${file_id}`],
+        query_key: debouncedSearch ? [`files-in-folder-${currentUserId}-${folder_name}-${debouncedSearch}`] : [`files-in-folder-${currentUserId}-${folder_name}`],
+        searched: debouncedSearch.trim(),
         stale_time: 1200000
     });
 
+    const { error: ba, fetchNextPage: bb, isFetchingNextPage: bc, isLoading: bd, isReachedEnd: be, paginatedData: bf } = infiniteScroll<FolderIntrf>({
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
+        limit: 14,
+        query_key: [`all-folder-prev-${currentUserId}`],
+        stale_time: 1200000
+    });
+
+    const deleteAllFilesMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async () => {
+            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all-in-folder/${folder_name}` });
+        },
+        onError: (error) => {
+            setMessage(error.message || 'Failed to delete or check your internet connection.');
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`files-in-folder-${currentUserId}-${folder_name}`] });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`is-favorited-${currentUserId}-`);
+                    }
+                    return false;
+                }
+            });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
+
+    const insertFileToFolderMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (_id: string) => {
+            if (!chosenFolder || !chosenFileId) return;
+            await changeData<FilesDataProps>({
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-folder/${chosenFileId}`,
+                data: { folder_name: chosenFolder.trim() }
+            });
+        },
+        onSuccess: () => {
+            setOpenFolderList(false);
+            setChosenFileId(null);
+            setChosenFolder(null);
+            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
+        },
+        onSettled: () => {
+            setIsProcessing(false);
+        }
+    });
+
+    function closeFolderList() {
+        setOpenFolderList(false);
+        setChosenFileId(null);
+        setChosenFolder(null);
+    }
+
+    function showFolderList(_id: string) {
+        setChosenFileId(_id);
+        setOpenFolderList(true);
+    }
+
     return (
-        <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
-            <div className="w-full md:w-3/4 flex flex-col gap-x-4 h-full min-h-[200px] rounded shadow-[0_0_4px_#1a1a1a] bg-white">
-                <form className="flex gap-[1rem] items-center pt-[1rem] px-[1rem]">
-                    <input
-                        type="text"
+        <section className="flex md:flex-row flex-col h-screen gap-4 p-4 bg-white z-10 relative">
+            {message ? Notification(message) : null}
+            {openFolderList ? (
+                <FolderListPreview 
+                    error={ba}
+                    fetchNextPage={bb} 
+                    folder_prev={bf} 
+                    isLoading={bd}
+                    isFetchingNextPage={bc} 
+                    isReachedEnd={be}
+                    move={insertFileToFolderMt}
+                    toggle={closeFolderList}
+                    set_chosen_folder={setChosenFolder}
+                /> 
+            ) : null}
+            <div className="flex flex-col gap-4 md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white">
+                <form className="flex gap-4 items-center pt-4 px-4">
+                    <input 
+                        type="text" 
+                        value={searchValue}
+                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchValue(event.target.value)}
                         className="border rounded border-gray-700 p-[0.45rem] w-full text-[0.9rem] outline-0 font-[500]"
-                        placeholder="search folder here"
+                        placeholder="search file here"
                     />
                     <button 
-                        type="button"
-                        className="cursor-pointer flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded"
+                        type="button" 
+                        disabled={isProcessing}
+                        className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" 
+                        onClick={() => deleteAllFilesMt.mutate()}
                     >
-                        <Trash size={22}/>
+                        <Trash size={22}></Trash>
                     </button>
                 </form>
-                {isLoading ? (
+                {ad ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
                     </div>
-                ) : paginatedData ? (
-                    <FileListInFolder 
-                        fetchNextPage={fetchNextPage} 
-                        file_list={paginatedData} 
-                        isFetchingNextPage={isFetchingNextPage}
-                        isReachedEnd={isReachedEnd} 
+                ) : af ? (
+                    <FileList 
+                        fetchNextPage={ab} 
+                        files={af} 
+                        isFetchingNextPage={ac}
+                        isReachedEnd={ae} 
+                        showFolderList={showFolderList}
                     />
-                ) : error ? (
+                ) : aa ? (
                     <div className="flex justify-center items-center h-full bg-white">
-                        <span className="text-[2rem] font-[600] text-gray-700">{error.message}</span>
+                        <span className="text-[2rem] font-[600] text-gray-700">{aa.message}</span>
                     </div>
                 ) : (
                     <div className="flex justify-center items-center h-full bg-white">

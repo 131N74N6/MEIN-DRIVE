@@ -13,7 +13,6 @@ import cors from 'cors';
 import db from "./database/mongodb";
 import userRoutes from "./routes/user.router";
 import fileRoutes from "./routes/file.router";
-import favoriteRoutes from "./routes/favorited.router";
 import { v2 } from "cloudinary";
 import authRoutes from './routes/auth.router';
 import folderRouter from './routes/folder.router';
@@ -34,8 +33,7 @@ app.use(cors({
 app.use('/api/files', fileRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/favorited', favoriteRoutes);
-app.use('/api/folder', folderRouter);
+app.use('/api/folders', folderRouter);
 
 if (process.env.NODE_ENV !== 'production') {
     db.then(() => {

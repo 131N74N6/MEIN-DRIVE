@@ -6,21 +6,30 @@ import type { FolderIntrf } from "../models/folderModel";
 import { useParams } from "react-router-dom";
 import { FolderList } from "../components/FolderList";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FolderForm from "../components/FolderForm";
 
 export default function Folders() {
     const { user_id } = useParams();
     const currentUserId = user_id ? user_id : '';
     const queryClient = useQueryClient();
+    const { changeData, deleteData, message, infiniteScroll, insertData, setMessage } = DataModifier();
 
-    const { changeData, deleteData, infiniteScroll, insertData } = DataModifier();
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => setMessage(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [message, setMessage]);
+
     const { fetchNextPage, isLoading, isFetchingNextPage, isReachedEnd, error, paginatedData } = infiniteScroll<FolderIntrf>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/get/${currentUserId}`,
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
         limit: 14,
         query_key: [`all-folders-${currentUserId}`],
         stale_time: 1200000
     });
+
+    console.log(paginatedData);
     
     const [folderName, setFolderName] = useState<string>('');
     const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -31,11 +40,12 @@ export default function Folders() {
         onMutate: () => setIsProcessing(true),
         mutationFn: async (data: Pick<FolderIntrf, '_id' | 'folder_name'>) => {
             await changeData<FolderIntrf>({ 
-                api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/change/${data._id}`, 
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/change/${data._id}`, 
                 data: { folder_name: data.folder_name }
             });
         },
         onSuccess: () => {
+            setSelectedFolderId(null);
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
         },
@@ -46,7 +56,7 @@ export default function Folders() {
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
             await insertData<FolderIntrf>({
-                api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/make`,
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/make`,
                 data: {
                     created_at: new Date().toLocaleString(),
                     folder_name: folderName.trim(),
@@ -68,7 +78,7 @@ export default function Folders() {
     const removeOneFolder = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async (_id: string) => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/delete/${_id}` });
+            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/delete/${_id}` });
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
@@ -90,7 +100,7 @@ export default function Folders() {
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
-            {openForm ? <FolderForm closed_form={folderFormToggle} folder_name={folderName} is_making={isProcessing} set_folder_name={setFolderName} submit_folder={makeFolder}/> : null}
+            {openForm ? <FolderForm closed_form={folderFormToggle} message={message} folder_name={folderName} is_making={isProcessing} set_folder_name={setFolderName} submit_folder={makeFolder}/> : null}
             <div className="w-full md:w-3/4 flex flex-col gap-x-4 h-full min-h-[200px] rounded shadow-[0_0_4px_#1a1a1a] bg-white">
                 <form className="flex gap-[1rem] items-center pt-[1rem] px-[1rem]">
                     <input

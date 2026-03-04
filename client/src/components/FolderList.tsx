@@ -71,7 +71,13 @@ export function FolderListPreview(props: FolderListPrevIntrf) {
                 </>
                 <div className="flex flex-col gap-4">
                     {props.folder_prev.map((folder, index) => (
-                        <FolderItemPreview key={`folder-${index}`} move={props.move} _id={folder._id} folder_name={folder.folder_name}/>
+                        <FolderItemPreview 
+                            key={`folder-${index}`} 
+                            move={props.move} 
+                            _id={folder._id} 
+                            folder_name={folder.folder_name}
+                            set_chosen_folder={props.set_chosen_folder}
+                        />
                     ))}
                 </div>
                 <div className="flex justify-center">

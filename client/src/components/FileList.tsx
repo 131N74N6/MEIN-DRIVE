@@ -13,7 +13,7 @@ export default function FileList(props: FileListProps) {
 
     return (
         <div className="flex flex-col gap-4 px-4 overflow-y-auto">
-            <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
+            <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-4">
                 {props.files.map((file) => (
                     <FileItem file={file} key={`file_${file._id}`} showFolderList={props.showFolderList}/>
                 ))}

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import type { FilesDataProps, MediaFilesProps } from "../models/fileModel";
+import type { FilesFormIntrf, MediaFilesProps } from "../models/fileModel";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import useAuth from "../services/authService";
 import DataModifier from "../services/dataService";
@@ -78,7 +78,7 @@ export default function AddFiles() {
             }
 
             for (let y = 0; y < uploadedFiles.length; y++) {
-                await insertData<FilesDataProps>({
+                await insertData<FilesFormIntrf>({
                     api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add`,
                     data: {
                         created_at: new Date().toISOString(),
@@ -89,7 +89,7 @@ export default function AddFiles() {
                         },
                         file_name: uploadedFiles[y].file_name,
                         file_type: uploadedFiles[y].file_type,
-                        user_id: currentUserId
+                        user_id: currentUserId,
                     },
                 });
             }

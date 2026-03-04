@@ -1,4 +1,5 @@
 import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, UseMutationResult } from "@tanstack/react-query";
+import type { Dispatch, SetStateAction } from "react";
 
 export type FolderIntrf = {
     _id: string;
@@ -22,7 +23,8 @@ export type FolderItemIntrf = {
 export type FolderItemPrevIntrf = {
     _id: string;
     folder_name: string;
-    move:  UseMutationResult<void, Error, string, unknown>;
+    move: UseMutationResult<void, Error, string, unknown>;
+    set_chosen_folder: Dispatch<SetStateAction<string | null>>;
 }
 
 export type FolderListPrevIntrf = {
@@ -34,6 +36,7 @@ export type FolderListPrevIntrf = {
     isReachedEnd: boolean;
     move: UseMutationResult<void, Error, string, unknown>;
     toggle: () => void;
+    set_chosen_folder: Dispatch<SetStateAction<string | null>>;
 }
 
 export type FolderFormIntrf = {
@@ -42,6 +45,7 @@ export type FolderFormIntrf = {
     is_making: boolean;
     set_folder_name: (value: React.SetStateAction<string>) => void;
     submit_folder: (event: React.FormEvent<Element>) => void;
+    message: string | null
 }
 
 export type FolderListIntrf = {
@@ -53,18 +57,4 @@ export type FolderListIntrf = {
     isReachedEnd: boolean;
     selectOne: (id: string) => void;
     selectedFolderId: string | null;
-}
-
-export type FolderDetailIntrf = {
-    _id: string;
-    created_at: string;
-    folder_name: string;
-    files: {
-        file_name: string;
-        file_type: string;
-        public_id: string;
-        resource_type: string;
-        url: string;
-    };
-    user_id: string;
 }

@@ -23,7 +23,7 @@ export default function App() {
                     <Route path='/home/:user_id' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
                     <Route path='/favorite/:user_id' element={<ProtectedRoute><Favorited/></ProtectedRoute>}/>
                     <Route path='/folders/:user_id' element={<ProtectedRoute><Folders/></ProtectedRoute>}/>
-                    <Route path='/folder-files/:file_id' element={<ProtectedRoute><Files/></ProtectedRoute>}/>
+                    <Route path='/folder-files/:folder_name' element={<ProtectedRoute><Files/></ProtectedRoute>}/>
                     <Route path='/add-file' element={<ProtectedRoute><AddFiles/></ProtectedRoute>}/>
                     <Route path="/" element={<Navigate to="/home" replace/>}/>
                     <Route path="*" element={<Navigate to="/sign-in" replace/>}/>

@@ -26,6 +26,7 @@ export default function FolderForm(props: FolderFormIntrf) {
                 >
                     Create Folder
                 </button>
+                {props.message ? <p className="text-red-600 font-medium text-center">{props.message}</p> : null}
             </form>
         </div>
     );
