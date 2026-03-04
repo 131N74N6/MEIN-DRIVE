@@ -7,6 +7,18 @@ export type FolderIntrf = {
     user_id: string;
 }
 
+export type FolderItemIntrf = {
+    _id: string;
+    is_selected: boolean;
+    created_at: string;
+    folder_name: string;
+    user_id: string;
+    changeOne: UseMutationResult<void, Error, Pick<FolderIntrf, '_id' | 'folder_name'>, void>;
+    deleteOne: UseMutationResult<void, Error, string, void>;
+    selectOne: (id: string) => void;
+    selectedFolderId: string | null;
+}
+
 export type FolderItemPrevIntrf = {
     _id: string;
     folder_name: string;
@@ -33,10 +45,14 @@ export type FolderFormIntrf = {
 }
 
 export type FolderListIntrf = {
+    changeOne: UseMutationResult<void, Error, Pick<FolderIntrf, '_id' | 'folder_name'>, void>;
+    deleteOne: UseMutationResult<void, Error, string, void>;
     folders: FolderIntrf[];
     fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>
     isFetchingNextPage: boolean
     isReachedEnd: boolean;
+    selectOne: (id: string) => void;
+    selectedFolderId: string | null;
 }
 
 export type FolderDetailIntrf = {

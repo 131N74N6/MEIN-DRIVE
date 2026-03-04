@@ -12,9 +12,9 @@ import FolderForm from "../components/FolderForm";
 export default function Folders() {
     const { user_id } = useParams();
     const currentUserId = user_id ? user_id : '';
-    const queryQlient = useQueryClient();
+    const queryClient = useQueryClient();
 
-    const { infiniteScroll, insertData } = DataModifier();
+    const { changeData, deleteData, infiniteScroll, insertData } = DataModifier();
     const { fetchNextPage, isLoading, isFetchingNextPage, isReachedEnd, error, paginatedData } = infiniteScroll<FolderIntrf>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/get/${currentUserId}`,
         limit: 14,
@@ -23,11 +23,27 @@ export default function Folders() {
     });
     
     const [folderName, setFolderName] = useState<string>('');
-    const [isMaking, setIsMaking] = useState<boolean>(false);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [openForm, setOpenForm] = useState<boolean>(false);
+    const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
+
+    const changeFolderName = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (data: Pick<FolderIntrf, '_id' | 'folder_name'>) => {
+            await changeData<FolderIntrf>({ 
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/change/${data._id}`, 
+                data: { folder_name: data.folder_name }
+            });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
 
     const makeFolderMutation = useMutation({
-        onMutate: () => setIsMaking(true),
+        onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
             await insertData<FolderIntrf>({
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/make`,
@@ -39,15 +55,29 @@ export default function Folders() {
             });
         },
         onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
             setOpenForm(false);
-            queryQlient.invalidateQueries({ queryKey: [`all-folder-${currentUserId}`] });
         },
-        onError: () => {},
         onSettled: () => {
-            setIsMaking(false);
+            setIsProcessing(false);
             setFolderName('');
         }
     });
+
+    const removeOneFolder = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (_id: string) => {
+            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folder/delete/${_id}` });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
+
+    const selectFolder = (id: string) => setSelectedFolderId(prev => prev === id ? null : id);
 
     function makeFolder(event: React.FormEvent) {
         event.preventDefault();
@@ -60,7 +90,7 @@ export default function Folders() {
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
-            {openForm ? <FolderForm closed_form={folderFormToggle} folder_name={folderName} is_making={isMaking} set_folder_name={setFolderName} submit_folder={makeFolder}/> : null}
+            {openForm ? <FolderForm closed_form={folderFormToggle} folder_name={folderName} is_making={isProcessing} set_folder_name={setFolderName} submit_folder={makeFolder}/> : null}
             <div className="w-full md:w-3/4 flex flex-col gap-x-4 h-full min-h-[200px] rounded shadow-[0_0_4px_#1a1a1a] bg-white">
                 <form className="flex gap-[1rem] items-center pt-[1rem] px-[1rem]">
                     <input
@@ -88,10 +118,14 @@ export default function Folders() {
                     </div>
                 ) : paginatedData ? (
                     <FolderList 
+                        changeOne={changeFolderName}
+                        deleteOne={removeOneFolder}
                         fetchNextPage={fetchNextPage} 
                         folders={paginatedData} 
                         isFetchingNextPage={isFetchingNextPage}
                         isReachedEnd={isReachedEnd} 
+                        selectedFolderId={selectedFolderId}
+                        selectOne={selectFolder}
                     />
                 ) : error ? (
                     <div className="flex justify-center items-center h-full bg-white">

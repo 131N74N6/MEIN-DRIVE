@@ -49,3 +49,19 @@ export type FileInFolderIntrf = {
     resource_type: string;
     url: string;
 }
+
+export type FileListInFolderIntrf = {
+    fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>;
+    file_list:FileInFolderIntrf[];
+    isFetchingNextPage: boolean;
+    isReachedEnd: boolean;
+}
+
+export type FileItemInFolderIntrf = {
+    file_id: string;
+    file_name: string;
+    file_type: string;
+    public_id: string;
+    resource_type: string;
+    url: string;
+}

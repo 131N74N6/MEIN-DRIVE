@@ -16,7 +16,15 @@ export function FolderList(props: FolderListIntrf) {
         <div className="flex flex-col gap-[1rem] px-4 pt-4 overflow-y-auto">
             <div className="flex flex-col gap-4">
                 {props.folders.map((folder, index) => (
-                    <FolderItem key={`folder-${index}`} {...folder}/>
+                    <FolderItem 
+                        key={`folder-${index}`} 
+                        {...folder} 
+                        is_selected={props.selectedFolderId === folder._id}
+                        selectedFolderId={props.selectedFolderId}
+                        selectOne={props.selectOne} 
+                        changeOne={props.changeOne} 
+                        deleteOne={props.deleteOne}
+                    />
                 ))}
             </div>
             <div className="flex justify-center">

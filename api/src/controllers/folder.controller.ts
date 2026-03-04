@@ -51,7 +51,7 @@ export async function getCurrentUserFolder(req: Request, res: Response) {
         if (searched) {
             const getFolders = await Folder.find(
                 { user_id: getUserId, folder_name: new RegExp(searched, 'i')}
-            ).limit(limit).skip(skip);
+            ).limit(limit).skip(skip).sort({ created_at: 1 });
             res.status(200).json(getFolders);
         } else {
             const getFolders = await Folder.find({ user_id: getUserId }).limit(limit).skip(skip);

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { File } from "../models/file.model";
 import { Favorited } from "../models/favorited.model";
 import { v2 } from "cloudinary";
+import { Folder } from "../models/folder.model";
 
 export async function getAllFiles(req: Request, res: Response) {
     try {
@@ -42,7 +43,8 @@ export async function deleteAllFiles(req: Request, res: Response) {
         await Promise.all(deletePromise);
         await Promise.all([
             File.deleteMany({ user_id: getUserId }),
-            Favorited.deleteMany({ user_id: getUserId })
+            Favorited.deleteMany({ user_id: getUserId }),
+            Folder.updateOne({ user_id: getUserId }, { $set: { files: [] } })
         ]);
         res.status(200).json({ message: 'file deleted' });
     } catch (error) {
@@ -60,7 +62,8 @@ export async function deleteSelectedFile(req: Request, res: Response): Promise<R
         await v2.uploader.destroy(getFile.files.public_id, { resource_type: getFile.files.resource_type });
         await Promise.all([
             File.deleteOne({ _id: getFileId }),
-            Favorited.deleteOne({ file_id: getFileId })
+            Favorited.deleteOne({ file_id: getFileId }),
+            Folder.updateOne({ 'files.file_id': getFileId }, { $pull: { files: getFile } })
         ]);
         res.status(200).json({ message: 'file deleted' });
     } catch (error) {
