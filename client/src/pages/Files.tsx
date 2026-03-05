@@ -71,7 +71,7 @@ export default function Files() {
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
                     if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`is-favorited-files-`);
+                        return queryKey[0].startsWith(`is-file-favorited-`);
                     }
                     return false;
                 }
@@ -93,13 +93,37 @@ export default function Files() {
             setOpenFolderList(false);
             setChosenFileId(null);
             setChosenFolder(null);
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`files-in-folder-${currentUserId}-${folderName}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
         },
         onSettled: () => {
             setIsProcessing(false);
         }
+    });
+
+    const moveOutsideFolderMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (_id: string) => {
+            await changeData<FilesDataProps>({
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/remove-from-folder/${_id}`,
+                data: {}
+            });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
+                    }
+                    return false; 
+                }
+            });
+        },
+        onSettled: () => setIsProcessing(false)
     });
 
     function closeFolderList() {
@@ -157,6 +181,7 @@ export default function Files() {
                         files={fileData} 
                         isFetchingNextPage={fileHasNext}
                         isReachedEnd={fileEnd} 
+                        move_outside_folder={moveOutsideFolderMt}
                         showFolderList={showFolderList}
                     />
                 ) : fileError ? (

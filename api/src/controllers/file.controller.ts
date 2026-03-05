@@ -180,14 +180,12 @@ export async function isFileFavorited(req: Request, res: Response) {
     }
 }
 
-export async function isFileInFolder(req: Request, res: Response) {
+export async function moveOutsideFolder(req: Request, res: Response) {
     try {
-        const getTargetedFile = await File.find({ 
-            _id: req.params._id, 
-            user_id: req.params.user_id, 
-            folder_name: { $ne: null, $exists: true } 
+        await File.updateOne({ _id: req.params._id }, { 
+            $set: { folder_name: null }
         });
-        res.status(200).json(!!getTargetedFile.length);
+        res.status(200).json({ message: 'added 1 file' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }

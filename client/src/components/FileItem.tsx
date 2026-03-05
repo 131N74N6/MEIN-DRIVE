@@ -1,7 +1,7 @@
 import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { FileItemProps, FilesDataProps } from "../models/fileModel";
 import DataModifier from "../services/dataService";
-import { FolderUp, Star, Trash } from "lucide-react";
+import { FolderUp, MoveLeft, Star, Trash } from "lucide-react";
 import { useState } from "react";
 import { FileIcon } from "./FileIcon";
 
@@ -103,6 +103,16 @@ export default function FileItem(props: FileItemProps) {
                 >
                     <FolderUp></FolderUp>
                 </button>
+                {props.is_in_folder ? (
+                    <button 
+                        type="button" 
+                        disabled={IsProcessing}
+                        onClick={() => props.move_outside_folder.mutate(props.file._id)} 
+                        className="cursor-pointer text-gray-500 font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <MoveLeft/>
+                    </button>
+                ) : null}
             </div>
         </div>
     );

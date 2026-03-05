@@ -1,4 +1,4 @@
-import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult } from "@tanstack/react-query";
+import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, UseMutationResult } from "@tanstack/react-query";
 
 export type MediaFilesProps = {
     file: File;
@@ -37,10 +37,13 @@ export type FileListProps = {
     files: FilesDataProps[];
     isFetchingNextPage: boolean;
     isReachedEnd: boolean;
+    move_outside_folder: UseMutationResult<void, Error, string, void>;
     showFolderList: (_id: string) => void;
 }
 
 export type FileItemProps = {
     file: FilesDataProps;
+    is_in_folder: boolean;
+    move_outside_folder: UseMutationResult<void, Error, string, void>;
     showFolderList: (_id: string) => void;
 }

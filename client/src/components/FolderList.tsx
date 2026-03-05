@@ -61,12 +61,12 @@ export function FolderListPreview(props: FolderListPrevIntrf) {
             <div className="flex flex-col gap-[1rem] w-170 h-180 px-4 pt-4 overflow-y-auto bg-white">
                 <>
                     <button 
-                    onClick={props.toggle}
-                    type="button" 
-                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    <X></X>
-                </button>
+                        onClick={props.toggle}
+                        type="button" 
+                        className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        <X></X>
+                    </button>
                 </>
                 <div className="flex flex-col gap-4">
                     {props.folder_prev.map((folder, index) => (
