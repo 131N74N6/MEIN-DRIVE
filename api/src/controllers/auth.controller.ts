@@ -19,7 +19,7 @@ export async function signIn(req: Request, res: Response) {
 
         const generatedToken = jwt.sign(
             { user_id: findEmail._id.toString() },
-            process.env.JWT_TOKEN || 'your-jwt-key',
+            process.env.JWT_TOKEN || 'your_jwt_key_myfriend',
         );
 
         res.status(200).json({
