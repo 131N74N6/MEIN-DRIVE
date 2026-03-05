@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { 
     deleteAllFiles, deleteSelectedFile, getAllFiles, addNewFile, getFavoritedFiles,
-    addToFavorite, removeFromFavorite, addToFolder, getFileInFolder, isFileFavorited,
-    deleteAllFilesInFolder
+    addToFavorite, removeFromFavorite, addToFolder, getFilesInFolder, isFileFavorited,
+    deleteAllFilesInFolder, isFileInFolder
 } from "../controllers/file.controller";
 import { checkOwnership, verifyToken } from "../middleware/auth.middleware";
 
@@ -14,8 +14,9 @@ fileRoutes.delete('/erase-all-in-folder/:folder_name', verifyToken, deleteAllFil
 
 fileRoutes.get('/get-all/:user_id', verifyToken, checkOwnership, getAllFiles);
 fileRoutes.get('/favorited/:user_id', verifyToken, checkOwnership, getFavoritedFiles);
-fileRoutes.get('/is-favorited/:_id/:is_favorited', verifyToken, isFileFavorited);
-fileRoutes.get('/files-in-folder/:folder_name/:user_id', verifyToken, checkOwnership, getFileInFolder);
+fileRoutes.get('/is-favorited/:_id', verifyToken, isFileFavorited);
+fileRoutes.get('/files-in-folder/:folder_name/:user_id', verifyToken, checkOwnership, getFilesInFolder);
+fileRoutes.get('/is-in-folder/:_id/:user_id', verifyToken, checkOwnership, isFileInFolder);
 
 fileRoutes.post('/add', verifyToken, addNewFile);
 

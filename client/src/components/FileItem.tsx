@@ -11,9 +11,9 @@ export default function FileItem(props: FileItemProps) {
     const [IsProcessing, setIsProcessing] = useState<boolean>(false);
 
     const { data: isFavorited } = getData<boolean>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/is-favorited/${props.file.user_id}/${props.file.is_favorited}`,
-        query_key: [`is-favorited-${props.file.user_id}-${props.file.is_favorited}`],
-        stale_time: 600000
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/is-favorited/${props.file._id}`,
+        query_key: [`is-file-favorited-${props.file._id}`],
+        stale_time: 1200000
     });
 
     const addToFavoriteMt = useMutation({
@@ -27,7 +27,7 @@ export default function FileItem(props: FileItemProps) {
         onError: () => {},
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${props.file.user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`is-favorited-${props.file.user_id}-${props.file._id}`] });
+            queryClient.invalidateQueries({ queryKey: [`is-file-favorited-${props.file._id}`] });
         },
         onSettled: () => setIsProcessing(false)
     });
@@ -40,7 +40,7 @@ export default function FileItem(props: FileItemProps) {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-files-${props.file.user_id}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${props.file.user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`is-favorited-${props.file.user_id}-${props.file._id}`] });
+            queryClient.invalidateQueries({ queryKey: [`is-file-favorited-${props.file._id}`] });
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
@@ -63,7 +63,7 @@ export default function FileItem(props: FileItemProps) {
         },
         onError: () => {},
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`is-favorited-${props.file.user_id}-${props.file._id}`] });
+            queryClient.invalidateQueries({ queryKey: [`is-file-favorited-${props.file._id}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${props.file.user_id}`] });
         },
         onSettled: () => setIsProcessing(false)
@@ -87,10 +87,20 @@ export default function FileItem(props: FileItemProps) {
                 >
                     <Star></Star>
                 </button>
-                <button type="button" onClick={() => deleteOneFileMt.mutate()} className="cursor-pointer text-gray-500 font-[500] text-[1rem]">
+                <button 
+                    type="button" 
+                    disabled={IsProcessing}
+                    onClick={() => deleteOneFileMt.mutate()} 
+                    className="cursor-pointer text-gray-500 font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                     <Trash></Trash>
                 </button>
-                <button type="button" onClick={() => props.showFolderList(props.file._id)} className="cursor-pointer text-gray-500 font-[500] text-[1rem]">
+                <button 
+                    type="button" 
+                    disabled={IsProcessing}
+                    onClick={() => props.showFolderList(props.file._id)} 
+                    className="cursor-pointer text-gray-500 font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                     <FolderUp></FolderUp>
                 </button>
             </div>

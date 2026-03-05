@@ -8,9 +8,8 @@ import { FolderList } from "../components/FolderList";
 import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import FolderForm from "../components/FolderForm";
-import useDebounce from "../services/useDebounce";
 
-export default function Folders() {
+export default function FavoritedFolders() {
     const { user_id } = useParams();
     const currentUserId = user_id ? user_id : '';
     const queryClient = useQueryClient();
@@ -22,16 +21,12 @@ export default function Folders() {
             return () => clearTimeout(timer);
         }
     }, [message, setMessage]);
-    
-    const [searchValue, setSearchValue] = useState<string>('');
-    const debouncedSearch = useDebounce<string>(searchValue, 500);
 
     const { fetchNextPage, isLoading, isFetchingNextPage, isReachedEnd, error, paginatedData } = infiniteScroll<FolderIntrf>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/favorited/${currentUserId}`,
         limit: 14,
-        query_key: debouncedSearch ? [`all-folders-${currentUserId}-${debouncedSearch}`] : [`all-folders-${currentUserId}`],
-        stale_time: 1200000,
-        searched: debouncedSearch.trim()
+        query_key: [`all-favorited-folders-${currentUserId}`],
+        stale_time: 1200000
     });
     
     const [folderName, setFolderName] = useState<string>('');
@@ -50,6 +45,7 @@ export default function Folders() {
         onSuccess: () => {
             setSelectedFolderId(null);
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
         },
         onSettled: () => setIsProcessing(false)
@@ -61,8 +57,8 @@ export default function Folders() {
             await insertData<FolderFormProps>({
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/make`,
                 data: {
-                    created_at: new Date().toISOString(),
-                    folder_name: folderName.trim().replace(/\s+/g, '_'),
+                    created_at: new Date().toLocaleString(),
+                    folder_name: folderName.trim(),
                     user_id: currentUserId
                 }
             });
@@ -86,6 +82,7 @@ export default function Folders() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${currentUserId}`] });
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
@@ -121,26 +118,15 @@ export default function Folders() {
 
     function folderFormToggle() {
         setOpenForm(!openForm);
-        if (openForm === false) setFolderName('');
     }
-
+    
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
-            {openForm ? (
-                <FolderForm 
-                closed_form={folderFormToggle} 
-                message={message} 
-                folder_name={folderName} 
-                is_making={isProcessing} 
-                set_folder_name={setFolderName} 
-                submit_folder={makeFolder}/> 
-            ): null}
+            {openForm ? <FolderForm closed_form={folderFormToggle} message={message} folder_name={folderName} is_making={isProcessing} set_folder_name={setFolderName} submit_folder={makeFolder}/> : null}
             <div className="w-full md:w-3/4 flex flex-col gap-x-4 h-full min-h-[200px] rounded shadow-[0_0_4px_#1a1a1a] bg-white">
                 <form className="flex gap-[1rem] items-center pt-[1rem] px-[1rem]">
                     <input
                         type="text"
-                        value={searchValue}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchValue(event.target.value)}
                         className="border rounded border-gray-700 p-[0.45rem] w-full text-[0.9rem] outline-0 font-[500]"
                         placeholder="search folder here"
                     />

@@ -15,10 +15,11 @@ import { useParams } from "react-router-dom";
 
 export default function Files() {
     const { folder_name } = useParams();
-    const queryClient = useQueryClient();
     const { currentUserId } = useAuth();
     const { changeData, deleteData, infiniteScroll, message, setMessage } = DataModifier();
+    const folderName = folder_name ? folder_name : '';
     const [searchValue, setSearchValue] = useState<string>('');
+    const queryClient = useQueryClient();
     const debouncedSearch = useDebounce<string>(searchValue, 500);
 
     const [chosenFileId, setChosenFileId] = useState<string | null>(null);
@@ -32,14 +33,16 @@ export default function Files() {
             return () => clearTimeout(timer);
         }
     }, [message, setMessage]);
-    
+
     const { error: aa, fetchNextPage: ab, isFetchingNextPage: ac, isLoading: ad, isReachedEnd: ae, paginatedData: af } = infiniteScroll<FilesDataProps>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/files-in-folder/${folder_name}/${currentUserId}`,
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/files-in-folder/${folderName}/${currentUserId}`,
         limit: 14,
-        query_key: debouncedSearch ? [`files-in-folder-${currentUserId}-${folder_name}-${debouncedSearch}`] : [`files-in-folder-${currentUserId}-${folder_name}`],
+        query_key: debouncedSearch ? [`files-in-folder-${currentUserId}-${folderName}-${debouncedSearch}`] : [`files-in-folder-${currentUserId}-${folderName}`],
         searched: debouncedSearch.trim(),
         stale_time: 1200000
     });
+
+    console.log(af)
 
     const { error: ba, fetchNextPage: bb, isFetchingNextPage: bc, isLoading: bd, isReachedEnd: be, paginatedData: bf } = infiniteScroll<FolderIntrf>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
@@ -51,7 +54,7 @@ export default function Files() {
     const deleteAllFilesMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all-in-folder/${folder_name}` });
+            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all-in-folder/${folderName}` });
         },
         onError: (error) => {
             setMessage(error.message || 'Failed to delete or check your internet connection.');
@@ -59,12 +62,12 @@ export default function Files() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`files-in-folder-${currentUserId}-${folder_name}`] });
+            queryClient.invalidateQueries({ queryKey: [`files-in-folder-${currentUserId}-${folderName}`] });
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
                     if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`is-favorited-${currentUserId}-`);
+                        return queryKey[0].startsWith(`is-favorited-files-`);
                     }
                     return false;
                 }
@@ -75,7 +78,7 @@ export default function Files() {
 
     const insertFileToFolderMt = useMutation({
         onMutate: () => setIsProcessing(true),
-        mutationFn: async (_id: string) => {
+        mutationFn: async () => {
             if (!chosenFolder || !chosenFileId) return;
             await changeData<FilesDataProps>({
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-folder/${chosenFileId}`,
@@ -86,6 +89,7 @@ export default function Files() {
             setOpenFolderList(false);
             setChosenFileId(null);
             setChosenFolder(null);
+            queryClient.invalidateQueries({ queryKey: [`files-in-folder-${currentUserId}-${folderName}`] });
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
         },

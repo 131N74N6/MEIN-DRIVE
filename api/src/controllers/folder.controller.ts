@@ -23,6 +23,8 @@ export async function changeFolderName(req: Request, res: Response) {
         await Folder.updateOne({ _id: req.params._id }, {
             $set: { folder_name: req.body.folder_name }
         });
+        
+        res.status(200).json({ message: 'folder name changed' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }
@@ -117,7 +119,7 @@ export async function geFavoritedFolders(req: Request, res: Response) {
 
 export async function isFolderFavorited(req: Request, res: Response) {
     try {
-        const getTargetedFolder = await Folder.find({ _id: req.params._id, is_favorited: req.params.is_favorited });
+        const getTargetedFolder = await Folder.find({ _id: req.params._id, is_favorited: true });
         res.status(200).json(!!getTargetedFolder.length);
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
@@ -126,8 +128,7 @@ export async function isFolderFavorited(req: Request, res: Response) {
 
 export async function makeNewFolder(req: Request, res: Response) {
     try {
-        const folderExist = await Folder.find({ folder_name: req.body.folder_name, user_id: req.body.user_id });
-        if (folderExist) return res.status(400).json({ message: 'this folder already exist' });
+        if (!req.body.folder_name) return res.status(400).json({ message: 'folder name is required' });
         
         const newFolder = new Folder(req.body);
         await newFolder.save();

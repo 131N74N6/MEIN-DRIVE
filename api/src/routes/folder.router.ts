@@ -5,19 +5,19 @@ import {
     geFavoritedFolders, getCurrentUserFolder, isFolderFavorited, makeNewFolder, removeFromFavorite 
 } from '../controllers/folder.controller';
 
-const folderRouter = express.Router();
+const folderRouters = express.Router();
 
-folderRouter.delete('/delete/:user_id/:folder_name', verifyToken, deleteOneFolder);
-folderRouter.delete('/deletes/:user_id', verifyToken, checkOwnership, deleteAllFolders);
+folderRouters.delete('/delete/:user_id/:folder_name', verifyToken, deleteOneFolder);
+folderRouters.delete('/deletes/:user_id', verifyToken, checkOwnership, deleteAllFolders);
 
-folderRouter.get('/get/:user_id', verifyToken, checkOwnership, getCurrentUserFolder);
-folderRouter.get('/favorited/:user_id', verifyToken, checkOwnership, geFavoritedFolders);
-folderRouter.get('/is-favorited/:_id/:is_favorited', verifyToken, isFolderFavorited);
+folderRouters.get('/get/:user_id', verifyToken, checkOwnership, getCurrentUserFolder);
+folderRouters.get('/favorited/:user_id', verifyToken, checkOwnership, geFavoritedFolders);
+folderRouters.get('/is-favorited/:_id', verifyToken, isFolderFavorited);
 
-folderRouter.post('/make', verifyToken, makeNewFolder);
+folderRouters.post('/make', verifyToken, makeNewFolder);
 
-folderRouter.put('/change/:_id', verifyToken, changeFolderName);
-folderRouter.put('/add-to-favorited/:_id', verifyToken, addToFavorite);
-folderRouter.put('/remove-from-favorited/:_id', verifyToken, removeFromFavorite);
+folderRouters.put('/change/:_id', verifyToken, changeFolderName);
+folderRouters.put('/add-to-favorited/:_id', verifyToken, addToFavorite);
+folderRouters.put('/remove-from-favorited/:_id', verifyToken, removeFromFavorite);
 
-export default folderRouter;
+export default folderRouters;

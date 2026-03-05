@@ -15,7 +15,7 @@ import userRoutes from "./routes/user.router";
 import fileRoutes from "./routes/file.router";
 import { v2 } from "cloudinary";
 import authRoutes from './routes/auth.router';
-import folderRouter from './routes/folder.router';
+import folderRouters from './routes/folder.router';
 
 const app = express();
 
@@ -33,7 +33,7 @@ app.use(cors({
 app.use('/api/files', fileRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/folders', folderRouter);
+app.use('/api/folders', folderRouters);
 
 if (process.env.NODE_ENV !== 'production') {
     db.then(() => {

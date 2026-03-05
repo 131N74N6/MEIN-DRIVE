@@ -58,8 +58,8 @@ export default function DataModifier() {
         }
     }
 
-    function getData<BIN1999>(props: GetDataProps) {
-        const { data, error, isLoading } = useQuery<BIN1999, Error>({
+    function getData<X>(props: GetDataProps) {
+        const { data, error, isLoading } = useQuery<X, Error>({
             enabled: !!token && !userLoading,
             queryFn: async () => {
                 try {

@@ -23,7 +23,6 @@ export function FolderList(props: FolderListIntrf) {
                         selectedFolderId={props.selectedFolderId}
                         selectOne={props.selectOne} 
                         changeOne={props.changeOne} 
-                        deleteOne={props.deleteOne}
                     />
                 ))}
             </div>

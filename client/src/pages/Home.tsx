@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import DataModifier from "../services/dataService";
-import useAuth from "../services/authService";
 import type { FilesDataProps } from "../models/fileModel";
 import FileList from "../components/FileList";
 import Loading from "../components/Loading";
@@ -11,11 +10,13 @@ import Notification from "../components/Notification";
 import { Trash } from "lucide-react";
 import { FolderListPreview } from "../components/FolderList";
 import type { FolderIntrf } from "../models/folderModel";
+import { useParams } from "react-router-dom";
 
 export default function Home() {
-    const queryClient = useQueryClient();
-    const { currentUserId } = useAuth();
+    const { user_id } = useParams();
     const { changeData, deleteData, infiniteScroll, message, setMessage } = DataModifier();
+    const queryClient = useQueryClient();
+    const currentUserId = user_id ? user_id : '';
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearch = useDebounce<string>(searchValue, 500);
 
@@ -71,8 +72,8 @@ export default function Home() {
                     const queryKey = query.queryKey;
                     // Memastikan query key adalah array dan elemen pertama adalah string
                     if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        // Cocokkan apakah elemen pertama dimulai dengan pola 'is-favorited-{currentUserId}-'
-                        return queryKey[0].startsWith(`is-favorited-${currentUserId}-`);
+                        // Cocokkan apakah elemen pertama dimulai dengan pola 'is-file-favorited'
+                        return queryKey[0].startsWith(`is-file-favorited-`);
                     }
                     return false; // Abaikan jika format tidak sesuai
                 }
@@ -83,7 +84,7 @@ export default function Home() {
 
     const insertFileToFolderMt = useMutation({
         onMutate: () => setIsProcessing(true),
-        mutationFn: async (_id: string) => {
+        mutationFn: async () => {
             if (!chosenFolder || !chosenFileId) return;
             await changeData<FilesDataProps>({
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-folder/${chosenFileId}`,
@@ -94,8 +95,15 @@ export default function Home() {
             setOpenFolderList(false);
             setChosenFileId(null);
             setChosenFolder(null);
-            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
+                    }
+                    return false; 
+                }
+            });
         },
         onSettled: () => {
             setIsProcessing(false);

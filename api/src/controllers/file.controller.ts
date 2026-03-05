@@ -48,9 +48,7 @@ export async function deleteAllFilesInFolder(req: Request, res: Response) {
         });
 
         await Promise.all(deletePromise);
-        await Promise.all([
-            File.deleteMany({ folder_name: getCurrentFolder }),
-        ]);
+        await File.deleteMany({ folder_name: getCurrentFolder });
 
         res.status(200).json({ message: 'file deleted' });
     } catch (error) {
@@ -70,9 +68,7 @@ export async function deleteAllFiles(req: Request, res: Response) {
         });
 
         await Promise.all(deletePromise);
-        await Promise.all([
-            File.deleteMany({ user_id: getUserId }),
-        ]);
+        await File.deleteMany({ user_id: getUserId });
 
         res.status(200).json({ message: 'file deleted' });
     } catch (error) {
@@ -88,9 +84,7 @@ export async function deleteSelectedFile(req: Request, res: Response): Promise<R
         if (!getFile) return res.status(404).json({ message: 'file not found' });
         
         await v2.uploader.destroy(getFile.files.public_id, { resource_type: getFile.files.resource_type });
-        await Promise.all([
-            File.deleteOne({ _id: getFileId }),
-        ]);
+        await File.deleteOne({ _id: getFileId });
         
         res.status(200).json({ message: 'file deleted' });
     } catch (error) {
@@ -123,9 +117,9 @@ export async function getAllFiles(req: Request, res: Response) {
     }
 }
 
-export async function getFileInFolder(req: Request, res: Response) {
+export async function getFilesInFolder(req: Request, res: Response) {
     try {
-        const page = parseInt(req.query.limit as string) || 1;
+        const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 14;
         const skip = (page - 1) * limit;
         const searched = req.query.search as string | undefined;
@@ -179,7 +173,20 @@ export async function getFavoritedFiles(req: Request, res: Response) {
 
 export async function isFileFavorited(req: Request, res: Response) {
     try {
-        const getTargetedFile = await File.find({ _id: req.params._id, is_favorited: req.params.is_favorited });
+        const getTargetedFile = await File.find({ _id: req.params._id, is_favorited: true });
+        res.status(200).json(!!getTargetedFile.length);
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export async function isFileInFolder(req: Request, res: Response) {
+    try {
+        const getTargetedFile = await File.find({ 
+            _id: req.params._id, 
+            user_id: req.params.user_id, 
+            folder_name: { $ne: null, $exists: true } 
+        });
         res.status(200).json(!!getTargetedFile.length);
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });

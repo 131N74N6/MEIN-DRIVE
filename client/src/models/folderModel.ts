@@ -5,8 +5,11 @@ export type FolderIntrf = {
     _id: string;
     created_at: string;
     folder_name: string;
+    is_favorited: boolean;
     user_id: string;
 }
+
+export type FolderFormProps = Omit<FolderIntrf, "is_favorited">;
 
 export type FolderItemIntrf = {
     _id: string;
@@ -15,7 +18,6 @@ export type FolderItemIntrf = {
     folder_name: string;
     user_id: string;
     changeOne: UseMutationResult<void, Error, Pick<FolderIntrf, '_id' | 'folder_name'>, void>;
-    deleteOne: UseMutationResult<void, Error, string, void>;
     selectOne: (id: string) => void;
     selectedFolderId: string | null;
 }
@@ -23,7 +25,7 @@ export type FolderItemIntrf = {
 export type FolderItemPrevIntrf = {
     _id: string;
     folder_name: string;
-    move: UseMutationResult<void, Error, string, unknown>;
+    move: UseMutationResult<void, Error, void, unknown>;
     set_chosen_folder: Dispatch<SetStateAction<string | null>>;
 }
 
@@ -34,7 +36,7 @@ export type FolderListPrevIntrf = {
     isLoading: boolean;
     isFetchingNextPage: boolean
     isReachedEnd: boolean;
-    move: UseMutationResult<void, Error, string, unknown>;
+    move: UseMutationResult<void, Error, void, unknown>;
     toggle: () => void;
     set_chosen_folder: Dispatch<SetStateAction<string | null>>;
 }
@@ -50,7 +52,6 @@ export type FolderFormIntrf = {
 
 export type FolderListIntrf = {
     changeOne: UseMutationResult<void, Error, Pick<FolderIntrf, '_id' | 'folder_name'>, void>;
-    deleteOne: UseMutationResult<void, Error, string, void>;
     folders: FolderIntrf[];
     fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>
     isFetchingNextPage: boolean
