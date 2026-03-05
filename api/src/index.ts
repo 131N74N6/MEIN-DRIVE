@@ -28,7 +28,7 @@ v2.config({
 app.use(express.json());
 app.use(cors({
     credentials: true,
-    origin: ["http://localhost:4444", "http://localhost:5173"]
+    origin: ["http://localhost:4444", "http://localhost:5173", "https://mein-drive-be.vercel.app/", "https://mein-drive.vercel.app/"]
 }));
 app.use('/api/files', fileRoutes);
 app.use('/api/auth', authRoutes);

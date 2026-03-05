@@ -32,7 +32,10 @@ export default function Home() {
         }
     }, [message, setMessage]);
     
-    const { error: aa, fetchNextPage: ab, isFetchingNextPage: ac, isLoading: ad, isReachedEnd: ae, paginatedData: af } = infiniteScroll<FilesDataProps>({
+    const { 
+        error: fileError, fetchNextPage: fileNext, isFetchingNextPage: fileHasNext, 
+        isLoading: fileLoad, isReachedEnd: fileEnd, paginatedData: fileData 
+    } = infiniteScroll<FilesDataProps>({
         api_url: currentUserId ? `${import.meta.env.VITE_API_BASE_URL}/files/get-all/${currentUserId}` : '',
         limit: 14,
         query_key: debouncedSearch ? [`all-files-${currentUserId}-${debouncedSearch}`] : [`all-files-${currentUserId}`],
@@ -40,7 +43,10 @@ export default function Home() {
         stale_time: 1200000
     });
 
-    const { error: ba, fetchNextPage: bb, isFetchingNextPage: bc, isLoading: bd, isReachedEnd: be, paginatedData: bf } = infiniteScroll<FolderIntrf>({
+    const { 
+        error: folderError, fetchNextPage: folderNext, isFetchingNextPage: folderHasNext, 
+        isLoading: folderLoad, isReachedEnd: folderEnd, paginatedData: folderData 
+    } = infiniteScroll<FolderIntrf>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
         limit: 14,
         query_key: [`all-folder-prev-${currentUserId}`],
@@ -126,12 +132,12 @@ export default function Home() {
             {message ? Notification(message) : null}
             {openFolderList ? (
                 <FolderListPreview 
-                    error={ba}
-                    fetchNextPage={bb} 
-                    folder_prev={bf} 
-                    isLoading={bd}
-                    isFetchingNextPage={bc} 
-                    isReachedEnd={be}
+                    error={folderError}
+                    fetchNextPage={folderNext} 
+                    folder_prev={folderData} 
+                    isLoading={folderLoad}
+                    isFetchingNextPage={folderHasNext} 
+                    isReachedEnd={folderEnd}
                     move={insertFileToFolderMt}
                     toggle={closeFolderList}
                     set_chosen_folder={setChosenFolder}
@@ -155,21 +161,21 @@ export default function Home() {
                         <Trash size={22}></Trash>
                     </button>
                 </form>
-                {ad ? (
+                {fileLoad ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
                     </div>
-                ) : af ? (
+                ) : fileData ? (
                     <FileList 
-                        fetchNextPage={ab} 
-                        files={af} 
-                        isFetchingNextPage={ac}
-                        isReachedEnd={ae} 
+                        fetchNextPage={fileNext} 
+                        files={fileData} 
+                        isFetchingNextPage={fileHasNext}
+                        isReachedEnd={fileEnd} 
                         showFolderList={showFolderList}
                     />
-                ) : aa ? (
+                ) : fileError ? (
                     <div className="flex justify-center items-center h-full bg-white">
-                        <span className="text-[2rem] font-[600] text-gray-700">{aa.message}</span>
+                        <span className="text-[2rem] font-[600] text-gray-700">{fileError.message}</span>
                     </div>
                 ) : (
                     <div className="flex justify-center items-center h-full bg-white">
