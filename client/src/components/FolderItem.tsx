@@ -2,7 +2,7 @@ import { Folder, LucideCheckSquare2, Pen, Star, Trash, X } from "lucide-react";
 import type { FolderItemIntrf, FolderItemPrevIntrf } from "../models/folderModel";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import DataModifier from "../services/dataService";
+import DataModifier from "../services/data_service";
 import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { FilesDataProps } from "../models/fileModel";
 

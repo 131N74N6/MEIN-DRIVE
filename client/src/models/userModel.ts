@@ -1,7 +1,6 @@
 export type CurrentUserTokenIntrf = {
-    status: string;
-    token: string;
     user_id: string;
+    username: string;
 }
 
 export type CurrentUserIntrf = {
@@ -12,7 +11,6 @@ export type CurrentUserIntrf = {
 }
 
 export type SignUpProps = {
-    callback: (path: string) => void;
     created_at: string;
     email: string;
     password: string;

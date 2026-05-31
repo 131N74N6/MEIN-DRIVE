@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import useAuth from "../services/authService";
+import useAuth from "../services/auth_service";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SignIn() {
     const navigate = useNavigate();
-    const { currentUserId, setUserError, userError, userLoading, signIn } = useAuth();
+    const { currentUserId, setAuthError, authError, userLoading, signIn } = useAuth();
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [email, setEmail] = useState<string>('');
@@ -16,15 +16,15 @@ export default function SignIn() {
     }, [currentUserId, navigate]);
 
     useEffect(() => {
-        if (userError) {
-            const timer = setTimeout(() => setUserError(null), 3000);
+        if (authError) {
+            const timer = setTimeout(() => setAuthError(null), 3000);
             return () => clearTimeout(timer);
         }
-    }, [userError, setUserError]);
+    }, [authError, setAuthError]);
 
     async function signInButton(event: React.FormEvent) {
         event.preventDefault();
-        await signIn(email.trim(), password.trim(), navigate);
+        await signIn(email.trim(), password.trim());
     }
 
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
@@ -72,7 +72,7 @@ export default function SignIn() {
                 >
                     Sign In
                 </button>
-                {userError ? <p className="text-red-400 font-medium text-center">{userError}</p> : null}
+                {authError ? <p className="text-red-400 font-medium text-center">{authError}</p> : null}
             </form>
         </section>
     );

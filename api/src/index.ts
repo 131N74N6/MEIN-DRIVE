@@ -16,8 +16,15 @@ import fileRoutes from "./routes/file.router";
 import { v2 } from "cloudinary";
 import authRoutes from './routes/auth.router';
 import folderRoutes from './routes/folder.router';
+import cookieParser from 'cookie-parser';
 
 const app = express();
+
+db.then(response => {
+    if (response) console.log('database connected');
+}).catch(error => {
+    if (error) console.log('failed to connect database');
+});
 
 v2.config({
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -26,9 +33,15 @@ v2.config({
 });
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors({
     credentials: true,
-    origin: ["http://localhost:4444", "http://localhost:5173", "https://mein-drive-be.vercel.app/", "https://mein-drive.vercel.app/"]
+    origin: [
+        "http://localhost:4444", 
+        "http://localhost:5173", 
+        "https://mein-drive-be.vercel.app", 
+        "https://mein-drive.vercel.app"
+    ]
 }));
 app.use('/api/files', fileRoutes);
 app.use('/api/auth', authRoutes);
@@ -36,9 +49,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/folders', folderRoutes);
 
 if (process.env.NODE_ENV !== 'production') {
-    db.then(() => {
-        app.listen(4444, () => console.log(`server running at http://localhost:4444`))
-    });
+    app.listen(4444, () => console.log(`server running at http://localhost:4444`));
 }
 
 export default app;

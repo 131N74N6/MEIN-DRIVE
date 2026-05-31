@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import useAuth from "../services/authService";
+import useAuth from "../services/auth_service";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SignUp() {
     const navigate = useNavigate();
-    const { currentUserId, setUserError, signUp, userError, userLoading } = useAuth();
+    const { currentUserId, setAuthError, signUp, authError, userLoading } = useAuth();
     const [showPassword, setShowPassword] = useState<boolean>(false);
 
     const [email, setEmail] = useState<string>('');
@@ -17,17 +17,16 @@ export default function SignUp() {
     }, [currentUserId, navigate]);
 
     useEffect(() => {
-        if (userError) {
-            const timer = setTimeout(() => setUserError(null), 3000);
+        if (authError) {
+            const timer = setTimeout(() => setAuthError(null), 3000);
             return () => clearTimeout(timer);
         }
-    }, [userError, setUserError]);
+    }, [authError, setAuthError]);
 
     async function signUpButton(event: React.FormEvent) {
         event.preventDefault();
 
         await signUp({ 
-            callback: navigate,
             created_at: new Date().toISOString(), 
             email: email, 
             password: password, 
@@ -92,7 +91,7 @@ export default function SignUp() {
                 >
                     Sign Up
                 </button>
-                {userError ? <p className="text-red-400 font-medium text-center">{userError}</p> : null}
+                {authError ? <p className="text-red-400 font-medium text-center">{authError}</p> : null}
             </form>
         </section>
     );

@@ -16,9 +16,10 @@ export async function addToFavorite(req: Request, res: Response) {
 
 export async function changeFolderName(req: Request, res: Response) {
     try {
-        if (!req.body.folder_name) {
-            return res.status(400).json({ message: 'folder name required' });
-        }
+        const isFolderNameExist = await Folder.findOne({ folder_name: req.body.folder_name });
+        if (isFolderNameExist) return res.status(409).json({ message: 'folder name already exist' });
+        
+        if (!req.body.folder_name) return res.status(400).json({ message: 'folder name required' });
 
         await Folder.updateOne({ _id: req.params._id }, {
             $set: { folder_name: req.body.folder_name }
@@ -39,8 +40,8 @@ export async function deleteAllFolders(req: Request, res: Response) {
             return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
         });
 
-        await Promise.all(deletePromise);
         await Promise.all([
+            deletePromise,
             File.deleteMany({ user_id: getCurrentUserId, folder_name: { $ne: null, $exists: true } }),
             Folder.deleteMany({ user_id: getCurrentUserId })
         ]);
@@ -60,8 +61,8 @@ export async function deleteOneFolder(req: Request, res: Response) {
             return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
         });
 
-        await Promise.all(deletePromise);
         await Promise.all([
+            deletePromise,
             await File.deleteMany({ folder_name: getCurrentFolder }),
             await Folder.deleteOne({ folder_name: getCurrentFolder })
         ]);
@@ -128,6 +129,9 @@ export async function isFolderFavorited(req: Request, res: Response) {
 
 export async function makeNewFolder(req: Request, res: Response) {
     try {
+        const isFolderNameExist = await Folder.findOne({ folder_name: req.body.folder_name });
+        if (isFolderNameExist) return res.status(409).json({ message: 'folder name already exist' });
+
         if (!req.body.folder_name) return res.status(400).json({ message: 'folder name is required' });
         
         const newFolder = new Folder(req.body);

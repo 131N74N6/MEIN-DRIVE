@@ -3,6 +3,7 @@ import { User } from "../models/user.model";
 import { File } from "../models/file.model";
 import { Folder } from "../models/folder.model";
 import { v2 } from "cloudinary";
+import { AuthRequest } from "../middleware/auth.middleware";
 
 export async function changeUserInfo(req: Request, res: Response) {
     try {
@@ -27,8 +28,8 @@ export async function deleteCurrentUser(req: Request, res: Response) {
             return v2.uploader.destroy(userFile.files.public_id, { resource_type: userFile.files.resource_type });
         });
 
-        await Promise.all(deletePromise);
         await Promise.all([
+            deletePromise,
             await File.deleteMany({ user_id: currentUserId }),
             await Folder.deleteMany({ user_id: currentUserId })
         ]);
@@ -39,10 +40,9 @@ export async function deleteCurrentUser(req: Request, res: Response) {
     }
 }
 
-export async function getUserData(req: Request, res: Response) {
+export async function getUserData(req: AuthRequest, res: Response) {
     try {
-        const findUser = await User.find({ _id: req.params.user_id });
-
+        const findUser = await User.find({ _id: req.user?.user_id });
         if (!findUser) return res.status(404).json({ message: 'User not found' });
 
         res.status(200).json({

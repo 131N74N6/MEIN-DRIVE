@@ -6,26 +6,33 @@ import jwt from "jsonwebtoken";
 export async function signIn(req: Request, res: Response) {
     try {
         const { email, password } = req.body;
-        const findEmail = await User.findOne({ email });
         
         if (!password || !email) return res.status(400).json({ message: "email and password is required" });
         if (!email) return res.status(400).json({ message: 'email is required' });
         if (!password) return res.status(400).json({ message: 'password is required' });
-
-        if (!findEmail) return res.status(400).json({ message: 'email not found' });
+        
+        const findEmail = await User.findOne({ email });
+        if (!findEmail) return res.status(404).json({ message: 'email not found' });
         
         const isPasswordMatch = await bcrypt.compare(password, findEmail.password);
         if (!isPasswordMatch) return res.status(400).json({ message: 'incorrect password' });
 
         const generatedToken = jwt.sign(
-            { user_id: findEmail._id.toString() },
+            { user_id: findEmail._id.toString(), username: findEmail.username },
             process.env.JWT_TOKEN || 'your_jwt_key_myfriend',
+            { expiresIn: '1d' }
         );
 
+        res.cookie('token', generatedToken, {
+            httpOnly: true,
+            maxAge: 86400000,
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            secure: process.env.NODE_ENV === 'production'
+        });
+
         res.status(200).json({
-            status: 'ok',
-            token: generatedToken,
-            user_id: findEmail._id
+            user_id: findEmail._id,
+            username: findEmail.username
         });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
@@ -42,15 +49,29 @@ export async function signUp(req: Request, res: Response) {
         if (!username) return res.status(400).send({ message: 'username is required' });
         
         const findEmail = await User.findOne({ email: email });
-        if (findEmail) return res.status(400).send({ message: 'this email already exist' });
+        if (findEmail) return res.status(409).send({ message: 'this email already exist' });
 
         const findUser = await User.findOne({ username: username });
-        if (findUser) return res.status(400).send({ message: 'this username already exist' });
+        if (findUser) return res.status(409).send({ message: 'this username already exist' });
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ created_at, email, password: hashedPassword, username });
         await newUser.save();
         res.status(201).json({ message: 'user added' });
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export async function signOut(req: Request, res: Response) {
+    try {
+        res.clearCookie('token', {
+            httpOnly: true,
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            secure: process.env.NODE_ENV === 'production'
+        });
+
+        res.status(200).json({ message: 'sign out success' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }

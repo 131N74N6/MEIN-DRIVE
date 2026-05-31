@@ -1,7 +1,7 @@
 import { FolderPlus, Trash } from "lucide-react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import Loading from "../components/Loading";
-import DataModifier from "../services/dataService";
+import DataModifier from "../services/data_service";
 import type { FolderFormProps, FolderIntrf } from "../models/folderModel";
 import { useParams } from "react-router-dom";
 import { FolderList } from "../components/FolderList";

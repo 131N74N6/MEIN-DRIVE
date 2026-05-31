@@ -1,14 +1,14 @@
 import { FolderPlus, Trash } from "lucide-react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import Loading from "../components/Loading";
-import DataModifier from "../services/dataService";
+import DataModifier from "../services/data_service";
 import type { FolderFormProps, FolderIntrf } from "../models/folderModel";
 import { useParams } from "react-router-dom";
 import { FolderList } from "../components/FolderList";
 import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import FolderForm from "../components/FolderForm";
-import useDebounce from "../services/useDebounce";
+import useDebounce from "../hooks/useDebounce";
 
 export default function Folders() {
     const { user_id } = useParams();

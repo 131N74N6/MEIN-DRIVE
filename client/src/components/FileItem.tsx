@@ -1,6 +1,6 @@
 import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { FileItemProps, FilesDataProps } from "../models/fileModel";
-import DataModifier from "../services/dataService";
+import DataModifier from "../services/data_service";
 import { FolderUp, MoveLeft, Star, Trash } from "lucide-react";
 import { useState } from "react";
 import { FileIcon } from "./FileIcon";

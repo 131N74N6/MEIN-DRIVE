@@ -4,24 +4,23 @@ import jwt from "jsonwebtoken";
 export interface AuthRequest extends Request {
     user?: {
         user_id: string;
-        token: string;
+        username: string;
     };
 }
 
 export interface JwtPayload {
     user_id: string;
-    token: string;
+    username: string;
 }
 
 export async function verifyToken(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader || !authHeader.startsWith('Bearer ')) return res.status(401).json({ message: 'Access token required' });
-
-        const token = authHeader.split(' ')[1];
+        const token = req.cookies?.token;
+        if (!token) return res.status(401).json({ message: 'Access token is missing. Please log in.' });
+        
         const decoded = jwt.verify(token, process.env.JWT_TOKEN || 'your_jwt_key_myfriend') as JwtPayload;
 
-        req.user = { user_id: decoded.user_id, token: token }
+        req.user = { user_id: decoded.user_id, username: decoded.username };
         next();
     } catch (error) {
         if (error instanceof jwt.JsonWebTokenError) res.status(401).json({ message: 'Invalid or expired token' });
@@ -34,7 +33,6 @@ export async function checkOwnership(req: AuthRequest, res: Response, next: Next
         const requestedUserId = req.params.user_id;
 
         if (!req.user) return res.status(401).json({ message: 'Authentication required' });
-    
         if (!requestedUserId) return res.status(400).json({ message: 'User ID parameter required' });
         if (req.user.user_id !== requestedUserId) return res.status(403).json({ message: 'Access denied: You can only access your own resources' });
         

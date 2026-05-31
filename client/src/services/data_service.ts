@@ -1,18 +1,18 @@
 import { useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "../models/dataModel";
-import useAuth from "./authService";
+import useAuth from "./auth_service";
 
 export default function DataModifier() {
-    const { userLoading, token } = useAuth();
+    const { currentUserId, userLoading } = useAuth();
     const [message, setMessage] = useState<string | null>(null);
 
     async function changeData<R>(props: ChangeDataProps<R>) {
         try {
             const request = await fetch(props.api_url, {
                 body: JSON.stringify(props.data),
+                credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 method: 'PUT',
@@ -21,14 +21,11 @@ export default function DataModifier() {
             const response = await request.json();
 
             if (!request.ok) {
-                setMessage(response.message);
                 throw new Error(response.message);
             } else {
-                setMessage(null);
                 return response;
             }
         } catch (error: any) {
-            setMessage(error.message || 'Check Your Network Connection');
             throw error;
         }
     }
@@ -36,8 +33,8 @@ export default function DataModifier() {
     async function deleteData(props: DeleteDataProps) {
         try {
             const request = await fetch(props.api_url, {
+                credentials: 'include',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 method: 'DELETE'
@@ -46,26 +43,23 @@ export default function DataModifier() {
             const response = await request.json();
 
             if (!request.ok) {
-                setMessage(response.message);
                 throw new Error(response.message);
             } else {
-                setMessage(null);
                 return response;
             }
         } catch (error: any) {
-            setMessage(error.message || 'Check Your Network Connection');
             throw error;
         }
     }
 
     function getData<X>(props: GetDataProps) {
         const { data, error, isLoading } = useQuery<X, Error>({
-            enabled: !!token && !userLoading,
+            enabled: !!currentUserId && !userLoading,
             queryFn: async () => {
                 try {
                     const request = await fetch(props.api_url, {
+                        credentials: 'include',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
                             'Content-Type': 'application/json'
                         },
                         method: 'GET'
@@ -74,14 +68,11 @@ export default function DataModifier() {
                     const response = await request.json();
 
                     if (!request.ok) {
-                        setMessage(response.message);
                         throw new Error(response.message);
                     } else {
-                        setMessage(null);
                         return response;
                     }
                 } catch (error: any) {
-                    setMessage(error.message || 'Check Your Network Connection');
                     throw error;
                 }
             },
@@ -96,72 +87,42 @@ export default function DataModifier() {
     }
 
     const infiniteScroll = <X>(props: InfiniteScrollProps) => {
-        const fetchers = async ({ pageParam = 1 }: { pageParam?: number }) => {
-            try {
-                if (props.searched === undefined) {
-                    const request1 = await fetch(`${props.api_url}?page=${pageParam}&limit=${props.limit}`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        method: 'GET'
-                    });
-    
-                    const response = await request1.json();
-
-                    if (!request1.ok) {
-                        setMessage(response.message);
-                        throw new Error(response.message);
-                    } else {
-                        setMessage(null);
-                        return response;
-                    }
-                } else {
-                    const request2 = await fetch(`${props.api_url}?search=${props.searched}&page=${pageParam}&limit=${props.limit}`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        method: 'GET'
-                    });
-                    
-                    const response = await request2.json();
-
-                    if (!request2.ok) {
-                        setMessage(response.message);
-                        throw new Error(response.message);
-                    } else {
-                        setMessage(null);
-                        return response;
-                    }
-                }
-            } catch (error: any) {
-                setMessage(error.message || 'Check Your Network Connection');
-                throw error;
-            }
-        }
-
-        const { 
-            data, 
-            error, 
-            fetchNextPage, 
-            hasNextPage, 
-            isFetchingNextPage, 
-            isLoading 
-        } = useInfiniteQuery({
-            enabled: !!token && !userLoading,
-            gcTime: 600000,
+        const { data, error, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
+            enabled: !userLoading && !!currentUserId,
             getNextPageParam: (lastPage, allPages): number | undefined => {
                 if (lastPage.length < props.limit) return;
                 return allPages.length + 1;
             },
-            initialPageParam: 1,
-            queryFn: fetchers,
+            queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => {
+                try {
+                    const baseUrl = `${props.api_url}?page=${pageParam}&limit=${props.limit}`;
+                    const finalUrl = props.searched ? `${baseUrl}&search=${props.searched.trim()}` : baseUrl;
+
+                    const request = await fetch(finalUrl, {
+                        credentials: 'include',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        method: 'GET'
+                    });
+
+                    const response = await request.json();
+
+                    if (!request.ok) {
+                        throw new Error(response.message);
+                    } else {
+                        return response;
+                    }
+                } catch (error: any) {
+                    throw error;
+                }
+            },
             queryKey: props.query_key,
+            initialPageParam: 1,
             refetchOnMount: true,
             refetchOnReconnect: true,
             refetchOnWindowFocus: false,
-            staleTime: props.stale_time
+            staleTime: props.stale_time,
         });
 
         const paginatedData: X[] = data ? data.pages.flat() : [];
@@ -175,7 +136,6 @@ export default function DataModifier() {
             const request = await fetch(props.api_url, {
                 body: JSON.stringify(props.data),
                 headers: {
-                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
                 method: 'POST',
@@ -184,14 +144,11 @@ export default function DataModifier() {
             const response = await request.json();
             
             if (!request.ok) {
-                setMessage(response.message);
                 throw new Error(response.message);
             } else {
-                setMessage(null);
                 return response;
             }
         } catch (error: any) {
-            setMessage(error.message || 'Check Your Network Connection');
             throw error;
         }
     }
