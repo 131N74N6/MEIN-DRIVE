@@ -1,77 +1,17 @@
-import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { FileItemProps, FilesDataProps } from "../models/fileModel";
-import DataModifier from "../services/data_service";
+import type { FileItemProps } from "../models/file_model";
 import { FolderUp, MoveLeft, Star, Trash } from "lucide-react";
-import { useState } from "react";
 import { FileIcon } from "./FileIcon";
 
 export default function FileItem(props: FileItemProps) {
-    const queryClient = useQueryClient();
-    const { changeData, deleteData, getData } = DataModifier();
-    const [IsProcessing, setIsProcessing] = useState<boolean>(false);
-
-    const { data: isFavorited } = getData<boolean>({
+    const { data: isFavorited } = props.get_data<boolean>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/files/is-favorited/${props.file._id}`,
         query_key: [`is-file-favorited-${props.file._id}`],
         stale_time: 1200000
     });
 
-    const addToFavoriteMt = useMutation({
-        onMutate: () => setIsProcessing(true),
-        mutationFn: async () => {
-            await changeData<FilesDataProps>({
-                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-favorited/${props.file._id}`,
-                data: {}
-            });
-        },
-        onError: () => {},
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${props.file.user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`is-file-favorited-${props.file._id}`] });
-        },
-        onSettled: () => setIsProcessing(false)
-    });
-
-    const deleteOneFileMt = useMutation({
-        mutationFn: async () => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase/${props.file._id}` });
-        },
-        onError: () => {},
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`all-files-${props.file.user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${props.file.user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`is-file-favorited-${props.file._id}`] });
-            queryClient.removeQueries({
-                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
-                    const queryKey = query.queryKey;
-                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`files-in-folder-${props.file.user_id}-`);
-                    }
-                    return false; 
-                }
-            });
-        }
-    });
-
-    const removeFromFavoritedMt = useMutation({
-        onMutate: () => setIsProcessing(true),
-        mutationFn: async () => {
-            await changeData<FilesDataProps>({ 
-                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/remove-from-favorited/${props.file._id}`, 
-                data: {}
-            });
-        },
-        onError: () => {},
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`is-file-favorited-${props.file._id}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${props.file.user_id}`] });
-        },
-        onSettled: () => setIsProcessing(false)
-    });
-
     function handleFavoriteButton() {
-        if (isFavorited) removeFromFavoritedMt.mutate();
-        else addToFavoriteMt.mutate();
+        if (isFavorited) props.remove_from_favorite.mutate(props.file._id);
+        else props.add_to_favorite.mutate(props.file._id);
     }
 
     return (
@@ -81,7 +21,7 @@ export default function FileItem(props: FileItemProps) {
             <div className="flex gap-[0.5rem] opacity-0 hover:opacity-100 transition-opacity">
                 <button 
                     type="button" 
-                    disabled={IsProcessing}
+                    disabled={props.is_processing}
                     onClick={handleFavoriteButton}
                     className={`cursor-pointer font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed ${isFavorited ? 'text-blue-600' : 'text-gray-500'}`}
                 >
@@ -89,15 +29,15 @@ export default function FileItem(props: FileItemProps) {
                 </button>
                 <button 
                     type="button" 
-                    disabled={IsProcessing}
-                    onClick={() => deleteOneFileMt.mutate()} 
+                    disabled={props.is_processing}
+                    onClick={() => props.on_delete.mutate(props.file._id)} 
                     className="cursor-pointer text-gray-500 font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <Trash></Trash>
                 </button>
                 <button 
                     type="button" 
-                    disabled={IsProcessing}
+                    disabled={props.is_processing}
                     onClick={() => props.showFolderList(props.file._id)} 
                     className="cursor-pointer text-gray-500 font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -106,7 +46,7 @@ export default function FileItem(props: FileItemProps) {
                 {props.is_in_folder ? (
                     <button 
                         type="button" 
-                        disabled={IsProcessing}
+                        disabled={props.is_processing}
                         onClick={() => props.move_outside_folder.mutate(props.file._id)} 
                         className="cursor-pointer text-gray-500 font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed"
                     >

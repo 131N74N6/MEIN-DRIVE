@@ -1,15 +1,9 @@
 import { Folder, LucideCheckSquare2, Pen, Star, Trash, X } from "lucide-react";
-import type { FolderItemIntrf, FolderItemPrevIntrf } from "../models/folderModel";
+import type { FolderItemIntrf, FolderItemPrevIntrf } from "../models/folder_model";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import DataModifier from "../services/data_service";
-import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { FilesDataProps } from "../models/fileModel";
 
 export function FolderItem(props: FolderItemIntrf) {
-    const { changeData, deleteData, getData } = DataModifier();
-    const queryClient = useQueryClient();
-    const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const [folderName, setFolderName] = useState<string>('');
 
     useEffect(() => {
@@ -20,78 +14,12 @@ export function FolderItem(props: FolderItemIntrf) {
         }
     }, [props.is_selected, props._id]);
 
-    const { data: isFavorited } = getData<boolean>({
+    const { data: isFavorited } = props.getData<boolean>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/is-favorited/${props._id}`,
         query_key: [`is-folder-favorited-${props._id}`],
         stale_time: 1200000
     });
     
-    const addToFavoriteMt = useMutation({
-        onMutate: () => setIsProcessing(true),
-        mutationFn: async () => {
-            await changeData<FilesDataProps>({
-                api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/add-to-favorited/${props._id}`,
-                data: {}
-            });
-        },
-        onError: () => {},
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${props.user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`is-folder-favorited-${props._id}`] });
-        },
-        onSettled: () => setIsProcessing(false)
-    });
-
-    const removeFromFavoritedMt = useMutation({
-        onMutate: () => setIsProcessing(true),
-        mutationFn: async () => {
-            await changeData<FilesDataProps>({ 
-                api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/remove-from-favorited/${props._id}`, 
-                data: {}
-            });
-        },
-        onError: () => {},
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`is-folder-favorited-${props._id}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${props.user_id}`] });
-        },
-        onSettled: () => setIsProcessing(false)
-    });
-
-    const removeOneFolderMt = useMutation({
-        onMutate: () => setIsProcessing(true),
-        mutationFn: async () => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/delete/${props.user_id}/${props.folder_name}` });
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`all-folders-${props.user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`is-folder-favorited-${props._id}`] });
-            queryClient.removeQueries({
-                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
-                    const queryKey = query.queryKey;
-                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`is-file-favorited-`);
-                    }
-                    return false;
-                }
-            });
-            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${props.user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-files-${props.user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${props.user_id}`] });
-        },
-        onSettled: () => setIsProcessing(false)
-    });
-    
-    function updateFolderName(event: React.FormEvent) {
-        event.preventDefault();
-        props.changeOne.mutate({ _id: props._id, folder_name: folderName.trim() });
-    }
-
-    function handleFavoriteButton() {
-        if (isFavorited) removeFromFavoritedMt.mutate();
-        else addToFavoriteMt.mutate();
-    }
-
     const cancel = () => props.selectOne(props._id);
     
     if (props.is_selected) {

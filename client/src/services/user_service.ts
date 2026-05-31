@@ -2,10 +2,10 @@ import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
 import AuthServices from "./auth_service";
 import DataModifier from "./data_service";
 import { useEffect, useState } from "react";
-import type { CurrentUserIntrf } from "../models/userModel";
+import type { CurrentUserIntrf } from "../models/user_model";
 
 export default function UserServices(user_id?: string) {
-    const { changeData, deleteData } = DataModifier();
+    const { changeData, deleteData, message, setMessage } = DataModifier();
     const { signOut, userData, userError, userLoading } = AuthServices();
     const queryClient = useQueryClient();
 
@@ -26,7 +26,10 @@ export default function UserServices(user_id?: string) {
     const deleteAccountMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/users/delete-myself/${user_id}` });
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/users/delete-myself/${user_id}` });
+        },
+        onError: (error) => {
+            setMessage(error.message || 'Failed to delete or check your internet connection');
         },
         onSuccess: async () => {
             queryClient.invalidateQueries({ queryKey: ['current-user'] });
@@ -39,25 +42,9 @@ export default function UserServices(user_id?: string) {
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
                     if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`files-in-folder-`);
-                    }
-                    return false;
-                }
-            });
-            queryClient.removeQueries({
-                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
-                    const queryKey = query.queryKey;
-                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`is-file-favorited-`);
-                    }
-                    return false;
-                }
-            });
-            queryClient.removeQueries({
-                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
-                    const queryKey = query.queryKey;
-                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith("is-folder-favorited-");
+                        return queryKey[0].startsWith(`files-in-folder-`) ||
+                        queryKey[0].startsWith(`is-file-favorited-`) || 
+                        queryKey[0].startsWith("is-folder-favorited-")
                     }
                     return false;
                 }
@@ -70,7 +57,7 @@ export default function UserServices(user_id?: string) {
     const changeProfileMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
-            await changeData<CurrentUserIntrf>({ 
+            return await changeData<CurrentUserIntrf>({ 
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/users/change/${user_id}`,
                 data: {
                     email: newProfile.email.trim(),
@@ -78,7 +65,11 @@ export default function UserServices(user_id?: string) {
                 } 
             });
         },
-        onSuccess: () => {
+        onError: (error) => {
+            setMessage(error.message || 'Failed to change or check your internet connection');
+        },
+        onSuccess: (response) => {
+            setMessage(response.message);
             setNewProfile({ email: '', username: '' });
             setEditMode(false);
             queryClient.invalidateQueries({ queryKey: ['current-user'] });
@@ -87,7 +78,7 @@ export default function UserServices(user_id?: string) {
     });
 
     return { 
-        changeProfileMt, deleteAccountMt, editMode, handleInputChange, isProcessing, 
-        newProfile, setEditMode, setIsProcessing, setNewProfile, userData, userError, userLoading 
+        changeProfileMt, deleteAccountMt, editMode, handleInputChange, isProcessing, message,
+        newProfile, setEditMode, setIsProcessing, setMessage, setNewProfile, userData, userError, userLoading 
     }
 }

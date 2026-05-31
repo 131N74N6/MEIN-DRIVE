@@ -1,4 +1,4 @@
-import type { FileListProps } from "../models/fileModel";
+import type { FileListProps } from "../models/file_model";
 import FileItem from "./FileItem";
 import Loading from "./Loading";
 
@@ -17,16 +17,20 @@ export default function FileList(props: FileListProps) {
                 {props.files.map((file) => (
                     <FileItem 
                         file={file} 
+                        get_data={props.get_data}
                         is_in_folder={!!file.folder_name} 
+                        is_processing={props.is_processing}
                         key={`file_${file._id}`} 
                         move_outside_folder={props.move_outside_folder}
+                        on_delete={props.on_delete}
                         showFolderList={props.showFolderList}
                     />
                 ))}
             </div>
             <div className="flex justify-center">
-                {props.isFetchingNextPage ?  <Loading/> : null}
-                {props.files.length < 14 ? (
+                {props.isFetchingNextPage ? (
+                    <Loading/>
+                ) : props.files.length < 14 ? (
                     <></>
                 ) : props.isReachedEnd ? (
                     <p className="text-gray-700 font-[500] text-center text-4">No More Files to Show</p>

@@ -1,4 +1,4 @@
-import type { FilesDataProps, MediaFilesProps } from "../models/fileModel";
+import type { FilesDataProps, MediaFilesProps } from "../models/file_model";
 import { Database, FolderArchive, File, Notebook, AudioLines, Sheet, FileChartColumn, FileText, FileTypeCorner } from "lucide-react";
 
 export function FileIcon(props: FilesDataProps) {

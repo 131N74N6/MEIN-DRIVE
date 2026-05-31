@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import DataModifier from "../services/data_service";
-import type { FilesDataProps } from "../models/fileModel";
+import type { FilesDataProps } from "../models/file_model";
 import FileList from "../components/FileList";
 import Loading from "../components/Loading";
 import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,7 +9,7 @@ import useDebounce from "../hooks/useDebounce";
 import Notification from "../components/Notification";
 import { Trash } from "lucide-react";
 import { FolderListPreview } from "../components/FolderList";
-import type { FolderIntrf } from "../models/folderModel";
+import type { FolderIntrf } from "../models/folder_model";
 import { useParams } from "react-router-dom";
 
 export default function Home() {

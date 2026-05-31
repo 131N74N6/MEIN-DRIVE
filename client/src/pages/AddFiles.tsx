@@ -5,7 +5,7 @@ import FileServices from "../services/file_service";
 
 export default function AddFiles() {
     const { 
-        fileInputRef, handleChosenFiles, isUploading, mediaFiles, 
+        fileInputRef, handleChosenFiles, isProcessing, mediaFiles, 
         message, navigate, removeChosenFiles, uploadFilesMutation 
     } = FileServices();
     
@@ -31,7 +31,7 @@ export default function AddFiles() {
                                     <FileIconPreview {...mediaFile}/>
                                     <button
                                         type="button"
-                                        disabled={isUploading}
+                                        disabled={isProcessing}
                                         onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
                                             e.stopPropagation();
                                             removeChosenFiles(index);
@@ -48,18 +48,18 @@ export default function AddFiles() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.5rem]">
                     <button 
                         type="button" 
-                        disabled={isUploading}
+                        disabled={isProcessing}
                         className="rounded-md bg-gray-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50" 
                         onClick={() => navigate('/home')}
                     >
-                        {isUploading ? 'Uploading' : 'Back'}
+                        {isProcessing ? 'Uploading' : 'Back'}
                     </button>
                     <button 
                         type="submit" 
-                        disabled={isUploading}
+                        disabled={isProcessing}
                         className="rounded-md bg-blue-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                     >
-                        {isUploading ? 'Uploading' : 'Upload'}
+                        {isProcessing ? 'Uploading' : 'Upload'}
                     </button>
                 </div>
             </form>

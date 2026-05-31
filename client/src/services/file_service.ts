@@ -1,20 +1,28 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
 import { uploadToCloudinary } from "./cloudinary_service";
 import AuthServices from "./auth_service";
 import DataModifier from "./data_service";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import type { FilesFormIntrf, MediaFilesProps } from "../models/fileModel";
+import type { FilesDataProps, FileServicesIntrf, FilesFormIntrf, MediaFilesProps } from "../models/file_model";
+import useDebounce from "../hooks/useDebounce";
+import type { FolderIntrf } from "../models/folder_model";
 
-export default function FileServices() {
+export default function FileServices(props?: FileServicesIntrf) {
     const { currentUserId } = AuthServices();
-    const { insertData, message, setMessage } = DataModifier();
+    const { changeData, deleteData, getData, infiniteScroll, insertData, message, setMessage } = DataModifier();
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
     const [mediaFiles, setMediaFiles] = useState<MediaFilesProps[]>([]);
-    const [isUploading, setIsUploading] = useState<boolean>(false);
+    const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [searchValue, setSearchValue] = useState<string>('');
+    const debouncedSearch = useDebounce<string>(searchValue, 500);
+
+    const [openFolderList, setOpenFolderList] = useState<boolean>(false);
+    const [chosenFileId, setChosenFileId] = useState<string | null>(null);
+    const [chosenFolder, setChosenFolder] = useState<string | null>(null);
 
     useEffect(() => {
         if (message) {
@@ -22,6 +30,91 @@ export default function FileServices() {
             return () => clearTimeout(timer);
         }
     }, [message, setMessage]);
+
+    const addToFavoriteMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (id: string) => {
+            await changeData<FilesDataProps>({
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-favorited/${id}`,
+                data: {}
+            });
+        },
+        onError: () => {},
+        onSuccess: () => {
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`all-favorited-files-${currentUserId}`) ||
+                        queryKey[0].startsWith('is-file-favorited-');
+                    }
+                    return false;
+                }
+            });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
+
+    function closeFolderList() {
+        setOpenFolderList(false);
+        setChosenFileId(null);
+        setChosenFolder(null);
+    }
+    
+    const deleteAllFilesMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async () => {
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all-in-folder/${props?.folder_name}` });
+        },
+        onError: (error) => {
+            setMessage(error.message || 'Failed to delete or check your internet connection.');
+        },
+        onSuccess: (response) => {
+            setMessage(response.message);
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`is-file-favorited-`) || 
+                        queryKey[0].startsWith(`is-file-favorited-${currentUserId}`);
+                    }
+                    return false;
+                }
+            });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
+
+    const deleteOneFileMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (id: string) => {
+            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase/${id}` });
+        },
+        onError: () => {},
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`) ||
+                        queryKey[0].startsWith('is-file-favorited-');
+                    }
+                    return false; 
+                }
+            });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
+
+    const getResourceType = (fileType: string): 'image' | 'video' | 'raw' => {
+        if (fileType.startsWith('image/')) return 'image';
+        if (fileType.startsWith('video/')) return 'video';
+        return 'raw';
+    }
 
     const handleChosenFiles = (event: React.ChangeEvent<HTMLInputElement>) => {
         const files = event.target.files;
@@ -42,20 +135,106 @@ export default function FileServices() {
         if (fileInputRef.current) fileInputRef.current.value = '';
     }
 
+    const insertFileToFolderMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async () => {
+            if (!chosenFolder || !chosenFileId) return;
+            return await changeData<FilesDataProps>({
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-folder/${chosenFileId}`,
+                data: { folder_name: chosenFolder.trim() }
+            });
+        },
+        onError: (error: Error) => {
+            setMessage(error.message || 'Failed to move file or check your internet connection');
+        },
+        onSuccess: () => {
+            setOpenFolderList(false);
+            setChosenFileId(null);
+            setChosenFolder(null);
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
+                    }
+                    return false;
+                }
+            });
+        },
+        onSettled: () => {
+            setIsProcessing(false);
+        }
+    });
+
+    const moveOutsideFolderMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (_id: string) => {
+            return await changeData<FilesDataProps>({
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/remove-from-folder/${_id}`,
+                data: {}
+            });
+        },
+        onError: (error: Error) => {
+            setMessage(error.message || 'Failed to move file or check your internet connection');
+        },
+        onSuccess: (response) => {
+            setMessage(response.message);
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
+                    }
+                    return false; 
+                }
+            });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
+
     function removeChosenFiles(index: number) {
         const file = mediaFiles[index];
         URL.revokeObjectURL(file.preview_url);
         setMediaFiles(prev => prev.filter((_, i) => i !== index));
     }
 
-    const getResourceType = (fileType: string): 'image' | 'video' | 'raw' => {
-        if (fileType.startsWith('image/')) return 'image';
-        if (fileType.startsWith('video/')) return 'video';
-        return 'raw';
-    }
+    const removeFromFavoritedMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (id: string) => {
+            return await changeData<FilesDataProps>({ 
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/remove-from-favorited/${id}`, 
+                data: {}
+            });
+        },
+        onError: (error: Error) => {
+            setMessage(error.message || 'Failed to move file or check your internet connection');
+        },
+        onSuccess: () => {
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith('is-file-favorited-')
+                    }
+                    return false;
+                }
+            });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
 
+    function showFolderList(_id: string) {
+        setChosenFileId(_id);
+        setOpenFolderList(true);
+    }
+    
     const uploadFilesMutation = useMutation({
-        onMutate: () => setIsUploading(true),
+        onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
             const folderName = 'drive_files';
             if (mediaFiles.length === 0) throw new Error('Please select at least one file');
@@ -92,7 +271,7 @@ export default function FileServices() {
             }
         },
         onError: (error) => {
-            setMessage(error.message || 'Check your internet connection');
+            setMessage(error.message || 'Failed to upload or check your internet connection');
         },
         onSuccess: (response) => {
             setMessage(response.message)
@@ -101,10 +280,40 @@ export default function FileServices() {
         },
         onSettled: () => {
             if (fileInputRef.current) fileInputRef.current.value = '';
-            setIsUploading(false);
+            setIsProcessing(false);
             setMediaFiles([]);
         }
     });
+
+    const { 
+            error: fileError, fetchNextPage: fileNext, isFetchingNextPage: fileHasNext, 
+            isLoading: fileLoad, isReachedEnd: fileEnd, paginatedData: fileData 
+        } = infiniteScroll<FilesDataProps>({
+            api_url: `${import.meta.env.VITE_API_BASE_URL}/files/files-in-folder/${props?.folder_name}/${currentUserId}`,
+            limit: 14,
+            query_key: debouncedSearch ? [`files-in-folder-${currentUserId}-${props?.folder_name}-${debouncedSearch}`] : [`files-in-folder-${currentUserId}-${props?.folder_name}`],
+            searched: debouncedSearch.trim(),
+            stale_time: 1800000
+        });
     
-    return { fileInputRef, handleChosenFiles, isUploading, mediaFiles, message, navigate, removeChosenFiles, setMediaFiles, setMessage, uploadFilesMutation }
+        const { 
+            error: folderError, fetchNextPage: folderNext, isFetchingNextPage: folderHasNext, 
+            isLoading: folderLoad, isReachedEnd: folderEnd, paginatedData: folderData 
+        } = infiniteScroll<FolderIntrf>({
+            api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
+            limit: 14,
+            query_key: [`all-folder-prev-${currentUserId}`],
+            searched: debouncedSearch.trim(),
+            stale_time: 1800000
+        });
+
+        const filesData = { fileError, fileNext, fileHasNext, fileLoad, fileEnd, fileData };
+        const foldersPreviewData = { folderError, folderNext, folderHasNext, folderLoad, folderEnd, folderData }
+    
+    return { 
+        addToFavoriteMt, closeFolderList, deleteAllFilesMt, deleteOneFileMt, fileInputRef, filesData, foldersPreviewData, getData, 
+        handleChosenFiles, insertFileToFolderMt, isProcessing, mediaFiles, message, moveOutsideFolderMt, navigate, openFolderList, 
+        removeChosenFiles, removeFromFavoritedMt, searchValue, setChosenFolder, setMediaFiles, setMessage, setSearchValue, 
+        showFolderList, uploadFilesMutation 
+    }
 }

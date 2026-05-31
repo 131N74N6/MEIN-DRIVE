@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { FolderListIntrf, FolderListPrevIntrf } from "../models/folderModel";
+import type { FolderListIntrf, FolderListPrevIntrf } from "../models/folder_model";
 import { FolderItem, FolderItemPreview } from "./FolderItem";
 import Loading from "./Loading";
 

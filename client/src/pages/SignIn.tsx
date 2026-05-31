@@ -70,7 +70,7 @@ export default function SignIn() {
                     disabled={userLoading}
                     className="bg-gray-700 rounded-md cursor-pointer text-white font-[500] text-[0.9rem] p-[0.4rem] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black transition-colors"
                 >
-                    Sign In
+                    {userLoading ? 'Processing' : 'Sign In'}
                 </button>
                 {authError ? <p className="text-red-400 font-medium text-center">{authError}</p> : null}
             </form>

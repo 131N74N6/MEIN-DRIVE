@@ -47,8 +47,10 @@ export async function deleteAllFilesInFolder(req: Request, res: Response) {
             return v2.uploader.destroy(userFile.files.public_id, { resource_type: userFile.files.resource_type });
         });
 
-        await Promise.all(deletePromise);
-        await File.deleteMany({ folder_name: getCurrentFolder });
+        await Promise.all([
+            ...deletePromise,
+            File.deleteMany({ folder_name: getCurrentFolder })
+        ]);
 
         res.status(200).json({ message: 'file deleted' });
     } catch (error) {
@@ -67,8 +69,10 @@ export async function deleteAllFiles(req: Request, res: Response) {
             return v2.uploader.destroy(userFile.files.public_id, { resource_type: userFile.files.resource_type });
         });
 
-        await Promise.all(deletePromise);
-        await File.deleteMany({ user_id: getUserId });
+        await Promise.all([
+            ...deletePromise,
+            File.deleteMany({ user_id: getUserId })
+        ]);
 
         res.status(200).json({ message: 'file deleted' });
     } catch (error) {

@@ -41,7 +41,7 @@ export async function deleteAllFolders(req: Request, res: Response) {
         });
 
         await Promise.all([
-            deletePromise,
+            ...deletePromise,
             File.deleteMany({ user_id: getCurrentUserId, folder_name: { $ne: null, $exists: true } }),
             Folder.deleteMany({ user_id: getCurrentUserId })
         ]);
@@ -62,9 +62,9 @@ export async function deleteOneFolder(req: Request, res: Response) {
         });
 
         await Promise.all([
-            deletePromise,
-            await File.deleteMany({ folder_name: getCurrentFolder }),
-            await Folder.deleteOne({ folder_name: getCurrentFolder })
+            ...deletePromise,
+            File.deleteMany({ folder_name: getCurrentFolder }),
+            Folder.deleteOne({ folder_name: getCurrentFolder })
         ]);
 
         res.status(200).json({ message: 'one folder deleted' });

@@ -2,7 +2,7 @@ import { FolderPlus, Trash } from "lucide-react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import Loading from "../components/Loading";
 import DataModifier from "../services/data_service";
-import type { FolderFormProps, FolderIntrf } from "../models/folderModel";
+import type { FolderFormProps, FolderIntrf } from "../models/folder_model";
 import { useParams } from "react-router-dom";
 import { FolderList } from "../components/FolderList";
 import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
