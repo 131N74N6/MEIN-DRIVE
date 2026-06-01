@@ -1,6 +1,6 @@
 import { useState } from "react"
-import type { SignUpProps, CurrentUserIntrf } from "../models/user_model";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import type { SignUpProps, CurrentUserIntrf, SignInProps } from "../models/user_model";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
 export default function AuthServices() {
@@ -31,28 +31,36 @@ export default function AuthServices() {
     const currentUserId = userData && userData.user_id;
     const currentUserName = userData && userData.username;
 
-    async function signIn(email: string, password: string) {
-        try {
-            const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/sign-in`, {
-                body: JSON.stringify({ email, password }),
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                method: 'POST'
-            });
+    const signInMt = useMutation({
+        mutationFn: async (props: SignInProps) => {
+            try {
+                const request = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/sign-in`, {
+                    body: JSON.stringify(props),
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST'
+                });
 
-            const response = await request.json();
+                const response = await request.json();
 
-            if (!request.ok) {
-                const errorMessage = response.error || response.message || 'Failed to sign in. Try again later';
-                throw new Error(errorMessage);
-            } else {
-                await queryClient.invalidateQueries({ queryKey: ['current-user'] });
-                navigate(`/home/${currentUserId!}`);
-            }
-        } catch (error: any) {
-            setAuthError(error.message || 'Failed to sign in');
-        } 
-    }
+                if (!request.ok) {
+                    const errorMessage = response.message || 'Failed to sign in. Try again later';
+                    throw new Error(errorMessage);
+                } else {
+                    return response;
+                }
+            } catch (error: any) {
+                throw error;
+            } 
+        },
+        onError: (error: any) => {
+            setAuthError(error.message || 'Failed to sign in. Check your internet connection.');
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['current-user'] });
+            navigate(`/home/${currentUserId!}`);
+        }
+    });
 
     async function signUp (props: SignUpProps): Promise<void> {
         try {
@@ -66,7 +74,7 @@ export default function AuthServices() {
             const response = await request.json();
 
             if (!request.ok) {
-                const errorMessage = response.error || response.message || 'Failed to sign up. Try again later';
+                const errorMessage = response.message || 'Failed to sign up. Try again later';
                 throw new Error(errorMessage);
             } else {
                 navigate('/sign-in');
@@ -98,7 +106,8 @@ export default function AuthServices() {
         authError,
         currentUserId,
         currentUserName, 
-        signIn, 
+        isSigningIn: signInMt.isPending,
+        signInMt, 
         signOut, 
         signUp, 
         setAuthError, 

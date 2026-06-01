@@ -17,12 +17,17 @@ export function FolderList(props: FolderListIntrf) {
             <div className="flex flex-col gap-4">
                 {props.folders.map((folder, index) => (
                     <FolderItem 
-                        key={`folder-${index}`} 
                         {...folder} 
-                        is_selected={props.selectedFolderId === folder._id}
-                        selectedFolderId={props.selectedFolderId}
-                        selectOne={props.selectOne} 
-                        changeOne={props.changeOne} 
+                        add_to_favorite={props.add_to_favorite}
+                        get_data={props.get_data}
+                        is_processing={props.is_processing}
+                        is_selected={props.selected_folder_id === folder._id}
+                        key={`folder-${index}`} 
+                        on_delete={props.on_delete}
+                        on_edit={props.on_edit} 
+                        on_select={props.on_select} 
+                        remove_from_favorite={props.remove_from_favorite}
+                        selected_folder_id={props.selected_folder_id}
                     />
                 ))}
             </div>

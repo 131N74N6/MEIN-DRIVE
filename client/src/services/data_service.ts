@@ -52,7 +52,7 @@ export default function DataModifier() {
         }
     }
 
-    function getData<X>(props: GetDataProps) {
+    function getData<X>(props: GetDataProps): { data: X | undefined; error: Error | null; isLoading: boolean } {
         const { data, error, isLoading } = useQuery<X, Error>({
             enabled: !!currentUserId && !userLoading,
             queryFn: async () => {

@@ -9,21 +9,21 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 import express from "express";
+import { Request, Response, NextFunction } from "express";
 import cors from 'cors';
-import db from "./database/mongodb";
+import { db } from "./database/mongodb";
+import { v2 } from "cloudinary";
 import userRoutes from "./routes/user.router";
 import fileRoutes from "./routes/file.router";
-import { v2 } from "cloudinary";
 import authRoutes from './routes/auth.router';
 import folderRoutes from './routes/folder.router';
 import cookieParser from 'cookie-parser';
 
 const app = express();
 
-db.then(response => {
-    if (response) console.log('database connected');
-}).catch(error => {
-    if (error) console.log('failed to connect database');
+app.use(async (_: Request, __: Response, next: NextFunction) => {
+    await db;
+    next();
 });
 
 v2.config({

@@ -17,6 +17,11 @@ export type SignUpProps = {
     username: string;
 }
 
+export type SignInProps = {
+    email: string;
+    password: string;
+}
+
 export type UserFilesProps = {
     created_at: string;
     files: {

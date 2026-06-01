@@ -14,13 +14,23 @@ export function FolderItem(props: FolderItemIntrf) {
         }
     }, [props.is_selected, props._id]);
 
-    const { data: isFavorited } = props.getData<boolean>({
+    const { data: isFavorited } = props.get_data<boolean>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/is-favorited/${props._id}`,
         query_key: [`is-folder-favorited-${props._id}`],
         stale_time: 1200000
     });
     
-    const cancel = () => props.selectOne(props._id);
+    function updateFolderName(event: React.FormEvent) {
+        event.preventDefault();
+        props.on_edit.mutate({ _id: props._id, folder_name: folderName.trim() });
+    }
+
+    function handleFavoriteButton() {
+        if (isFavorited) props.remove_from_favorite.mutate(props._id);
+        else props.add_to_favorite.mutate(props._id);
+    }
+    
+    const cancel = () => props.on_select(props._id);
     
     if (props.is_selected) {
         return (
@@ -38,14 +48,14 @@ export function FolderItem(props: FolderItemIntrf) {
                 <div className="flex gap-3 items-center">
                     <button 
                         type="submit" 
-                        disabled={isProcessing}
+                        disabled={props.is_processing}
                         className="cursor-pointer text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <LucideCheckSquare2/>
                     </button>
                     <button 
                         type="button" 
-                        disabled={isProcessing}
+                        disabled={props.is_processing}
                         onClick={cancel}
                         className="cursor-pointer text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -68,23 +78,23 @@ export function FolderItem(props: FolderItemIntrf) {
             <div className="flex gap-3 items-center">
                 <button 
                     type="button" 
-                    disabled={isProcessing}
-                    onClick={() => removeOneFolderMt.mutate()}
+                    disabled={props.is_processing}
+                    onClick={() => props.on_delete.mutate(props._id)}
                     className="cursor-pointer text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <Trash/>
                 </button>
                 <button 
                     type="button" 
-                    disabled={isProcessing}
-                    onClick={() => props.selectOne(props._id)}
+                    disabled={props.is_processing}
+                    onClick={() => props.on_select(props._id)}
                     className="cursor-pointer text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <Pen/>
                 </button>
                 <button 
                     type="button" 
-                    disabled={isProcessing}
+                    disabled={props.is_processing}
                     onClick={handleFavoriteButton}
                     className={`cursor-pointer font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed ${isFavorited ? 'text-blue-600' : 'text-gray-500'}`}
                 >

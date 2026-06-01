@@ -1,164 +1,29 @@
-import { useEffect, useState } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
-import DataModifier from "../services/data_service";
-import type { FilesDataProps } from "../models/file_model";
 import FileList from "../components/FileList";
 import Loading from "../components/Loading";
-import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
-import useDebounce from "../hooks/useDebounce";
 import Notification from "../components/Notification";
 import { Trash } from "lucide-react";
 import { FolderListPreview } from "../components/FolderList";
-import type { FolderIntrf } from "../models/folder_model";
-import { useParams } from "react-router-dom";
+import FileServices from "../services/file_service";
 
-export default function FavoritedFiles() {
-    const { user_id } = useParams();
-    const { changeData, deleteData, infiniteScroll, message, setMessage } = DataModifier();
-    const queryClient = useQueryClient();
-    const currentUserId = user_id ? user_id : '';
-    const [searchValue, setSearchValue] = useState<string>('');
-    const debouncedSearch = useDebounce<string>(searchValue, 500);
-
-    const [chosenFileId, setChosenFileId] = useState<string | null>(null);
-    const [chosenFolder, setChosenFolder] = useState<string | null>(null);
-    const [openFolderList, setOpenFolderList] = useState<boolean>(false);
-    const [isProcessing, setIsProcessing] = useState<boolean>(false);
-
-    useEffect(() => {
-        if (message) {
-            const timer = setTimeout(() => setMessage(null), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [message, setMessage]);
-    
-    const { error: fileError, fetchNextPage: fileNext, isFetchingNextPage: fileHasNext, isLoading: fileLoad, isReachedEnd: fileEnd, paginatedData: fileData } = infiniteScroll<FilesDataProps>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/favorited/${currentUserId}`,
-        limit: 14,
-        query_key: debouncedSearch ? [`all-favorited-files-${currentUserId}-${debouncedSearch}`] : [`all-favorited-files-${currentUserId}`],
-        searched: debouncedSearch.trim(),
-        stale_time: 1200000
-    });
-
-    const { error: folderError, fetchNextPage: folderNext, isFetchingNextPage: folderHasNext, isLoading: folderLoad, isReachedEnd: folderEnd, paginatedData: folderData } = infiniteScroll<FolderIntrf>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
-        limit: 14,
-        query_key: [`all-folder-prev-${currentUserId}`],
-        stale_time: 1200000
-    });
-
-    const deleteAllFilesMt = useMutation({
-        onMutate: () => setIsProcessing(true),
-        mutationFn: async () => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all/${currentUserId}` });
-        },
-        onError: (error) => {
-            setMessage(error.message || 'Failed to delete or chech your internet connection.');
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-            queryClient.removeQueries({
-                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
-                    const queryKey = query.queryKey;
-                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
-                    }
-                    return false; 
-                }
-            });
-            queryClient.removeQueries({
-                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
-                    const queryKey = query.queryKey;
-                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`is-file-favorited-`);
-                    }
-                    return false;
-                }
-            });
-        },
-        onSettled: () => setIsProcessing(false)
-    });
-
-    const insertFileToFolderMt = useMutation({
-        onMutate: () => setIsProcessing(true),
-        mutationFn: async () => {
-            if (!chosenFolder || !chosenFileId) return;
-            await changeData<FilesDataProps>({
-                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-folder/${chosenFileId}`,
-                data: { folder_name: chosenFolder.trim() }
-            });
-        },
-        onError: (error) => {
-            setMessage(error.message || 'Failed to move to folder or chech your internet connection.');
-        },
-        onSuccess: () => {
-            setOpenFolderList(false);
-            setChosenFileId(null);
-            setChosenFolder(null);
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-            queryClient.removeQueries({
-                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
-                    const queryKey = query.queryKey;
-                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
-                    }
-                    return false; 
-                }
-            });
-        },
-        onSettled: () => {
-            setIsProcessing(false);
-        }
-    });
-
-    const moveOutsideFolderMt = useMutation({
-        onMutate: () => setIsProcessing(true),
-        mutationFn: async (_id: string) => {
-            await changeData<FilesDataProps>({
-                api_url: `${import.meta.env.VITE_API_BASE_URL}/files/remove-from-folder/${_id}`,
-                data: {}
-            });
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-            queryClient.removeQueries({
-                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
-                    const queryKey = query.queryKey;
-                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
-                    }
-                    return false; 
-                }
-            });
-        },
-        onSettled: () => setIsProcessing(false)
-    });
-
-    function closeFolderList() {
-        setOpenFolderList(false);
-        setChosenFileId(null);
-        setChosenFolder(null);
-    }
-
-    function showFolderList(_id: string) {
-        setChosenFileId(_id);
-        setOpenFolderList(true);
-    }
+export default function FavoritedFiles() {    
+    const { 
+        addToFavoriteMt, closeFolderList, deleteAllFilesMt, deleteOneFileMt, favoritedFiles, 
+        foldersPreviewData, getData, insertFileToFolderMt, isProcessing, message, moveOutsideFolderMt, 
+        openFolderList, removeFromFavoritedMt, searchValue, setChosenFolder, setSearchValue, showFolderList 
+    } = FileServices();
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-4 p-4 bg-white z-10 relative">
             {message ? Notification(message) : null}
             {openFolderList ? (
                 <FolderListPreview 
-                    error={folderError}
-                    fetchNextPage={folderNext} 
-                    folder_prev={folderData} 
-                    isLoading={folderLoad}
-                    isFetchingNextPage={folderHasNext} 
-                    isReachedEnd={folderEnd}
+                    error={foldersPreviewData.folderError}
+                    fetchNextPage={foldersPreviewData.folderNext} 
+                    folder_prev={foldersPreviewData.folderData} 
+                    isLoading={foldersPreviewData.folderLoad}
+                    isFetchingNextPage={foldersPreviewData.folderHasNext} 
+                    isReachedEnd={foldersPreviewData.folderEnd}
                     move={insertFileToFolderMt}
                     toggle={closeFolderList}
                     set_chosen_folder={setChosenFolder}
@@ -182,22 +47,27 @@ export default function FavoritedFiles() {
                         <Trash size={22}></Trash>
                     </button>
                 </form>
-                {fileLoad ? (
+                {favoritedFiles.fileLoad3 ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
                     </div>
-                ) : fileData ? (
+                ) : favoritedFiles.fileData3 ? (
                     <FileList 
-                        fetchNextPage={fileNext} 
-                        files={fileData} 
-                        isFetchingNextPage={fileHasNext}
-                        isReachedEnd={fileEnd} 
+                        add_to_favorite={addToFavoriteMt}
+                        fetchNextPage={favoritedFiles.fileNext3} 
+                        files={favoritedFiles.fileData3} 
+                        get_data={getData}
+                        isFetchingNextPage={favoritedFiles.fileHasNext3}
+                        is_processing={isProcessing}
+                        isReachedEnd={favoritedFiles.fileEnd3} 
                         move_outside_folder={moveOutsideFolderMt}
+                        on_delete={deleteOneFileMt}
+                        remove_from_favorite={removeFromFavoritedMt}
                         showFolderList={showFolderList}
                     />
-                ) : fileError ? (
+                ) : favoritedFiles.fileError3 ? (
                     <div className="flex justify-center items-center h-full bg-white">
-                        <span className="text-[2rem] font-[600] text-gray-700">{fileError.message}</span>
+                        <span className="text-[2rem] font-[600] text-gray-700">{favoritedFiles.fileError3.message}</span>
                     </div>
                 ) : (
                     <div className="flex justify-center items-center h-full bg-white">

@@ -61,7 +61,7 @@ export default function FileServices(props?: FileServicesIntrf) {
         setChosenFolder(null);
     }
     
-    const deleteAllFilesMt = useMutation({
+    const deleteAllFilesInFolderMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
             return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all-in-folder/${props?.folder_name}` });
@@ -81,6 +81,31 @@ export default function FileServices(props?: FileServicesIntrf) {
                         queryKey[0].startsWith(`is-file-favorited-${currentUserId}`);
                     }
                     return false;
+                }
+            });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
+    
+    const deleteAllFilesMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async () => {
+            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all/${currentUserId}` });
+        },
+        onError: (error) => {
+            setMessage(error.message || 'Failed to delete or chech your internet connection.');
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`) ||
+                        queryKey[0].startsWith(`is-file-favorited-`);
+                    }
+                    return false; 
                 }
             });
         },
@@ -286,34 +311,55 @@ export default function FileServices(props?: FileServicesIntrf) {
     });
 
     const { 
-            error: fileError, fetchNextPage: fileNext, isFetchingNextPage: fileHasNext, 
-            isLoading: fileLoad, isReachedEnd: fileEnd, paginatedData: fileData 
-        } = infiniteScroll<FilesDataProps>({
-            api_url: `${import.meta.env.VITE_API_BASE_URL}/files/files-in-folder/${props?.folder_name}/${currentUserId}`,
-            limit: 14,
-            query_key: debouncedSearch ? [`files-in-folder-${currentUserId}-${props?.folder_name}-${debouncedSearch}`] : [`files-in-folder-${currentUserId}-${props?.folder_name}`],
-            searched: debouncedSearch.trim(),
-            stale_time: 1800000
-        });
-    
-        const { 
-            error: folderError, fetchNextPage: folderNext, isFetchingNextPage: folderHasNext, 
-            isLoading: folderLoad, isReachedEnd: folderEnd, paginatedData: folderData 
-        } = infiniteScroll<FolderIntrf>({
-            api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
-            limit: 14,
-            query_key: [`all-folder-prev-${currentUserId}`],
-            searched: debouncedSearch.trim(),
-            stale_time: 1800000
-        });
+        error: fileError, fetchNextPage: fileNext, isFetchingNextPage: fileHasNext, 
+        isLoading: fileLoad, isReachedEnd: fileEnd, paginatedData: fileData 
+    } = infiniteScroll<FilesDataProps>({
+        api_url: currentUserId ? `${import.meta.env.VITE_API_BASE_URL}/files/get-all/${currentUserId}` : '',
+        limit: 14,
+        query_key: debouncedSearch ? [`all-files-${currentUserId}-${debouncedSearch}`] : [`all-files-${currentUserId}`],
+        searched: debouncedSearch.trim(),
+        stale_time: 1200000
+    });
 
-        const filesData = { fileError, fileNext, fileHasNext, fileLoad, fileEnd, fileData };
-        const foldersPreviewData = { folderError, folderNext, folderHasNext, folderLoad, folderEnd, folderData }
-    
+    const { 
+        error: fileError2, fetchNextPage: fileNext2, isFetchingNextPage: fileHasNext2, 
+        isLoading: fileLoad2, isReachedEnd: fileEnd2, paginatedData: fileData2 
+    } = infiniteScroll<FilesDataProps>({
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/files-in-folder/${props?.folder_name}/${currentUserId}`,
+        limit: 14,
+        query_key: debouncedSearch ? [`files-in-folder-${currentUserId}-${props?.folder_name}-${debouncedSearch}`] : [`files-in-folder-${currentUserId}-${props?.folder_name}`],
+        searched: debouncedSearch.trim(),
+        stale_time: 1800000
+    });
+
+    const { error: fileError3, fetchNextPage: fileNext3, isFetchingNextPage: fileHasNext3, isLoading: fileLoad3, isReachedEnd: fileEnd3, paginatedData: fileData3 } = infiniteScroll<FilesDataProps>({
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/favorited/${currentUserId}`,
+        limit: 14,
+        query_key: debouncedSearch ? [`all-favorited-files-${currentUserId}-${debouncedSearch}`] : [`all-favorited-files-${currentUserId}`],
+        searched: debouncedSearch.trim(),
+        stale_time: 1200000
+    });
+
+    const { 
+        error: folderError, fetchNextPage: folderNext, isFetchingNextPage: folderHasNext, 
+        isLoading: folderLoad, isReachedEnd: folderEnd, paginatedData: folderData 
+    } = infiniteScroll<FolderIntrf>({
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
+        limit: 14,
+        query_key: [`all-folder-prev-${currentUserId}`],
+        searched: debouncedSearch.trim(),
+        stale_time: 1800000
+    });
+
+    const filesInFolderData = { fileError2, fileNext2, fileHasNext2, fileLoad2, fileEnd2, fileData2 };
+    const foldersPreviewData = { folderError, folderNext, folderHasNext, folderLoad, folderEnd, folderData }
+    const allFiles = { fileError, fileNext, fileHasNext, fileLoad, fileEnd, fileData };
+    const favoritedFiles = { fileError3, fileNext3, fileHasNext3, fileLoad3, fileEnd3, fileData3 };
+
     return { 
-        addToFavoriteMt, closeFolderList, deleteAllFilesMt, deleteOneFileMt, fileInputRef, filesData, foldersPreviewData, getData, 
-        handleChosenFiles, insertFileToFolderMt, isProcessing, mediaFiles, message, moveOutsideFolderMt, navigate, openFolderList, 
-        removeChosenFiles, removeFromFavoritedMt, searchValue, setChosenFolder, setMediaFiles, setMessage, setSearchValue, 
-        showFolderList, uploadFilesMutation 
+        addToFavoriteMt, allFiles, closeFolderList, deleteAllFilesInFolderMt, deleteAllFilesMt, deleteOneFileMt, fileInputRef, 
+        filesInFolderData, foldersPreviewData, favoritedFiles, getData, handleChosenFiles, insertFileToFolderMt, isProcessing, 
+        mediaFiles, message, moveOutsideFolderMt, navigate, openFolderList, removeChosenFiles, removeFromFavoritedMt, 
+        searchValue, setChosenFolder, setMediaFiles, setMessage, setSearchValue, showFolderList, uploadFilesMutation 
     }
 }

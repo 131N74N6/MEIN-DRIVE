@@ -5,7 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 export default function SignIn() {
     const navigate = useNavigate();
-    const { currentUserId, setAuthError, authError, userLoading, signIn } = useAuth();
+    const { currentUserId, setAuthError, authError, isSigningIn, signInMt } = useAuth();
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [email, setEmail] = useState<string>('');
@@ -22,9 +22,9 @@ export default function SignIn() {
         }
     }, [authError, setAuthError]);
 
-    async function signInButton(event: React.FormEvent) {
+    function signInButton(event: React.FormEvent) {
         event.preventDefault();
-        await signIn(email.trim(), password.trim());
+        signInMt.mutate({ email: email.trim(), password: password.trim() });
     }
 
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
@@ -67,10 +67,10 @@ export default function SignIn() {
                 <p className="text-center text-gray-800">Don't have account? <Link className="text-blue-500" to={'/sign-up'}>Sign Up</Link></p>
                 <button 
                     type="submit" 
-                    disabled={userLoading}
+                    disabled={isSigningIn}
                     className="bg-gray-700 rounded-md cursor-pointer text-white font-[500] text-[0.9rem] p-[0.4rem] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black transition-colors"
                 >
-                    {userLoading ? 'Processing' : 'Sign In'}
+                    {isSigningIn ? 'Processing' : 'Sign In'}
                 </button>
                 {authError ? <p className="text-red-400 font-medium text-center">{authError}</p> : null}
             </form>

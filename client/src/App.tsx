@@ -21,10 +21,10 @@ export default function App() {
                     <Route path='/sign-in' element={<SignIn/>}/>
                     <Route path='/sign-up' element={<SignUp/>}/>
                     <Route path='/profile/:user_id' element={<ProtectedRoute><Profile/></ProtectedRoute>}/>
-                    <Route path='/home/:user_id' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
-                    <Route path='/favorited-files/:user_id' element={<ProtectedRoute><FavoritedFiles/></ProtectedRoute>}/>
-                    <Route path='/favorited-folders/:user_id' element={<ProtectedRoute><FavoritedFolders/></ProtectedRoute>}/>
-                    <Route path='/folders/:user_id' element={<ProtectedRoute><Folders/></ProtectedRoute>}/>
+                    <Route path='/home' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
+                    <Route path='/favorited-files' element={<ProtectedRoute><FavoritedFiles/></ProtectedRoute>}/>
+                    <Route path='/favorited-folders' element={<ProtectedRoute><FavoritedFolders/></ProtectedRoute>}/>
+                    <Route path='/folders' element={<ProtectedRoute><Folders/></ProtectedRoute>}/>
                     <Route path='/folder-files/:folder_name' element={<ProtectedRoute><Files/></ProtectedRoute>}/>
                     <Route path='/add-file' element={<ProtectedRoute><AddFiles/></ProtectedRoute>}/>
                     <Route path="/" element={<Navigate to="/home" replace/>}/>

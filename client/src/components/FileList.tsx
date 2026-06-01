@@ -16,6 +16,7 @@ export default function FileList(props: FileListProps) {
             <div className="grid lg:grid-cols-4 md:grid-cols-3 grid-cols-2 gap-4">
                 {props.files.map((file) => (
                     <FileItem 
+                        add_to_favorite={props.add_to_favorite}
                         file={file} 
                         get_data={props.get_data}
                         is_in_folder={!!file.folder_name} 
@@ -23,6 +24,7 @@ export default function FileList(props: FileListProps) {
                         key={`file_${file._id}`} 
                         move_outside_folder={props.move_outside_folder}
                         on_delete={props.on_delete}
+                        remove_from_favorite={props.remove_from_favorite}
                         showFolderList={props.showFolderList}
                     />
                 ))}

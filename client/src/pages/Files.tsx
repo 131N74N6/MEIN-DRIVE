@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import FileList from "../components/FileList";
 import Loading from "../components/Loading";
@@ -11,17 +10,10 @@ import FileServices from "../services/file_service";
 export default function Files() {
     const { folder_name } = useParams();
     const { 
-        addToFavoriteMt, closeFolderList, deleteAllFilesMt, deleteOneFileMt, filesData, foldersPreviewData, getData, insertFileToFolderMt, 
-        isProcessing, message, moveOutsideFolderMt, openFolderList, removeFromFavoritedMt, searchValue, setChosenFolder, setMessage, 
-        setSearchValue, showFolderList 
+        addToFavoriteMt, closeFolderList, deleteAllFilesInFolderMt, deleteOneFileMt, filesInFolderData, 
+        foldersPreviewData, getData, insertFileToFolderMt, isProcessing, message, moveOutsideFolderMt, 
+        openFolderList, removeFromFavoritedMt, searchValue, setChosenFolder, setSearchValue, showFolderList 
     } = FileServices({ folder_name: folder_name });
-
-    useEffect(() => {
-        if (message) {
-            const timer = setTimeout(() => setMessage(null), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [message, setMessage]);
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-4 p-4 bg-white z-10 relative">
@@ -52,32 +44,32 @@ export default function Files() {
                         type="button" 
                         disabled={isProcessing}
                         className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" 
-                        onClick={() => deleteAllFilesMt.mutate()}
+                        onClick={() => deleteAllFilesInFolderMt.mutate()}
                     >
                         <Trash size={22}></Trash>
                     </button>
                 </form>
-                {filesData.fileLoad ? (
+                {filesInFolderData.fileLoad2 ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
                     </div>
-                ) : filesData.fileData ? (
+                ) : filesInFolderData.fileData2 ? (
                     <FileList 
                         add_to_favorite={addToFavoriteMt}
-                        fetchNextPage={filesData.fileNext} 
-                        files={filesData.fileData} 
+                        fetchNextPage={filesInFolderData.fileNext2} 
+                        files={filesInFolderData.fileData2} 
                         get_data={getData}
-                        isFetchingNextPage={filesData.fileHasNext}
+                        isFetchingNextPage={filesInFolderData.fileHasNext2}
                         is_processing={isProcessing}
-                        isReachedEnd={filesData.fileEnd} 
+                        isReachedEnd={filesInFolderData.fileEnd2} 
                         move_outside_folder={moveOutsideFolderMt}
                         on_delete={deleteOneFileMt}
                         remove_from_favorite={removeFromFavoritedMt}
                         showFolderList={showFolderList}
                     />
-                ) : filesData.fileError ? (
+                ) : filesInFolderData.fileError2 ? (
                     <div className="flex justify-center items-center h-full bg-white">
-                        <span className="text-[2rem] font-[600] text-gray-700">{filesData.fileError.message}</span>
+                        <span className="text-[2rem] font-[600] text-gray-700">{filesInFolderData.fileError2.message}</span>
                     </div>
                 ) : (
                     <div className="flex justify-center items-center h-full bg-white">

@@ -37,11 +37,7 @@ export type FileListProps = {
     add_to_favorite: UseMutationResult<void, Error, string, void>;
     fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>;
     files: FilesDataProps[];
-    get_data: <X>(props: GetDataProps) => {
-        data: NoInfer<X> | undefined;
-        error: Error | null;
-        isLoading: boolean;
-    }
+    get_data: <X>(props: GetDataProps) => { data: X | undefined; error: Error | null; isLoading: boolean };
     isFetchingNextPage: boolean;
     is_processing: boolean;
     isReachedEnd: boolean;
@@ -54,11 +50,7 @@ export type FileListProps = {
 export type FileItemProps = {
     add_to_favorite: UseMutationResult<void, Error, string, void>;
     file: FilesDataProps;
-    get_data: <X>(props: GetDataProps) => {
-        data: NoInfer<X> | undefined;
-        error: Error | null;
-        isLoading: boolean;
-    }
+    get_data: <X>(props: GetDataProps) => { data: X | undefined; error: Error | null; isLoading: boolean };
     is_in_folder: boolean;
     is_processing: boolean;
     move_outside_folder: UseMutationResult<void, Error, string, void>;
