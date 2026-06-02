@@ -24,7 +24,7 @@ const app = express();
 app.use(async (_: Request, __: Response, next: NextFunction) => {
     mongoose.connect((`${process.env.MONGODB_URL}`))
     .then(res => {
-        if(res) console.log('Database connection succeffully');
+        if (res) console.log('Database connection succeffully');
     }).catch(err => {
         console.log("Database connection check failed:", err);
     });

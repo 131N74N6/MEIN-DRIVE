@@ -12,7 +12,7 @@ export function Navbar1() {
                 <CircleUser></CircleUser>
                 <span>Your Profile</span>
             </div>
-            <Link to={`/add-file`} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
+            <Link to={'/add-file'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
                 <FilePlusCorner></FilePlusCorner>
                 <span>Add Files</span>
             </Link>
@@ -20,15 +20,15 @@ export function Navbar1() {
                 <Home></Home>
                 <span>Home</span>
             </Link>
-            <Link to={`/folders/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
+            <Link to={'/folders'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
                 <Folder></Folder>
                 <span>Folder</span>
             </Link>
-            <Link to={`/favorited-files/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
+            <Link to={'/favorited-files'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
                 <FileHeart></FileHeart>
                 <span>Favorite Files</span>
             </Link>
-            <Link to={`/favorited-folders/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
+            <Link to={'/favorited-folders'} className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] items-center">
                 <FolderHeart></FolderHeart>
                 <span>Favorite Folders</span>
             </Link>
@@ -41,21 +41,21 @@ export function Navbar1() {
 }
 
 export function Navbar2() {
-    const { signOut, currentUserId } = useAuth();
+    const { currentUserId, signOut } = useAuth();
     const navigate = useNavigate();
 
     return (
         <nav className="md:hidden flex justify-center rounded gap-[1rem] shrink-0 shadow-[0_0_4px_#1a1a1a] bg-white p-[1rem]">
-            <Link to={`/home/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem]">
+            <Link to={'/home'} className="text-gray-700 font-[500] text-[1rem]">
                 <Home></Home>
             </Link>
-            <Link to={`/favorited-files/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem]">
+            <Link to={'/favorited-files'} className="text-gray-700 font-[500] text-[1rem]">
                 <FileHeart></FileHeart>
             </Link>
-            <Link to={`/favorited-folders/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem]">
+            <Link to={'/favorited-folders'} className="text-gray-700 font-[500] text-[1rem]">
                 <FolderHeart></FolderHeart>
             </Link>
-            <Link to={`/folders/${currentUserId}`} className="text-gray-700 font-[500] text-[1rem]">
+            <Link to={'/folders'} className="text-gray-700 font-[500] text-[1rem]">
                 <Folder></Folder>
             </Link>
             <Link to={'/add-file'} className="text-gray-700 font-[500] text-[1rem]">

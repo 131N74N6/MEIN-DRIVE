@@ -12,7 +12,7 @@ export default function SignIn() {
     const [password, setPassword] = useState<string>('');
 
     useEffect(() => {
-        if (currentUserId) navigate(`/home/${currentUserId}`);
+        if (currentUserId) navigate('/home');
     }, [currentUserId, navigate]);
 
     useEffect(() => {
@@ -24,7 +24,7 @@ export default function SignIn() {
 
     function signInButton(event: React.FormEvent) {
         event.preventDefault();
-        signInMt.mutate({ email: email.trim(), password: password.trim() });
+        signInMt.mutateAsync({ email: email.trim(), password: password.trim() });
     }
 
     const togglePasswordVisibility = () => setShowPassword(!showPassword);

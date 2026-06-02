@@ -58,7 +58,7 @@ export default function AuthServices() {
         },
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ['current-user'] });
-            navigate(`/home/${currentUserId!}`);
+            navigate('/home');
         }
     });
 

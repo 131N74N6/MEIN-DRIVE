@@ -13,7 +13,7 @@ export default function SignUp() {
     const [username, setUsername] = useState<string>('');
 
     useEffect(() => {
-        if (currentUserId) navigate(`/home/${currentUserId}`);
+        if (currentUserId) navigate('/home');
     }, [currentUserId, navigate]);
 
     useEffect(() => {
