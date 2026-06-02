@@ -9,7 +9,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 import express from "express";
-import { Request, Response, NextFunction } from "express";
 import cors from 'cors';
 import { v2 } from "cloudinary";
 import userRoutes from "./routes/user.router";
@@ -21,14 +20,11 @@ import mongoose from 'mongoose';
 
 const app = express();
 
-app.use(async (_: Request, __: Response, next: NextFunction) => {
-    mongoose.connect((`${process.env.MONGODB_URL}`))
-    .then(res => {
-        if (res) console.log('Database connection succeffully');
-    }).catch(err => {
-        console.log("Database connection check failed:", err);
-    });
-    next();
+mongoose.connect((`${process.env.MONGODB_URL}`))
+.then(res => {
+    if (res) console.log('Database connection succeffully');
+}).catch(err => {
+    console.log("Database connection check failed:", err);
 });
 
 v2.config({
