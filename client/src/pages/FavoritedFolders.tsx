@@ -4,12 +4,21 @@ import Loading from "../components/Loading";
 import { FolderList } from "../components/FolderList";
 import FolderForm from "../components/FolderForm";
 import FolderServices from "../services/folder_service";
+import { useEffect } from "react";
 
 export default function FavoritedFolders() {
     const { 
-        addToFavoriteMt, changeFolderName,favoritedFoldersData, folderFormToggle, folderName, getData, isProcessing, makeFolder, 
-        message, openForm, removeAllFolderMt, removeFromFavoritedMt, removeOneFolderMt, selectFolder,selectedFolderId, setFolderName 
+        addToFavoriteMt, changeFolderName,favoritedFoldersData, folderFormToggle, folderName, getData, 
+        isProcessing, makeFolder, message, openForm, removeAllFolderMt, removeFromFavoritedMt, removeOneFolderMt, 
+        selectFolder, selectedFolderId, setFolderName, setMessage 
     } = FolderServices();
+    
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => setMessage(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [message, setMessage]);
     
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">

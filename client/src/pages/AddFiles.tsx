@@ -2,12 +2,20 @@ import Notification from "../components/Notification";
 import { X } from "lucide-react";
 import { FileIconPreview } from "../components/FileIcon";
 import FileServices from "../services/file_service";
+import { useEffect } from "react";
 
 export default function AddFiles() {
     const { 
         fileInputRef, handleChosenFiles, isProcessing, mediaFiles, 
-        message, navigate, removeChosenFiles, uploadFilesMutation 
+        message, navigate, removeChosenFiles, setMessage, uploadFilesMutation 
     } = FileServices();
+
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => setMessage(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [message, setMessage]);
     
     const uploadFiles = (event: React.FormEvent) => {
         event.preventDefault();

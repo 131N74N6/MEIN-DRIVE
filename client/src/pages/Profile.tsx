@@ -2,13 +2,21 @@ import { useParams } from "react-router-dom";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import Loading from "../components/Loading";
 import UserServices from "../services/user_service";
+import { useEffect } from "react";
 
 export default function Profile() {
     const { user_id } = useParams();
     const { 
-        changeProfileMt, deleteAccountMt, editMode, handleInputChange, isProcessing, 
-        newProfile, setEditMode, setNewProfile, userData, userLoading, userError 
+        changeProfileMt, deleteAccountMt, editMode, handleInputChange, isProcessing, message,
+        newProfile, setEditMode, setMessage, setNewProfile, userData, userLoading, userError 
     } = UserServices(user_id!);
+    
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => setMessage(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [message, setMessage]);
 
     function cancelEditProfile() {
         setEditMode(false);
@@ -104,6 +112,7 @@ export default function Profile() {
                             </button>
                         </div>
                     )}
+                    {message ? <div className="text-center text-gray-700 text-2xl font-medium">{message}</div> : null}
                 </div>
             )}
             <Navbar1/>

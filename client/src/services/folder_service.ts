@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient, type Query } from "@tanstack/react-query";
 import type { FolderFormProps, FolderIntrf } from "../models/folder_model";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import useDebounce from "../hooks/useDebounce";
 import DataModifier from "./data_service";
 import type { FilesDataProps } from "../models/file_model";
@@ -17,13 +17,6 @@ export default function FolderServices() {
     const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearch = useDebounce<string>(searchValue, 500);
-
-    useEffect(() => {
-        if (message) {
-            const timer = setTimeout(() => setMessage(null), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [message, setMessage]);
 
     const addToFavoriteMt = useMutation({
         onMutate: () => setIsProcessing(true),
@@ -216,6 +209,6 @@ export default function FolderServices() {
     return { 
         addToFavoriteMt, changeFolderName, foldersData, favoritedFoldersData, folderFormToggle, folderName, getData, isProcessing, makeFolder, 
         message, openForm, removeAllFolderMt, removeFromFavoritedMt, removeOneFolderMt, searchValue, selectedFolderId, 
-        setFolderName, selectFolder, setSearchValue 
+        setFolderName, setMessage, selectFolder, setSearchValue 
     }
 }

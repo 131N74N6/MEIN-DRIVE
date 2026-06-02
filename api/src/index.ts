@@ -11,18 +11,23 @@ if (process.env.NODE_ENV !== 'production') {
 import express from "express";
 import { Request, Response, NextFunction } from "express";
 import cors from 'cors';
-import { db } from "./database/mongodb";
 import { v2 } from "cloudinary";
 import userRoutes from "./routes/user.router";
 import fileRoutes from "./routes/file.router";
 import authRoutes from './routes/auth.router';
 import folderRoutes from './routes/folder.router';
 import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 
 const app = express();
 
 app.use(async (_: Request, __: Response, next: NextFunction) => {
-    await db;
+    mongoose.connect((`${process.env.MONGODB_URL}`))
+    .then(res => {
+        if(res) console.log('Database connection succeffully');
+    }).catch(err => {
+        console.log("Database connection check failed:", err);
+    });
     next();
 });
 

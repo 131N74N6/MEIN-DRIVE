@@ -3,7 +3,7 @@ import { uploadToCloudinary } from "./cloudinary_service";
 import AuthServices from "./auth_service";
 import DataModifier from "./data_service";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { FilesDataProps, FileServicesIntrf, FilesFormIntrf, MediaFilesProps } from "../models/file_model";
 import useDebounce from "../hooks/useDebounce";
 import type { FolderIntrf } from "../models/folder_model";
@@ -23,13 +23,6 @@ export default function FileServices(props?: FileServicesIntrf) {
     const [openFolderList, setOpenFolderList] = useState<boolean>(false);
     const [chosenFileId, setChosenFileId] = useState<string | null>(null);
     const [chosenFolder, setChosenFolder] = useState<string | null>(null);
-
-    useEffect(() => {
-        if (message) {
-            const timer = setTimeout(() => setMessage(null), 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [message, setMessage]);
 
     const addToFavoriteMt = useMutation({
         onMutate: () => setIsProcessing(true),

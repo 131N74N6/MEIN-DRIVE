@@ -5,13 +5,21 @@ import Notification from "../components/Notification";
 import { Trash } from "lucide-react";
 import { FolderListPreview } from "../components/FolderList";
 import FileServices from "../services/file_service";
+import { useEffect } from "react";
 
 export default function FavoritedFiles() {    
     const { 
         addToFavoriteMt, closeFolderList, deleteAllFilesMt, deleteOneFileMt, favoritedFiles, 
         foldersPreviewData, getData, insertFileToFolderMt, isProcessing, message, moveOutsideFolderMt, 
-        openFolderList, removeFromFavoritedMt, searchValue, setChosenFolder, setSearchValue, showFolderList 
+        openFolderList, removeFromFavoritedMt, searchValue, setChosenFolder, setMessage, setSearchValue, showFolderList 
     } = FileServices();
+
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => setMessage(null), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [message, setMessage]);
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-4 p-4 bg-white z-10 relative">
