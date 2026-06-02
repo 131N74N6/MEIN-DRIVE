@@ -27,13 +27,16 @@ export default function FileServices(props?: FileServicesIntrf) {
     const addToFavoriteMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async (id: string) => {
-            await changeData<FilesDataProps>({
+            return await changeData<FilesDataProps>({
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-favorited/${id}`,
                 data: {}
             });
         },
-        onError: () => {},
-        onSuccess: () => {
+        onError: (error) => {
+            setMessage(error.message || 'Failed to add to favorites or check your internet connection.');
+        },
+        onSuccess: (response) => {
+            setMessage(response.message);
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
@@ -83,12 +86,13 @@ export default function FileServices(props?: FileServicesIntrf) {
     const deleteAllFilesMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all/${currentUserId}` });
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all/${currentUserId}` });
         },
         onError: (error) => {
-            setMessage(error.message || 'Failed to delete or chech your internet connection.');
+            setMessage(error.message || 'Failed to delete or check your internet connection.');
         },
-        onSuccess: () => {
+        onSuccess: (response) => {
+            setMessage(response.message);
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
             queryClient.removeQueries({
@@ -108,10 +112,13 @@ export default function FileServices(props?: FileServicesIntrf) {
     const deleteOneFileMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async (id: string) => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase/${id}` });
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase/${id}` });
         },
-        onError: () => {},
-        onSuccess: () => {
+        onError: (error) => {
+            setMessage(error.message || 'Failed to delete file or check your internet connection.');
+        },
+        onSuccess: (response) => {
+            setMessage(response.message);
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
             queryClient.removeQueries({
@@ -165,7 +172,8 @@ export default function FileServices(props?: FileServicesIntrf) {
         onError: (error: Error) => {
             setMessage(error.message || 'Failed to move file or check your internet connection');
         },
-        onSuccess: () => {
+        onSuccess: (response) => {
+            setMessage(response.message);
             setOpenFolderList(false);
             setChosenFileId(null);
             setChosenFolder(null);
@@ -231,7 +239,8 @@ export default function FileServices(props?: FileServicesIntrf) {
         onError: (error: Error) => {
             setMessage(error.message || 'Failed to move file or check your internet connection');
         },
-        onSuccess: () => {
+        onSuccess: (response) => {
+            setMessage(response.message);
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;

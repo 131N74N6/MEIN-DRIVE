@@ -21,7 +21,7 @@ export default function FolderServices() {
     const addToFavoriteMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async (id: string) => {
-            await changeData<FilesDataProps>({
+            return await changeData<FilesDataProps>({
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/add-to-favorited/${id}`,
                 data: {}
             });
@@ -29,7 +29,8 @@ export default function FolderServices() {
         onError: (error) => {
             setMessage(error.message || 'Failed to add to favorite');
         },
-        onSuccess: () => {
+        onSuccess: (response) => {
+            setMessage(response.message);
             queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${currentUserId}`] });
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
@@ -47,12 +48,16 @@ export default function FolderServices() {
     const changeFolderName = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async (data: Pick<FolderIntrf, '_id' | 'folder_name'>) => {
-            await changeData<FolderIntrf>({ 
+            return await changeData<FolderIntrf>({ 
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/change/${data._id}`, 
                 data: { folder_name: data.folder_name }
             });
         },
-        onSuccess: () => {
+        onError: (error) => {
+            setMessage(error.message || 'Failed to change folder name or check your internet connection');
+        },
+        onSuccess: (response) => {
+            setMessage(response.message);
             setSelectedFolderId(null);
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
@@ -68,7 +73,7 @@ export default function FolderServices() {
     const makeFolderMutation = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
-            await insertData<FolderFormProps>({
+            return await insertData<FolderFormProps>({
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/make`,
                 data: {
                     created_at: new Date().toISOString(),
@@ -80,7 +85,8 @@ export default function FolderServices() {
         onError: (error) => {
             setMessage(error.message || 'Failed to make folder');
         },
-        onSuccess: () => {
+        onSuccess: (response) => {
+            setMessage(response.message);
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
             setOpenForm(false);
@@ -135,7 +141,8 @@ export default function FolderServices() {
         onError: (error) => {
             setMessage(error.message || 'Failed to remove from favorite');
         },
-        onSuccess: () => {
+        onSuccess: (response) => {
+            setMessage(response.message);
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
@@ -153,9 +160,13 @@ export default function FolderServices() {
     const removeOneFolderMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async (folder_name: string) => {
-            await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/delete/${currentUserId}/${folder_name}` });
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/delete/${currentUserId}/${folder_name}` });
         },
-        onSuccess: () => {
+        onError: (error) => {
+            setMessage(error.message || 'Failed to delete folder or check your internet connection');
+        },
+        onSuccess: (response) => {
+            setMessage(response.message);
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
