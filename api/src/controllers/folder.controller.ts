@@ -36,6 +36,9 @@ export async function deleteAllFolders(req: Request, res: Response) {
         const getCurrentUserId = req.params.user_id;
         const getAllFiles = await File.find({ user_id: getCurrentUserId, folder_name: { $ne: null, $exists: true } });
 
+        const getAllFolders = await Folder.find({ user_id: getCurrentUserId });
+        if (getAllFolders.length === 0) return res.status(404).json({ message: 'no folders found' });
+
         const deletePromise = getAllFiles.map((file) => {
             return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
         });

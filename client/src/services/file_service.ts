@@ -345,7 +345,7 @@ export default function FileServices(props?: FileServicesIntrf) {
     });
 
     const filesInFolderData = { fileError2, fileNext2, fileHasNext2, fileLoad2, fileEnd2, fileData2 };
-    const foldersPreviewData = { folderError, folderNext, folderHasNext, folderLoad, folderEnd, folderData }
+    const foldersPreviewData = { folderError, folderNext, folderHasNext, folderLoad, folderEnd, folderData };
     const allFiles = { fileError, fileNext, fileHasNext, fileLoad, fileEnd, fileData };
     const favoritedFiles = { fileError3, fileNext3, fileHasNext3, fileLoad3, fileEnd3, fileData3 };
 

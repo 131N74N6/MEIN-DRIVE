@@ -187,9 +187,9 @@ export default function FolderServices() {
     });
 
     const { 
-            fetchNextPage: fetchFavoritedNextPage, isLoading: isFavoritedLoading, isFetchingNextPage: isFavoritedFetchingNextPage, 
-            isReachedEnd: isFavoritedReachedEnd, error: favoritedError, paginatedData: favoritedPaginatedData 
-        } = infiniteScroll<FolderIntrf>({
+        fetchNextPage: fetchFavoritedNextPage, isLoading: isFavoritedLoading, isFetchingNextPage: isFavoritedFetchingNextPage, 
+        isReachedEnd: isFavoritedReachedEnd, error: favoritedError, paginatedData: favoritedPaginatedData 
+    } = infiniteScroll<FolderIntrf>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/favorited/${currentUserId}`,
         limit: 14,
         query_key: [`all-favorited-folders-${currentUserId}`],

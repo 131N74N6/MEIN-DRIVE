@@ -5,6 +5,7 @@ import { FolderList } from "../components/FolderList";
 import FolderForm from "../components/FolderForm";
 import FolderServices from "../services/folder_service";
 import { useEffect } from "react";
+import Notification from "../components/Notification";
 
 export default function FavoritedFolders() {
     const { 
@@ -22,6 +23,7 @@ export default function FavoritedFolders() {
     
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
+            {message ? Notification(message) : null}
             {openForm ? <FolderForm closed_form={folderFormToggle} message={message} folder_name={folderName} is_making={isProcessing} set_folder_name={setFolderName} submit_folder={makeFolder}/> : null}
             <div className="w-full md:w-3/4 flex flex-col gap-x-4 h-full min-h-[200px] rounded shadow-[0_0_4px_#1a1a1a] bg-white">
                 <form className="flex gap-[1rem] items-center pt-[1rem] px-[1rem]">

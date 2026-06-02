@@ -5,6 +5,7 @@ import { FolderList } from "../components/FolderList";
 import FolderForm from "../components/FolderForm";
 import FolderServices from "../services/folder_service";
 import { useEffect } from "react";
+import Notification from "../components/Notification";
 
 export default function Folders() {
     const { 
@@ -22,6 +23,7 @@ export default function Folders() {
     
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
+            {message ? Notification(message) : null}
             {openForm ? (
                 <FolderForm 
                     closed_form={folderFormToggle} 
