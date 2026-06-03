@@ -135,6 +135,7 @@ export default function DataModifier() {
         try {
             const request = await fetch(props.api_url, {
                 body: JSON.stringify(props.data),
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json'
                 },
