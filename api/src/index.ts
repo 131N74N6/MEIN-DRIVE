@@ -10,22 +10,15 @@ if (process.env.NODE_ENV !== 'production') {
 
 import express from "express";
 import cors from 'cors';
+import { connection } from './mongodb/connection';
 import { v2 } from "cloudinary";
 import userRoutes from "./routes/user.router";
 import fileRoutes from "./routes/file.router";
 import authRoutes from './routes/auth.router';
 import folderRoutes from './routes/folder.router';
 import cookieParser from 'cookie-parser';
-import mongoose from 'mongoose';
 
 const app = express();
-
-mongoose.connect((`${process.env.MONGODB_URL}`))
-.then(res => {
-    if (res) console.log('Database connection succeffully');
-}).catch(err => {
-    console.log("Database connection check failed:", err);
-});
 
 v2.config({
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -50,7 +43,9 @@ app.use('/api/users', userRoutes);
 app.use('/api/folders', folderRoutes);
 
 if (process.env.NODE_ENV !== 'production') {
-    app.listen(4444, () => console.log(`server running at http://localhost:4444`));
+    connection.then(() => {
+        app.listen(4444, () => console.log(`server running at http://localhost:4444`));
+    });
 }
 
 export default app;
