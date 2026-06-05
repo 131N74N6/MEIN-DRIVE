@@ -3,7 +3,7 @@ import FileList from "../components/FileList";
 import Loading from "../components/Loading";
 import Notification from "../components/Notification";
 import { Trash } from "lucide-react";
-import { FolderListPreview } from "../components/FolderList";
+import FolderListPreview from "../components/FolderListPreview";
 import { useParams } from "react-router-dom";
 import FileServices from "../services/file_service";
 import { useEffect } from "react";

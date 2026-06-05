@@ -189,7 +189,7 @@ export async function moveOutsideFolder(req: Request, res: Response) {
         await File.updateOne({ _id: req.params._id }, { 
             $set: { folder_name: null }
         });
-        res.status(200).json({ message: 'added 1 file' });
+        res.status(200).json({ message: 'removed 1 file' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }

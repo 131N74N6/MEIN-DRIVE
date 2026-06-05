@@ -69,3 +69,14 @@ export type FolderListIntrf = {
     remove_from_favorite: UseMutationResult<any, Error, string, void>;
     selected_folder_id: string | null;
 }
+
+export type FolderOptionIntrf = {
+    _id: string;
+    created_at: string;
+    handle_favorite: () => void;
+    is_favorited: boolean;
+    is_processing: boolean;
+    on_delete: UseMutationResult<void, Error, string, void>;
+    on_select: (id: string) => void;
+    show_more_options: () => void;
+}
