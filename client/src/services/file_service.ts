@@ -303,7 +303,7 @@ export default function FileServices(props?: FileServicesIntrf) {
         onSuccess: (response) => {
             setMessage(response.message)
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            navigate(`/home/${currentUserId}`);
+            navigate('/home');
         },
         onSettled: () => {
             if (fileInputRef.current) fileInputRef.current.value = '';
