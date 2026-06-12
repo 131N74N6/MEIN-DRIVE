@@ -8,14 +8,14 @@ import { checkOwnership, verifyToken } from "../middleware/auth.middleware";
 
 const fileRoutes = Router();
 
-fileRoutes.delete('/erase-all/:user_id', verifyToken, checkOwnership, deleteAllFiles);
-fileRoutes.delete('/erase/:_id', verifyToken, deleteSelectedFile);
-fileRoutes.delete('/erase-all-in-folder/:folder_name', verifyToken, deleteAllFilesInFolder)
+fileRoutes.delete('/rm-all/:user_id', verifyToken, checkOwnership, deleteAllFiles);
+fileRoutes.delete('/rm/:_id', verifyToken, deleteSelectedFile);
+fileRoutes.delete('/rm-all-in-folder/:folder_id', verifyToken, deleteAllFilesInFolder)
 
-fileRoutes.get('/get-all/:user_id', verifyToken, checkOwnership, getAllFiles);
-fileRoutes.get('/favorited/:user_id', verifyToken, checkOwnership, getFavoritedFiles);
+fileRoutes.get('/all', verifyToken, getAllFiles);
+fileRoutes.get('/favorited', verifyToken, getFavoritedFiles);
 fileRoutes.get('/is-favorited/:_id', verifyToken, isFileFavorited);
-fileRoutes.get('/files-in-folder/:folder_name/:user_id', verifyToken, checkOwnership, getFilesInFolder);
+fileRoutes.get('/files-in-folder/:folder_id', verifyToken, getFilesInFolder);
 
 fileRoutes.post('/add', verifyToken, addNewFile);
 

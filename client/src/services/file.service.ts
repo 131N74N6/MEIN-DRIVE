@@ -1,7 +1,7 @@
 import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
-import { uploadToCloudinary } from "./cloudinary_service";
-import AuthServices from "./auth_service";
-import DataModifier from "./data_service";
+import { uploadToCloudinary } from "./cloudinary.service";
+import AuthServices from "./auth.service";
+import DataModifier from "./data.service";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import type { FilesDataProps, FileServicesIntrf, FilesFormIntrf, MediaFilesProps } from "../models/file_model";
@@ -60,7 +60,7 @@ export default function FileServices(props?: FileServicesIntrf) {
     const deleteAllFilesInFolderMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
-            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all-in-folder/${props?.folder_name}` });
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all-in-folder/${props?.folder_id}` });
         },
         onError: (error) => {
             setMessage(error.message || 'Failed to delete or check your internet connection.');
@@ -86,7 +86,7 @@ export default function FileServices(props?: FileServicesIntrf) {
     const deleteAllFilesMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
-            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all/${currentUserId}` });
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/rm-all` });
         },
         onError: (error) => {
             setMessage(error.message || 'Failed to delete or check your internet connection.');
@@ -112,7 +112,7 @@ export default function FileServices(props?: FileServicesIntrf) {
     const deleteOneFileMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async (id: string) => {
-            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase/${id}` });
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/rm/${id}` });
         },
         onError: (error) => {
             setMessage(error.message || 'Failed to delete file or check your internet connection.');
@@ -166,7 +166,7 @@ export default function FileServices(props?: FileServicesIntrf) {
             if (!chosenFolder || !chosenFileId) return;
             return await changeData<FilesDataProps>({
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-folder/${chosenFileId}`,
-                data: { folder_name: chosenFolder.trim() }
+                data: { folder_id: chosenFolder.trim() }
             });
         },
         onError: (error: Error) => {
@@ -179,15 +179,7 @@ export default function FileServices(props?: FileServicesIntrf) {
             setChosenFolder(null);
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-            queryClient.removeQueries({
-                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
-                    const queryKey = query.queryKey;
-                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
-                    }
-                    return false;
-                }
-            });
+            queryClient.invalidateQueries({ queryKey: [`files-in-folder-${currentUserId}-${props?.folder_id}`] });
         },
         onSettled: () => {
             setIsProcessing(false);
@@ -209,15 +201,7 @@ export default function FileServices(props?: FileServicesIntrf) {
             setMessage(response.message);
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-            queryClient.removeQueries({
-                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
-                    const queryKey = query.queryKey;
-                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
-                    }
-                    return false; 
-                }
-            });
+            queryClient.invalidateQueries({ queryKey: [`files-in-folder-${currentUserId}-${props?.folder_id}`] });
         },
         onSettled: () => setIsProcessing(false)
     });
@@ -316,7 +300,7 @@ export default function FileServices(props?: FileServicesIntrf) {
         error: fileError, fetchNextPage: fileNext, isFetchingNextPage: fileHasNext, 
         isLoading: fileLoad, isReachedEnd: fileEnd, paginatedData: fileData 
     } = infiniteScroll<FilesDataProps>({
-        api_url: currentUserId ? `${import.meta.env.VITE_API_BASE_URL}/files/get-all/${currentUserId}` : '',
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/all`,
         limit: 14,
         query_key: debouncedSearch ? [`all-files-${currentUserId}-${debouncedSearch}`] : [`all-files-${currentUserId}`],
         searched: debouncedSearch.trim(),
@@ -327,15 +311,15 @@ export default function FileServices(props?: FileServicesIntrf) {
         error: fileError2, fetchNextPage: fileNext2, isFetchingNextPage: fileHasNext2, 
         isLoading: fileLoad2, isReachedEnd: fileEnd2, paginatedData: fileData2 
     } = infiniteScroll<FilesDataProps>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/files-in-folder/${props?.folder_name}/${currentUserId}`,
+        api_url: props && props.folder_id ? `${import.meta.env.VITE_API_BASE_URL}/files/files-in-folder/${props.folder_id}` : '',
         limit: 14,
-        query_key: debouncedSearch ? [`files-in-folder-${currentUserId}-${props?.folder_name}-${debouncedSearch}`] : [`files-in-folder-${currentUserId}-${props?.folder_name}`],
+        query_key: debouncedSearch ? [`files-in-folder-${currentUserId}-${props?.folder_id}-${debouncedSearch}`] : [`files-in-folder-${currentUserId}-${props?.folder_id}`],
         searched: debouncedSearch.trim(),
         stale_time: 1800000
     });
 
     const { error: fileError3, fetchNextPage: fileNext3, isFetchingNextPage: fileHasNext3, isLoading: fileLoad3, isReachedEnd: fileEnd3, paginatedData: fileData3 } = infiniteScroll<FilesDataProps>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/favorited/${currentUserId}`,
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/favorited`,
         limit: 14,
         query_key: debouncedSearch ? [`all-favorited-files-${currentUserId}-${debouncedSearch}`] : [`all-favorited-files-${currentUserId}`],
         searched: debouncedSearch.trim(),
@@ -346,7 +330,7 @@ export default function FileServices(props?: FileServicesIntrf) {
         error: folderError, fetchNextPage: folderNext, isFetchingNextPage: folderHasNext, 
         isLoading: folderLoad, isReachedEnd: folderEnd, paginatedData: folderData 
     } = infiniteScroll<FolderIntrf>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/all`,
         limit: 14,
         query_key: [`all-folder-prev-${currentUserId}`],
         searched: debouncedSearch.trim(),

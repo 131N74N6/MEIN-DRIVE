@@ -1,12 +1,12 @@
 import { useMutation, useQueryClient, type Query } from "@tanstack/react-query";
-import type { FolderFormProps, FolderIntrf } from "../models/folder_model";
+import type { ChildFolderIntrf, FolderFormProps, FolderIntrf, FolderServieIntrf } from "../models/folder_model";
 import { useState } from "react";
 import useDebounce from "../hooks/useDebounce";
-import DataModifier from "./data_service";
+import DataModifier from "./data.service";
 import type { FilesDataProps } from "../models/file_model";
-import AuthServices from "./auth_service";
+import AuthServices from "./auth.service";
 
-export default function FolderServices() {
+export default function FolderServices(props?: FolderServieIntrf) {
     const queryClient = useQueryClient();
     const { currentUserId } = AuthServices();
     const { changeData, deleteData, getData, message, infiniteScroll, insertData, setMessage } = DataModifier();
@@ -97,6 +97,30 @@ export default function FolderServices() {
         }
     });
 
+    const makeChildFolderMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (parent_folder_id: string) => {
+            await insertData<ChildFolderIntrf>({
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/make-child/${parent_folder_id}`,
+                data: {
+                    created_at: new Date().toLocaleString(),
+                    folder_name: folderName.trim().replace(/\s+/g, '_'),
+                    is_favorited: false,
+                    parent_folder_id: parent_folder_id,
+                    user_id: currentUserId!
+                }
+            });
+        },
+        onError: () => {},
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-child-folders-${currentUserId}`] });
+            setOpenForm(false);
+        },
+        onSettled: () => setIsProcessing(false)
+    });
+
     function makeFolder(event: React.FormEvent) {
         event.preventDefault();
         makeFolderMutation.mutate();
@@ -105,7 +129,7 @@ export default function FolderServices() {
     const removeAllFolderMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
-            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/deletes/${currentUserId}` });
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/rm-all` });
         },
         onError: (error) => {
             setMessage(error.message || 'Failed to remove all folder');
@@ -159,8 +183,8 @@ export default function FolderServices() {
 
     const removeOneFolderMt = useMutation({
         onMutate: () => setIsProcessing(true),
-        mutationFn: async (folder_name: string) => {
-            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/delete/${currentUserId}/${folder_name}` });
+        mutationFn: async (folder_id: string) => {
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/rm/${folder_id}` });
         },
         onError: (error) => {
             setMessage(error.message || 'Failed to delete folder or check your internet connection');
@@ -190,7 +214,7 @@ export default function FolderServices() {
     }
 
     const { fetchNextPage, isLoading, isFetchingNextPage, isReachedEnd, error, paginatedData } = infiniteScroll<FolderIntrf>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/get/${currentUserId}`,
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/parent-folder-only`,
         limit: 14,
         query_key: debouncedSearch ? [`all-folders-${currentUserId}-${debouncedSearch}`] : [`all-folders-${currentUserId}`],
         stale_time: 1200000,
@@ -201,13 +225,25 @@ export default function FolderServices() {
         fetchNextPage: fetchFavoritedNextPage, isLoading: isFavoritedLoading, isFetchingNextPage: isFavoritedFetchingNextPage, 
         isReachedEnd: isFavoritedReachedEnd, error: favoritedError, paginatedData: favoritedPaginatedData 
     } = infiniteScroll<FolderIntrf>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/favorited/${currentUserId}`,
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/favorited`,
         limit: 14,
         query_key: [`all-favorited-folders-${currentUserId}`],
         stale_time: 1200000
     });
 
     const foldersData = { fetchNextPage, isLoading, isFetchingNextPage, isReachedEnd, error, paginatedData }
+
+    const { 
+        fetchNextPage: fetchChildFolder, isLoading: isChildFolderLoading, isFetchingNextPage: isChildFolderFetchingNextPage, 
+        isReachedEnd: isChildFolderReachedEnd, error: childFolderError, paginatedData: childFolderPaginatedData 
+    } = infiniteScroll<FolderIntrf>({
+        api_url: props && props.parent_folder_id ? `${import.meta.env.VITE_API_BASE_URL}/folders/all-child-folder/${props.parent_folder_id!}` : '',
+        limit: 14,
+        query_key: [`all-child-folders-${currentUserId}`],
+        stale_time: 1200000
+    });
+
+    const childFoldersData = { fetchChildFolder, isChildFolderLoading, isChildFolderFetchingNextPage, isChildFolderReachedEnd, childFolderError, childFolderPaginatedData }
     
     const favoritedFoldersData = { 
         fetchNextPage: fetchFavoritedNextPage, isLoading: isFavoritedLoading, 
@@ -218,8 +254,8 @@ export default function FolderServices() {
     }
 
     return { 
-        addToFavoriteMt, changeFolderName, foldersData, favoritedFoldersData, folderFormToggle, folderName, getData, isProcessing, makeFolder, 
-        message, openForm, removeAllFolderMt, removeFromFavoritedMt, removeOneFolderMt, searchValue, selectedFolderId, 
-        setFolderName, setMessage, selectFolder, setSearchValue 
+        addToFavoriteMt, changeFolderName, childFoldersData, foldersData, favoritedFoldersData, folderFormToggle, folderName, getData, 
+        isProcessing, makeFolder, makeChildFolderMt, message, openForm, removeAllFolderMt, removeFromFavoritedMt, removeOneFolderMt, 
+        searchValue, selectedFolderId, setFolderName, setMessage, selectFolder, setSearchValue 
     }
 }

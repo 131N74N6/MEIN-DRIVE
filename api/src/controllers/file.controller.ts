@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { File } from "../models/file.model";
 import { v2 } from "cloudinary";
+import { AuthRequest } from "../middleware/auth.middleware";
 
 export async function addNewFile(req: Request, res: Response) {
     try {
@@ -28,7 +29,7 @@ export async function addToFavorite(req: Request, res: Response) {
 export async function addToFolder(req: Request, res: Response) {
     try {
         await File.updateOne({ _id: req.params._id }, { 
-            $set: { folder_name: req.body.folder_name }
+            $set: { folder_id: req.body.folder_id }
         });
         res.status(200).json({ message: 'added 1 file' });
     } catch (error) {
@@ -38,8 +39,8 @@ export async function addToFolder(req: Request, res: Response) {
 
 export async function deleteAllFilesInFolder(req: Request, res: Response) {
     try {
-        const getCurrentFolder = req.params.folder_name;
-        const getAllFiles = await File.find({ folder_name: getCurrentFolder });
+        const getCurrentFolderId = req.params.folder_id;
+        const getAllFiles = await File.find({ folder_name: getCurrentFolderId });
 
         if (getAllFiles.length === 0) return res.status(400).json({ message: "no files added" });
 
@@ -49,7 +50,7 @@ export async function deleteAllFilesInFolder(req: Request, res: Response) {
 
         await Promise.all([
             ...deletePromise,
-            File.deleteMany({ folder_name: getCurrentFolder })
+            File.deleteMany({ folder_id: getCurrentFolderId })
         ]);
 
         res.status(200).json({ message: 'file deleted' });
@@ -96,9 +97,9 @@ export async function deleteSelectedFile(req: Request, res: Response): Promise<R
     }
 }
 
-export async function getAllFiles(req: Request, res: Response) {
+export async function getAllFiles(req: AuthRequest, res: Response) {
     try {
-        const getUserId = req.params.user_id;
+        const getUserId = req.user?.user_id;
         const searched = req.query.search as string | undefined;
 
         const page = parseInt(req.query.page as string) || 1;
@@ -121,7 +122,7 @@ export async function getAllFiles(req: Request, res: Response) {
     }
 }
 
-export async function getFilesInFolder(req: Request, res: Response) {
+export async function getFilesInFolder(req: AuthRequest, res: Response) {
     try {
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 14;
@@ -130,16 +131,16 @@ export async function getFilesInFolder(req: Request, res: Response) {
 
         if (searched !== undefined) {
             const getAllFiles = await File.find({ 
-                folder_name: req.params.folder_name, 
+                folder_id: req.params.folder_id, 
+                user_id: req.user?.user_id,
                 file_name: { $regex: new RegExp(searched, 'i') }, 
-                user_id: req.params.user_id 
             }).limit(limit).skip(skip);
 
             res.status(200).json(getAllFiles);
         } else {
             const getAllFiles = await File.find({ 
-                folder_name: req.params.folder_name, 
-                user_id: req.params.user_id 
+                folder_id: req.params.folder_id, 
+                user_id: req.user?.user_id,
             }).limit(limit).skip(skip);
 
             res.status(200).json(getAllFiles);
@@ -149,9 +150,9 @@ export async function getFilesInFolder(req: Request, res: Response) {
     }
 }
 
-export async function getFavoritedFiles(req: Request, res: Response) {
+export async function getFavoritedFiles(req: AuthRequest, res: Response) {
     try {
-        const getUserId = req.params.user_id;
+        const getUserId = req.user?.user_id;
         const searched = req.query.search as string | undefined;
 
         const page = parseInt(req.query.page as string) || 1;
@@ -187,7 +188,7 @@ export async function isFileFavorited(req: Request, res: Response) {
 export async function moveOutsideFolder(req: Request, res: Response) {
     try {
         await File.updateOne({ _id: req.params._id }, { 
-            $set: { folder_name: null }
+            $set: { folder_id: null }
         });
         res.status(200).json({ message: 'removed 1 file' });
     } catch (error) {

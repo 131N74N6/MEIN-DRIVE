@@ -1,7 +1,7 @@
 import Notification from "../components/Notification";
 import { X } from "lucide-react";
 import { FileIconPreview } from "../components/FileIcon";
-import FileServices from "../services/file_service";
+import FileServices from "../services/file.service";
 import { useEffect } from "react";
 
 export default function AddFiles() {

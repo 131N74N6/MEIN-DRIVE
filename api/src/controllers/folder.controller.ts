@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Folder } from "../models/folder.model";
 import { File } from "../models/file.model";
 import { v2 } from "cloudinary";
+import { AuthRequest } from "../middleware/auth.middleware";
 
 export async function addToFavorite(req: Request, res: Response) {
     try {
@@ -14,9 +15,9 @@ export async function addToFavorite(req: Request, res: Response) {
     }
 }
 
-export async function changeFolderName(req: Request, res: Response) {
+export async function changeFolderName(req: AuthRequest, res: Response) {
     try {
-        const isFolderNameExist = await Folder.findOne({ folder_name: req.body.folder_name });
+        const isFolderNameExist = await Folder.findOne({ folder_name: req.body.folder_name, user_id: req.user?.user_id });
         if (isFolderNameExist) return res.status(409).json({ message: 'folder name already exist' });
         
         if (!req.body.folder_name) return res.status(400).json({ message: 'folder name required' });
@@ -31,9 +32,9 @@ export async function changeFolderName(req: Request, res: Response) {
     }
 }
 
-export async function deleteAllFolders(req: Request, res: Response) {
+export async function deleteAllFolders(req: AuthRequest, res: Response) {
     try {
-        const getCurrentUserId = req.params.user_id;
+        const getCurrentUserId = req.user?.user_id;
         const getAllFiles = await File.find({ user_id: getCurrentUserId, folder_name: { $ne: null, $exists: true } });
 
         const getAllFolders = await Folder.find({ user_id: getCurrentUserId });
@@ -45,8 +46,32 @@ export async function deleteAllFolders(req: Request, res: Response) {
 
         await Promise.all([
             ...deletePromise,
-            File.deleteMany({ user_id: getCurrentUserId, folder_name: { $ne: null, $exists: true } }),
+            File.deleteMany({ user_id: getCurrentUserId, folder_id: { $ne: null, $exists: true } }),
             Folder.deleteMany({ user_id: getCurrentUserId })
+        ]);
+
+        res.status(200).json({ message: 'all folders deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export async function deleteAllChildFolders(req: AuthRequest, res: Response) {
+    try {
+        const getCurrentUserId = req.user?.user_id;
+        const getAllFiles = await File.find({ user_id: getCurrentUserId, folder_name: { $ne: null, $exists: true } });
+
+        const getAllFolders = await Folder.find({ user_id: getCurrentUserId, parent_folder_id: req.params.parent_folder_id });
+        if (getAllFolders.length === 0) return res.status(404).json({ message: 'no folders found' });
+
+        const deletePromise = getAllFiles.map((file) => {
+            return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
+        });
+
+        await Promise.all([
+            ...deletePromise,
+            File.deleteMany({ user_id: getCurrentUserId, folder_id: { $ne: null, $exists: true } }),
+            Folder.deleteMany({ parent_folder_id: req.params.parent_folder_id })
         ]);
 
         res.status(200).json({ message: 'all folders deleted' });
@@ -57,8 +82,8 @@ export async function deleteAllFolders(req: Request, res: Response) {
 
 export async function deleteOneFolder(req: Request, res: Response) {
     try {
-        const getCurrentFolder = req.params.folder_name;
-        const getAllFiles = await File.find({ user_id: req.params.user_id, folder_name: getCurrentFolder });
+        const getCurrentFolderId = req.params._id;
+        const getAllFiles = await File.find({ folder_id: getCurrentFolderId });
 
         const deletePromise = getAllFiles.map((file) => {
             return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
@@ -66,8 +91,9 @@ export async function deleteOneFolder(req: Request, res: Response) {
 
         await Promise.all([
             ...deletePromise,
-            File.deleteMany({ folder_name: getCurrentFolder }),
-            Folder.deleteOne({ folder_name: getCurrentFolder })
+            File.deleteMany({ folder_id: getCurrentFolderId }),
+            Folder.deleteMany({ parent_folder_id: getCurrentFolderId }),
+            Folder.deleteOne({ _id: getCurrentFolderId })
         ]);
 
         res.status(200).json({ message: 'one folder deleted' });
@@ -76,7 +102,28 @@ export async function deleteOneFolder(req: Request, res: Response) {
     }
 }
 
-export async function getCurrentUserFolder(req: Request, res: Response) {
+export async function deleteOneChildFolder(req: Request, res: Response) {
+    try {
+        const getCurrentFolderId = req.params._id;
+        const getAllFiles = await File.find({ folder_id: getCurrentFolderId });
+
+        const deletePromise = getAllFiles.map((file) => {
+            return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
+        });
+
+        await Promise.all([
+            ...deletePromise,
+            File.deleteMany({ folder_id: getCurrentFolderId }),
+            Folder.deleteMany({ _id: getCurrentFolderId }),
+        ]);
+
+        res.status(200).json({ message: 'one folder deleted' });
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export async function getCurrentUserFolder(req: AuthRequest, res: Response) {
     try {
         const searched = req.query.search as string | undefined;
         const page = parseInt(req.query.page as string) || 1;
@@ -85,12 +132,12 @@ export async function getCurrentUserFolder(req: Request, res: Response) {
 
         if (searched !== undefined) {
             const getAllFolders = await Folder.find({ 
-                user_id: req.params.user_id,
+                user_id: req.user?.user_id,
                 folder_name: { $regex: new RegExp(searched, 'i') }
             }).limit(limit).skip(skip);
             res.status(200).json(getAllFolders);
         } else {
-            const getAllFolders = await Folder.find({ user_id: req.params.user_id }).limit(limit).skip(skip);
+            const getAllFolders = await Folder.find({ user_id: req.user?.user_id }).limit(limit).skip(skip);
             res.status(200).json(getAllFolders);
         }
     } catch (error) {
@@ -98,7 +145,40 @@ export async function getCurrentUserFolder(req: Request, res: Response) {
     }
 }
 
-export async function geFavoritedFolders(req: Request, res: Response) {
+export async function getParentFolderOnly(req: AuthRequest, res: Response) {
+    try {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 14;
+        const skip = (page - 1) * limit;
+
+        const getAllFolders = await Folder.find({ 
+            user_id: req.user?.user_id, 
+            parent_folder_id: { $exists: false } 
+        }).limit(limit).skip(skip);
+
+        res.status(200).json(getAllFolders);        
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export async function getChildFolders(req: AuthRequest, res:Response) {
+    try {
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 14;
+        const skip = (page - 1) * limit;
+
+        const getAllFolders = await Folder.find({ 
+            user_id: req.user?.user_id, 
+            parent_folder_id: req.params.parent_folder_id 
+        }).limit(limit).skip(skip);
+        res.status(200).json(getAllFolders);        
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export async function geFavoritedFolders(req: AuthRequest, res: Response) {
     try {
         const searched = req.query.search as string | undefined;
         const page = parseInt(req.query.page as string) || 1;
@@ -107,13 +187,13 @@ export async function geFavoritedFolders(req: Request, res: Response) {
 
         if (searched !== undefined) {
             const getFavoriteFolders = await Folder.find({ 
-                user_id: req.params.user_id,
+                user_id: req.user?.user_id,
                 is_favorited: true,
                 folder_name: { $regex: new RegExp(searched, 'i') }
             }).limit(limit).skip(skip);
             res.status(200).json(getFavoriteFolders);
         } else {
-            const getFavoriteFolders = await Folder.find({ user_id: req.params.user_id, is_favorited: true }).limit(limit).skip(skip);
+            const getFavoriteFolders = await Folder.find({ user_id: req.user?.user_id, is_favorited: true }).limit(limit).skip(skip);
             res.status(200).json(getFavoriteFolders);
         }
     } catch (error) {
@@ -130,16 +210,40 @@ export async function isFolderFavorited(req: Request, res: Response) {
     }
 }
 
-export async function makeNewFolder(req: Request, res: Response) {
+export async function makeNewFolder(req: AuthRequest, res: Response) {
     try {
-        const isFolderNameExist = await Folder.findOne({ folder_name: req.body.folder_name });
+        const isFolderNameExist = await Folder.findOne({ folder_name: req.body.folder_name, user_id: req.user?.user_id });
         if (isFolderNameExist) return res.status(409).json({ message: 'folder name already exist' });
-
         if (!req.body.folder_name) return res.status(400).json({ message: 'folder name is required' });
         
         const newFolder = new Folder(req.body);
         await newFolder.save();
         res.status(200).json({ message: 'new folder created' });
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export async function makeChildFolder(req: AuthRequest, res: Response) {
+    try {
+        const isFolderNameExist = await Folder.findOne({ folder_name: req.body.folder_name, user_id: req.user?.user_id, parent_folder_id: req.params.parent_folder_id });
+        if (isFolderNameExist) return res.status(409).json({ message: 'folder name already exist' });
+        if (!req.body.folder_name) return res.status(400).json({ message: 'folder name is required' });
+        
+        const newFolder = new Folder(req.body);
+        await newFolder.save();
+        res.status(200).json({ message: 'new folder created' });
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export async function moveOutsideParentFolder(req: Request, res: Response) {
+    try {
+        await Folder.updateOne({ _id: req.params._id }, { 
+            $unset: { parent_folder_id: '' }
+        });
+        res.status(200).json({ message: 'removed 1 file' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }

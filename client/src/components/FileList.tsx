@@ -19,7 +19,7 @@ export default function FileList(props: FileListProps) {
                         add_to_favorite={props.add_to_favorite}
                         file={file} 
                         get_data={props.get_data}
-                        is_in_folder={!!file.folder_name} 
+                        is_in_folder={!!file.folder_id} 
                         is_processing={props.is_processing}
                         key={`file_${file._id}`} 
                         move_outside_folder={props.move_outside_folder}

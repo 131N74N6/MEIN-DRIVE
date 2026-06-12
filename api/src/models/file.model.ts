@@ -9,7 +9,7 @@ type IFile ={
     };
     file_name: string;
     file_type: string;
-    folder_name: string;
+    folder_id: Types.ObjectId;
     is_favorited: boolean;
     user_id: Types.ObjectId;
 }
@@ -23,7 +23,7 @@ const fileSchema = new Schema<IFile>({
     },
     file_name: { type: String, required: true },
     file_type: { type: String, required: true },
-    folder_name: { type: String, default: null },
+    folder_id: { type: Schema.Types.ObjectId, default: null },
     is_favorited: { type: Boolean, default: false },
     user_id: { type: Schema.Types.ObjectId, required: true },
 });

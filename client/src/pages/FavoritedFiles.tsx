@@ -4,7 +4,7 @@ import Loading from "../components/Loading";
 import Notification from "../components/Notification";
 import { Trash } from "lucide-react";
 import FolderListPreview from "../components/FolderListPreview";
-import FileServices from "../services/file_service";
+import FileServices from "../services/file.service";
 import { useEffect } from "react";
 
 export default function FavoritedFiles() {    

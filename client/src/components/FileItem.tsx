@@ -10,7 +10,7 @@ export default function FileItem(props: FileItemProps) {
     const { data: isFavorited } = props.get_data<boolean>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/files/is-favorited/${props.file._id}`,
         query_key: [`is-file-favorited-${props.file._id}`],
-        stale_time: 1200000
+        stale_time: 1800000
     });
 
     const showMoreOptions = () => setShowOption(!showOption);

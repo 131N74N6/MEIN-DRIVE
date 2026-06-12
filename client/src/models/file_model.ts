@@ -26,12 +26,12 @@ export type FilesDataProps = {
     }
     file_name: string;
     file_type: string;
-    folder_name: string;
+    folder_id: string;
     is_favorited: boolean;
     user_id: string;
 }
 
-export type FilesFormIntrf = Omit<FilesDataProps, "folder_name" | "is_favorited">;
+export type FilesFormIntrf = Omit<FilesDataProps, "folder_id" | "is_favorited">;
 
 export type FileListProps = {
     add_to_favorite: UseMutationResult<void, Error, string, void>;
@@ -60,7 +60,7 @@ export type FileItemProps = {
 }
 
 export type FileServicesIntrf = {
-    folder_name?: string;
+    folder_id?: string;
     id?:string;
     user_id?: string;
 }

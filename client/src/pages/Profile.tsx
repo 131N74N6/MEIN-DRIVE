@@ -1,7 +1,7 @@
 import { useParams } from "react-router-dom";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import Loading from "../components/Loading";
-import UserServices from "../services/user_service";
+import UserServices from "../services/user.service";
 import { useEffect } from "react";
 
 export default function Profile() {

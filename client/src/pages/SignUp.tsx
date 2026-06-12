@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import useAuth from "../services/auth_service";
+import useAuth from "../services/auth.service";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function SignUp() {

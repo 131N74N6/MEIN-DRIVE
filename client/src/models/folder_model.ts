@@ -37,7 +37,17 @@ export type FolderFormIntrf = {
     is_making: boolean;
     set_folder_name: (value: React.SetStateAction<string>) => void;
     submit_folder: (event: React.FormEvent<Element>) => void;
-    message: string | null
+    message: string | null;
+}
+
+export type ChildFolderFormIntrf = {
+    closed_form: () => void;
+    folder_name: string;
+    is_making: boolean;
+    set_folder_name: (value: React.SetStateAction<string>) => void;
+    submit_folder: UseMutationResult<void, Error, string, void>;
+    message: string | null;
+    parent_folder_id: string;
 }
 
 export type FolderItemIntrf = {
@@ -51,6 +61,7 @@ export type FolderItemIntrf = {
     on_delete: UseMutationResult<void, Error, string, void>;
     on_edit: UseMutationResult<void, Error, Pick<FolderIntrf, '_id' | 'folder_name'>, void>;
     on_select: (id: string) => void;
+    parent_folder_id?: string;
     remove_from_favorite: UseMutationResult<any, Error, string, void>;
     selected_folder_id: string | null;
 }
@@ -66,6 +77,7 @@ export type FolderListIntrf = {
     on_delete: UseMutationResult<void, Error, string, void>;
     on_edit: UseMutationResult<void, Error, Pick<FolderIntrf, '_id' | 'folder_name'>, void>;
     on_select: (id: string) => void;
+    parent_folder_id?: string;
     remove_from_favorite: UseMutationResult<any, Error, string, void>;
     selected_folder_id: string | null;
 }
@@ -78,5 +90,18 @@ export type FolderOptionIntrf = {
     is_processing: boolean;
     on_delete: UseMutationResult<void, Error, string, void>;
     on_select: (id: string) => void;
+    parent_folder_id?: string;
     show_more_options: () => void;
+}
+
+export type FolderServieIntrf = {
+    parent_folder_id?: string;
+}
+
+export type ChildFolderIntrf = {
+    created_at: string;
+    folder_name: string;
+    is_favorited: boolean;
+    parent_folder_id: string;
+    user_id: string;
 }

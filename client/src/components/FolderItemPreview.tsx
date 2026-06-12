@@ -3,7 +3,7 @@ import type { FolderItemPrevIntrf } from "../models/folder_model";
 
 export default function FolderItemPreview(props: FolderItemPrevIntrf) {
     function moveToFolder() {
-        props.set_chosen_folder(props.folder_name); 
+        props.set_chosen_folder(props._id);
         props.move.mutate();
     };
     

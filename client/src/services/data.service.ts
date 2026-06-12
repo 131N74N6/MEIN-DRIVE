@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "../models/data_model";
-import useAuth from "./auth_service";
+import useAuth from "./auth.service";
 
 export default function DataModifier() {
     const { currentUserId, userLoading } = useAuth();

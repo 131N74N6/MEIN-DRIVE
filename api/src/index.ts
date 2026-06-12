@@ -37,10 +37,10 @@ app.use(cors({
         "https://mein-drive.vercel.app"
     ]
 }));
-app.use('/api/files', fileRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
+app.use('/api/files', fileRoutes);
 app.use('/api/folders', folderRoutes);
+app.use('/api/users', userRoutes);
 
 if (process.env.NODE_ENV !== 'production') {
     connection.then(() => {

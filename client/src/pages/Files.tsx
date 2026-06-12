@@ -2,20 +2,25 @@ import { Navbar1, Navbar2 } from "../components/Navbar";
 import FileList from "../components/FileList";
 import Loading from "../components/Loading";
 import Notification from "../components/Notification";
-import { Trash } from "lucide-react";
+import { FolderPlusIcon, Trash } from "lucide-react";
 import FolderListPreview from "../components/FolderListPreview";
 import { useParams } from "react-router-dom";
-import FileServices from "../services/file_service";
+import FileServices from "../services/file.service";
 import { useEffect } from "react";
+import FolderServices from "../services/folder.service";
+import ChildFolderForm from "../components/ChildFolderForm";
 
 export default function Files() {
-    const { folder_name } = useParams();
+    const { folder_id } = useParams();
+
     const { 
         addToFavoriteMt, closeFolderList, deleteAllFilesInFolderMt, deleteOneFileMt, filesInFolderData, 
         foldersPreviewData, getData, insertFileToFolderMt, isProcessing, message, moveOutsideFolderMt, 
         openFolderList, removeFromFavoritedMt, searchValue, setChosenFolder, setMessage, setSearchValue, showFolderList 
-    } = FileServices({ folder_name: folder_name });
-        
+    } = FileServices({ folder_id: folder_id });
+
+    const { childFoldersData, folderName, folderFormToggle, makeChildFolderMt, openForm, setFolderName } = FolderServices();
+    
     useEffect(() => {
         if (message) {
             const timer = setTimeout(() => setMessage(null), 3000);
@@ -39,6 +44,17 @@ export default function Files() {
                     set_chosen_folder={setChosenFolder}
                 /> 
             ) : null}
+            {openForm ? (
+                <ChildFolderForm 
+                    closed_form={folderFormToggle} 
+                    message={message} 
+                    folder_name={folderName} 
+                    is_making={isProcessing} 
+                    set_folder_name={setFolderName} 
+                    submit_folder={makeChildFolderMt}
+                    parent_folder_id={folder_id!}
+                /> 
+            ): null}
             <div className="flex flex-col gap-4 md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white">
                 <form className="flex gap-4 items-center pt-4 px-4">
                     <input 
@@ -56,25 +72,35 @@ export default function Files() {
                     >
                         <Trash size={22}></Trash>
                     </button>
+                    <button 
+                        type="button" 
+                        disabled={isProcessing}
+                        className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" 
+                        onClick={folderFormToggle}
+                    >
+                        <FolderPlusIcon size={22}></FolderPlusIcon>
+                    </button>
                 </form>
                 {filesInFolderData.fileLoad2 ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
                     </div>
-                ) : filesInFolderData.fileData2 ? (
-                    <FileList 
-                        add_to_favorite={addToFavoriteMt}
-                        fetchNextPage={filesInFolderData.fileNext2} 
-                        files={filesInFolderData.fileData2} 
-                        get_data={getData}
-                        isFetchingNextPage={filesInFolderData.fileHasNext2}
-                        is_processing={isProcessing}
-                        isReachedEnd={filesInFolderData.fileEnd2} 
-                        move_outside_folder={moveOutsideFolderMt}
-                        on_delete={deleteOneFileMt}
-                        remove_from_favorite={removeFromFavoritedMt}
-                        showFolderList={showFolderList}
-                    />
+                ) : filesInFolderData.fileData2 && childFoldersData.childFolderPaginatedData ? (
+                    <>
+                        <FileList 
+                            add_to_favorite={addToFavoriteMt}
+                            fetchNextPage={filesInFolderData.fileNext2} 
+                            files={filesInFolderData.fileData2} 
+                            get_data={getData}
+                            isFetchingNextPage={filesInFolderData.fileHasNext2}
+                            is_processing={isProcessing}
+                            isReachedEnd={filesInFolderData.fileEnd2} 
+                            move_outside_folder={moveOutsideFolderMt}
+                            on_delete={deleteOneFileMt}
+                            remove_from_favorite={removeFromFavoritedMt}
+                            showFolderList={showFolderList}
+                        />
+                    </>
                 ) : filesInFolderData.fileError2 ? (
                     <div className="flex justify-center items-center h-full bg-white">
                         <span className="text-[2rem] font-[600] text-gray-700">{filesInFolderData.fileError2.message}</span>
