@@ -193,6 +193,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
             });
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${currentUserId}`] });
         },
         onSettled: () => setIsProcessing(false)
     });
@@ -209,6 +210,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
             setMessage(response.message);
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-child-folders-${currentUserId}-${props?.parent_folder_id}`] });
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
@@ -277,6 +279,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
             queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${currentUserId}`] });
         },
         onSettled: () => setIsProcessing(false)
     });
@@ -306,6 +309,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
             queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${currentUserId}`] });
         },
         onSettled: () => setIsProcessing(false)
     });

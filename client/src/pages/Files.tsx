@@ -15,14 +15,38 @@ export default function Files() {
     const { folder_id } = useParams();
 
     const { 
-        addToFavoriteMt, closeFolderList, deleteAllFilesInFolderMt, deleteOneFileMt, filesInFolderData, 
-        foldersPreviewData, getData, insertFileToFolderMt, isProcessing, message, moveOutsideFolderMt, 
-        openFolderList, removeFromFavoritedMt, setChosenFolder, setMessage, showFolderList 
+        addToFavoriteMt: addFileToFavorite, 
+        closeFolderList, 
+        deleteAllFilesInFolderMt, 
+        deleteOneFileMt, 
+        filesInFolderData, 
+        foldersPreviewData, 
+        getData, 
+        insertFileToFolderMt, 
+        isProcessing, 
+        message, 
+        moveOutsideFolderMt, 
+        openFolderList, 
+        removeFromFavoritedMt, 
+        setChosenFolder, 
+        setMessage, 
+        showFolderList 
     } = FileServices({ folder_id: folder_id });
 
     const { 
-        changeFolderName, childFoldersData, folderName, folderFormToggle, makeChildFolderMt, moveChildFolderToOutsideMt, 
-        openForm, removeAllChildFolderMt, removeOneChildFolderMt, selectFolder, selectedFolderId, setFolderName 
+        addToFavoriteMt: addFolderToFavorite, 
+        changeFolderName, 
+        childFoldersData, 
+        folderName, 
+        folderFormToggle, 
+        makeChildFolderMt, 
+        moveChildFolderToOutsideMt, 
+        openForm, 
+        removeAllChildFolderMt, 
+        removeOneChildFolderMt, 
+        selectFolder, 
+        selectedFolderId, 
+        setFolderName 
     } = FolderServices({ parent_folder_id: folder_id! });
     
     useEffect(() => {
@@ -102,7 +126,7 @@ export default function Files() {
                 ) : filesInFolderData.fileData2 && childFoldersData.childFolderPaginatedData ? (
                     <>
                         <FolderList 
-                            add_to_favorite={addToFavoriteMt}
+                            add_to_favorite={addFolderToFavorite}
                             fetchNextPage={childFoldersData.fetchChildFolder} 
                             folders={childFoldersData.childFolderPaginatedData} 
                             get_data={getData}
@@ -118,7 +142,7 @@ export default function Files() {
                             selected_folder_id={selectedFolderId}
                         />
                         <FileList 
-                            add_to_favorite={addToFavoriteMt}
+                            add_to_favorite={addFileToFavorite}
                             fetchNextPage={filesInFolderData.fileNext2} 
                             files={filesInFolderData.fileData2} 
                             get_data={getData}

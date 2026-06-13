@@ -9,9 +9,24 @@ import { useEffect } from "react";
 
 export default function Home() {
     const { 
-        addToFavoriteMt, allFiles, closeFolderList, deleteAllFilesMt, deleteOneFileMt, foldersPreviewData, 
-        getData, insertFileToFolderMt, isProcessing, message, moveOutsideFolderMt, openFolderList, 
-        removeFromFavoritedMt, searchValue, setChosenFolder, setMessage, setSearchValue, showFolderList 
+        addToFavoriteMt, 
+        allFiles, 
+        closeFolderList, 
+        deleteAllFilesMt, 
+        deleteOneFileMt, 
+        foldersPreviewData, 
+        getData, 
+        insertFileToFolderMt, 
+        isProcessing, 
+        message, 
+        moveOutsideFolderMt, 
+        openFolderList, 
+        removeFromFavoritedMt, 
+        searchValue, 
+        setChosenFolder, 
+        setMessage, 
+        setSearchValue, 
+        showFolderList 
     } = FileServices();
         
     useEffect(() => {

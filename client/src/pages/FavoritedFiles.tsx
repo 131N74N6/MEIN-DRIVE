@@ -9,9 +9,24 @@ import { useEffect } from "react";
 
 export default function FavoritedFiles() {    
     const { 
-        addToFavoriteMt, closeFolderList, deleteAllFilesMt, deleteOneFileMt, favoritedFiles, 
-        foldersPreviewData, getData, insertFileToFolderMt, isProcessing, message, moveOutsideFolderMt, 
-        openFolderList, removeFromFavoritedMt, searchValue, setChosenFolder, setMessage, setSearchValue, showFolderList 
+        addToFavoriteMt, 
+        closeFolderList, 
+        deleteAllFilesMt, 
+        deleteOneFileMt, 
+        favoritedFiles, 
+        foldersPreviewData, 
+        getData, 
+        insertFileToFolderMt, 
+        isProcessing, 
+        message, 
+        moveOutsideFolderMt, 
+        openFolderList, 
+        removeFromFavoritedMt, 
+        searchValue, 
+        setChosenFolder, 
+        setMessage, 
+        setSearchValue, 
+        showFolderList 
     } = FileServices();
 
     useEffect(() => {

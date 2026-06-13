@@ -9,9 +9,22 @@ import Notification from "../components/Notification";
 
 export default function FavoritedFolders() {
     const { 
-        addToFavoriteMt, changeFolderName,favoritedFoldersData, folderFormToggle, folderName, getData, 
-        isProcessing, makeFolder, message, openForm, removeAllFolderMt, removeFromFavoritedMt, removeOneFolderMt, 
-        selectFolder, selectedFolderId, setFolderName, setMessage 
+        addToFavoriteMt, 
+        changeFolderName,favoritedFoldersData, 
+        folderFormToggle, 
+        folderName, 
+        getData, 
+        isProcessing, 
+        makeFolder, 
+        message, 
+        openForm, 
+        removeAllFolderMt, 
+        removeFromFavoritedMt, 
+        removeOneFolderMt, 
+        selectFolder, 
+        selectedFolderId, 
+        setFolderName, 
+        setMessage 
     } = FolderServices();
     
     useEffect(() => {

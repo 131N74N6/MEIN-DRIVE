@@ -7,8 +7,19 @@ import { useEffect } from "react";
 export default function Profile() {
     const { user_id } = useParams();
     const { 
-        changeProfileMt, deleteAccountMt, editMode, handleInputChange, isProcessing, message,
-        newProfile, setEditMode, setMessage, setNewProfile, userData, userLoading, userError 
+        changeProfileMt, 
+        deleteAccountMt, 
+        editMode, 
+        handleInputChange, 
+        isProcessing, 
+        message,
+        newProfile, 
+        setEditMode, 
+        setMessage, 
+        setNewProfile, 
+        userData, 
+        userLoading, 
+        userError 
     } = UserServices(user_id!);
     
     useEffect(() => {

@@ -6,8 +6,15 @@ import { useEffect } from "react";
 
 export default function AddFiles() {
     const { 
-        fileInputRef, handleChosenFiles, isProcessing, mediaFiles, 
-        message, navigate, removeChosenFiles, setMessage, uploadFilesMutation 
+        fileInputRef, 
+        handleChosenFiles, 
+        isProcessing, 
+        mediaFiles, 
+        message, 
+        navigate, 
+        removeChosenFiles, 
+        setMessage, 
+        uploadFilesMutation 
     } = FileServices();
 
     useEffect(() => {
