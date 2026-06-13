@@ -3,14 +3,6 @@ import FolderItem from "./FolderItem";
 import Loading from "./Loading";
 
 export default function FolderList(props: FolderListIntrf) {
-    if (props.folders.length === 0) {
-        return (
-            <section className="flex h-full items-center justify-center">
-                <span className="text-gray-700 font-[600] text-[1rem]">No folders found...</span>
-            </section>
-        );
-    }
-    
     return (
         <div className="flex flex-col gap-[1rem] px-4 pt-4 overflow-y-auto">
             <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
@@ -22,17 +14,20 @@ export default function FolderList(props: FolderListIntrf) {
                         is_processing={props.is_processing}
                         is_selected={props.selected_folder_id === folder._id}
                         key={`folder-${index}`} 
+                        move_outside_parent_folder={props.move_outside_parent_folder}
                         on_delete={props.on_delete}
                         on_edit={props.on_edit} 
                         on_select={props.on_select} 
+                        parent_folder_id={props.parent_folder_id}
                         remove_from_favorite={props.remove_from_favorite}
                         selected_folder_id={props.selected_folder_id}
                     />
                 ))}
             </div>
             <div className="flex justify-center">
-                {props.isFetchingNextPage ?  <Loading/> : null}
-                {props.folders.length < 14 ? (
+                {props.isFetchingNextPage ?  (
+                    <Loading/>
+                ) : props.folders.length < 14 ? (
                     <></>
                 ) : props.isReachedEnd ? (
                     <p className="text-gray-700 font-[500] text-center text-[1rem]">No More Files to Show</p>

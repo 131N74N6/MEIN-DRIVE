@@ -84,9 +84,9 @@ export default function Folders() {
                         <span className="text-[2rem] font-[600] text-gray-700">{foldersData.error.message}</span>
                     </div>
                 ) : (
-                    <div className="flex justify-center items-center h-full bg-white">
-                        <span className="text-[2rem] font-[600] text-gray-700">Failed to get posts</span>
-                    </div>
+                    <section className="flex h-full items-center justify-center">
+                        <span className="text-gray-700 font-[600] text-4">No Folders found...</span>
+                    </section>
                 )}
             </div>
             <Navbar1/>

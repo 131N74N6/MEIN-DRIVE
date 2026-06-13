@@ -9,6 +9,7 @@ import FileServices from "../services/file.service";
 import { useEffect } from "react";
 import FolderServices from "../services/folder.service";
 import ChildFolderForm from "../components/ChildFolderForm";
+import FolderList from "../components/FolderList";
 
 export default function Files() {
     const { folder_id } = useParams();
@@ -16,10 +17,13 @@ export default function Files() {
     const { 
         addToFavoriteMt, closeFolderList, deleteAllFilesInFolderMt, deleteOneFileMt, filesInFolderData, 
         foldersPreviewData, getData, insertFileToFolderMt, isProcessing, message, moveOutsideFolderMt, 
-        openFolderList, removeFromFavoritedMt, searchValue, setChosenFolder, setMessage, setSearchValue, showFolderList 
+        openFolderList, removeFromFavoritedMt, setChosenFolder, setMessage, showFolderList 
     } = FileServices({ folder_id: folder_id });
 
-    const { childFoldersData, folderName, folderFormToggle, makeChildFolderMt, openForm, setFolderName } = FolderServices();
+    const { 
+        changeFolderName, childFoldersData, folderName, folderFormToggle, makeChildFolderMt, moveChildFolderToOutsideMt, 
+        openForm, removeAllChildFolderMt, removeOneChildFolderMt, selectFolder, selectedFolderId, setFolderName 
+    } = FolderServices({ parent_folder_id: folder_id! });
     
     useEffect(() => {
         if (message) {
@@ -55,38 +59,64 @@ export default function Files() {
                     parent_folder_id={folder_id!}
                 /> 
             ): null}
-            <div className="flex flex-col gap-4 md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white">
-                <form className="flex gap-4 items-center pt-4 px-4">
-                    <input 
-                        type="text" 
-                        value={searchValue}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => setSearchValue(event.target.value)}
-                        className="border rounded border-gray-700 p-[0.45rem] w-full text-[0.9rem] outline-0 font-[500]"
-                        placeholder="search file here"
-                    />
+            <div className="flex flex-col md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white">
+                <div className="flex gap-4 items-center pt-4 px-4">
                     <button 
                         type="button" 
                         disabled={isProcessing}
-                        className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" 
+                        className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium flex justify-center bg-gray-700 text-white text-[0.9rem] p-2 rounded" 
                         onClick={() => deleteAllFilesInFolderMt.mutate()}
                     >
-                        <Trash size={22}></Trash>
+                        <div className="flex gap-1">
+                            <Trash size={22}></Trash>
+                            <span>Delete All Files</span>
+                        </div>
                     </button>
                     <button 
                         type="button" 
                         disabled={isProcessing}
-                        className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" 
+                        className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium flex justify-center bg-gray-700 text-white text-[0.9rem] p-2 rounded" 
+                        onClick={() => removeAllChildFolderMt.mutate(folder_id!)}
+                    >
+                        <div className="flex gap-1">
+                            <Trash size={22}></Trash>
+                            <span>Delete All Folders</span>
+                        </div>
+                    </button>
+                    <button 
+                        type="button" 
+                        disabled={isProcessing}
+                        className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium flex justify-center bg-gray-700 text-white text-[0.9rem] p-2 rounded" 
                         onClick={folderFormToggle}
                     >
-                        <FolderPlusIcon size={22}></FolderPlusIcon>
+                        <div className="flex gap-1">
+                            <FolderPlusIcon size={22}></FolderPlusIcon>
+                            <span>Make New Folder</span>
+                        </div>
                     </button>
-                </form>
-                {filesInFolderData.fileLoad2 ? (
+                </div>
+                {filesInFolderData.fileLoad2 && childFoldersData.isChildFolderLoading ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
                     </div>
                 ) : filesInFolderData.fileData2 && childFoldersData.childFolderPaginatedData ? (
                     <>
+                        <FolderList 
+                            add_to_favorite={addToFavoriteMt}
+                            fetchNextPage={childFoldersData.fetchChildFolder} 
+                            folders={childFoldersData.childFolderPaginatedData} 
+                            get_data={getData}
+                            isFetchingNextPage={childFoldersData.isChildFolderFetchingNextPage}
+                            isReachedEnd={childFoldersData.isChildFolderReachedEnd} 
+                            move_outside_parent_folder={moveChildFolderToOutsideMt}
+                            on_delete={removeOneChildFolderMt}
+                            on_edit={changeFolderName}
+                            on_select={selectFolder}
+                            parent_folder_id={folder_id!}
+                            remove_from_favorite={removeFromFavoritedMt}
+                            is_processing={isProcessing}
+                            selected_folder_id={selectedFolderId}
+                        />
                         <FileList 
                             add_to_favorite={addToFavoriteMt}
                             fetchNextPage={filesInFolderData.fileNext2} 
@@ -101,15 +131,14 @@ export default function Files() {
                             showFolderList={showFolderList}
                         />
                     </>
-                ) : filesInFolderData.fileError2 ? (
+                ) : filesInFolderData.fileError2 && childFoldersData.childFolderError ? (
                     <div className="flex justify-center items-center h-full bg-white">
-                        <span className="text-[2rem] font-[600] text-gray-700">{filesInFolderData.fileError2.message}</span>
+                        <div className="flex flex-col gap-3">
+                            <span className="text-[2rem] font-[600] text-gray-700">{filesInFolderData.fileError2.message}</span>
+                            <span className="text-[2rem] font-[600] text-gray-700">{childFoldersData.childFolderError.message}</span>
+                        </div>
                     </div>
-                ) : (
-                    <div className="flex justify-center items-center h-full bg-white">
-                        <span className="text-[2rem] font-[600] text-gray-700">Failed to get posts</span>
-                    </div>
-                )}
+                ) : null}
             </div>
             <Navbar1/>
             <Navbar2/>

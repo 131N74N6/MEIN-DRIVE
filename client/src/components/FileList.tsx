@@ -3,14 +3,6 @@ import FileItem from "./FileItem";
 import Loading from "./Loading";
 
 export default function FileList(props: FileListProps) {
-    if (props.files.length === 0) {
-        return (
-            <section className="flex h-full items-center justify-center">
-                <span className="text-gray-700 font-[600] text-4">No files found...</span>
-            </section>
-        );
-    }
-
     return (
         <div className="flex flex-col gap-4 px-4 overflow-y-auto">
             <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">

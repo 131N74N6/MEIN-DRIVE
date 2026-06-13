@@ -38,8 +38,7 @@ export default function FolderListPreview(props: FolderListPrevIntrf) {
                     ))}
                 </div>
                 <div className="flex justify-center">
-                    {props.isFetchingNextPage ?  <Loading/> : null}
-                    {props.folder_prev.length < 14 ? (
+                    {props.isFetchingNextPage ?  <Loading/> : props.folder_prev.length < 14 ? (
                         <></>
                     ) : props.isReachedEnd ? (
                         <p className="text-gray-700 font-[500] text-center text-[1rem]">No More Files to Show</p>

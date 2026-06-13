@@ -15,6 +15,7 @@ export type GetDataProps = {
 
 export type InfiniteScrollProps = {
     api_url: string;
+    enabled?: boolean;
     limit: number;
     stale_time: number;
     query_key: string[];

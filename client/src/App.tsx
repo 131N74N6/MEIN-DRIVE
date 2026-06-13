@@ -25,6 +25,7 @@ export default function App() {
                     <Route path='/favorited-files' element={<ProtectedRoute><FavoritedFiles/></ProtectedRoute>}/>
                     <Route path='/favorited-folders' element={<ProtectedRoute><FavoritedFolders/></ProtectedRoute>}/>
                     <Route path='/folders' element={<ProtectedRoute><Folders/></ProtectedRoute>}/>
+                    <Route path='/child-folder-container/:folder_id' element={<ProtectedRoute><Files/></ProtectedRoute>}/>
                     <Route path='/folder-files/:folder_id' element={<ProtectedRoute><Files/></ProtectedRoute>}/>
                     <Route path='/add-file' element={<ProtectedRoute><AddFiles/></ProtectedRoute>}/>
                     <Route path="/" element={<Navigate to="/home" replace/>}/>
@@ -32,5 +33,5 @@ export default function App() {
                 </Routes>
             </BrowserRouter>
         </QueryClientProvider>
-    )
+    );
 }

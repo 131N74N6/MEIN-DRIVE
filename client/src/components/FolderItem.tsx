@@ -15,7 +15,7 @@ export default function FolderItem(props: FolderItemIntrf) {
         } else {
             setFolderName('');
         }
-    }, [props.is_selected, props._id]);
+    }, [props.is_selected, props.parent_folder_id, props.folder_name, props._id]);
 
     const { data: isFavorited } = props.get_data<boolean>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/is-favorited/${props._id}`,
@@ -83,14 +83,16 @@ export default function FolderItem(props: FolderItemIntrf) {
                     handle_favorite={handleFavoriteButton}
                     is_favorited={isFavorited!}
                     is_processing={props.is_processing}
+                    move_outside_parent_folder={props.move_outside_parent_folder}
                     on_delete={props.on_delete}
                     on_select={props.on_select}
+                    parent_folder_id={props.parent_folder_id}
                     show_more_options={handleShowOption}
                 />
             ) : (
                 <>
                     <div className="flex gap-2 flex-col">
-                        <Link to={`/folder-files/${props._id}`}>
+                        <Link to={`/child-folder-container/${props._id}`}>
                             <div className="flex justify-center items-center aspect-square text-gray-500 text-[2rem] border border-gray-500 rounded">
                                 <Folder></Folder>
                             </div>

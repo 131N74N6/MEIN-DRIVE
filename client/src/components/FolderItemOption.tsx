@@ -1,10 +1,10 @@
-import { Pen, Star, Trash, X } from "lucide-react";
+import { MoveLeft, Pen, Star, Trash, X } from "lucide-react";
 import type { FolderOptionIntrf } from "../models/folder_model";
 
 export default function FolderItemOption(props: FolderOptionIntrf) {
     return (
         <div className="flex flex-col p-1.5 gap-2.5">
-            <div className="font-medium text-gray-600">{props.created_at}</div>
+            <div className="font-medium text-gray-500">{props.created_at}</div>
             <button
                 type="button" 
                 disabled={props.is_processing}
@@ -20,7 +20,7 @@ export default function FolderItemOption(props: FolderOptionIntrf) {
                 type="button" 
                 disabled={props.is_processing}
                 onClick={() => props.on_delete.mutate(props._id)}
-                className="cursor-pointer text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <div className="flex gap-4">
                     <Trash/>
@@ -31,7 +31,7 @@ export default function FolderItemOption(props: FolderOptionIntrf) {
                 type="button" 
                 disabled={props.is_processing}
                 onClick={() => props.on_select(props._id)}
-                className="cursor-pointer text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <div className="flex gap-4">                       
                     <Pen/>
@@ -49,6 +49,19 @@ export default function FolderItemOption(props: FolderOptionIntrf) {
                     <div className="font-medium">{props.is_favorited ? 'Remove from Favorite' : 'Add to Favorite'}</div>
                 </div>
             </button>
+            {props.parent_folder_id !== undefined ? (
+                <button 
+                    type="button" 
+                    disabled={props.is_processing}
+                    onClick={() => props.move_outside_parent_folder?.mutate(props._id)}
+                    className={`cursor-pointer font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed ${props.is_favorited ? 'text-blue-600' : 'text-gray-500'}`}
+                >
+                    <div className="flex gap-4">                       
+                        <MoveLeft/>
+                        <div className="font-medium">Move Outside Folder</div>
+                    </div>
+                </button>
+            ) : null}
         </div>
     );
 }

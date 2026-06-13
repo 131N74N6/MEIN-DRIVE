@@ -8,6 +8,7 @@ export type FolderIntrf = {
     folder_name: string;
     is_favorited: boolean;
     user_id: string;
+    parent_folder_id?: string;
 }
 
 export type FolderFormProps = Omit<FolderIntrf, "is_favorited">;
@@ -58,6 +59,7 @@ export type FolderItemIntrf = {
     created_at: string;
     folder_name: string;
     is_processing: boolean;
+    move_outside_parent_folder?: UseMutationResult<void, Error, string, void>;
     on_delete: UseMutationResult<void, Error, string, void>;
     on_edit: UseMutationResult<void, Error, Pick<FolderIntrf, '_id' | 'folder_name'>, void>;
     on_select: (id: string) => void;
@@ -74,6 +76,7 @@ export type FolderListIntrf = {
     isFetchingNextPage: boolean;
     isReachedEnd: boolean;
     is_processing: boolean;
+    move_outside_parent_folder?: UseMutationResult<void, Error, string, void>;
     on_delete: UseMutationResult<void, Error, string, void>;
     on_edit: UseMutationResult<void, Error, Pick<FolderIntrf, '_id' | 'folder_name'>, void>;
     on_select: (id: string) => void;
@@ -88,6 +91,7 @@ export type FolderOptionIntrf = {
     handle_favorite: () => void;
     is_favorited: boolean;
     is_processing: boolean;
+    move_outside_parent_folder?: UseMutationResult<void, Error, string, void>;
     on_delete: UseMutationResult<void, Error, string, void>;
     on_select: (id: string) => void;
     parent_folder_id?: string;

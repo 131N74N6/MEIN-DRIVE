@@ -88,7 +88,7 @@ export default function DataModifier() {
 
     const infiniteScroll = <X>(props: InfiniteScrollProps) => {
         const { data, error, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-            enabled: !userLoading && !!currentUserId,
+            enabled: !userLoading && !!currentUserId && (props.enabled ?? true),
             getNextPageParam: (lastPage, allPages): number | undefined => {
                 if (lastPage.length < props.limit) return;
                 return allPages.length + 1;

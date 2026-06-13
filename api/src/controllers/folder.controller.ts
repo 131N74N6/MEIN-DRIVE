@@ -170,7 +170,7 @@ export async function getChildFolders(req: AuthRequest, res:Response) {
 
         const getAllFolders = await Folder.find({ 
             user_id: req.user?.user_id, 
-            parent_folder_id: req.params.parent_folder_id 
+            parent_folder_id: { $eq: req.params.parent_folder_id, $exists: true } 
         }).limit(limit).skip(skip);
         res.status(200).json(getAllFolders);        
     } catch (error) {
@@ -233,6 +233,17 @@ export async function makeChildFolder(req: AuthRequest, res: Response) {
         const newFolder = new Folder(req.body);
         await newFolder.save();
         res.status(200).json({ message: 'new folder created' });
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export async function moveInsideParentFolder(req: Request, res: Response) {
+    try {
+        await Folder.updateOne({ _id: req.params._id }, { 
+            $set: { parent_folder_id: req.body.parent_folder_id }
+        });
+        res.status(200).json({ message: 'removed 1 file' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }

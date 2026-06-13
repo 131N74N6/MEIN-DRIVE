@@ -301,6 +301,7 @@ export default function FileServices(props?: FileServicesIntrf) {
         isLoading: fileLoad, isReachedEnd: fileEnd, paginatedData: fileData 
     } = infiniteScroll<FilesDataProps>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/files/all`,
+        enabled: !!currentUserId,
         limit: 14,
         query_key: debouncedSearch ? [`all-files-${currentUserId}-${debouncedSearch}`] : [`all-files-${currentUserId}`],
         searched: debouncedSearch.trim(),
@@ -311,15 +312,20 @@ export default function FileServices(props?: FileServicesIntrf) {
         error: fileError2, fetchNextPage: fileNext2, isFetchingNextPage: fileHasNext2, 
         isLoading: fileLoad2, isReachedEnd: fileEnd2, paginatedData: fileData2 
     } = infiniteScroll<FilesDataProps>({
-        api_url: props && props.folder_id ? `${import.meta.env.VITE_API_BASE_URL}/files/files-in-folder/${props.folder_id}` : '',
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/files/files-in-folder/${props?.folder_id}`,
+        enabled: !!props?.folder_id,
         limit: 14,
         query_key: debouncedSearch ? [`files-in-folder-${currentUserId}-${props?.folder_id}-${debouncedSearch}`] : [`files-in-folder-${currentUserId}-${props?.folder_id}`],
         searched: debouncedSearch.trim(),
         stale_time: 1800000
     });
 
-    const { error: fileError3, fetchNextPage: fileNext3, isFetchingNextPage: fileHasNext3, isLoading: fileLoad3, isReachedEnd: fileEnd3, paginatedData: fileData3 } = infiniteScroll<FilesDataProps>({
+    const { 
+        error: fileError3, fetchNextPage: fileNext3, isFetchingNextPage: fileHasNext3, 
+        isLoading: fileLoad3, isReachedEnd: fileEnd3, paginatedData: fileData3 
+    } = infiniteScroll<FilesDataProps>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/files/favorited`,
+        enabled: !!currentUserId,
         limit: 14,
         query_key: debouncedSearch ? [`all-favorited-files-${currentUserId}-${debouncedSearch}`] : [`all-favorited-files-${currentUserId}`],
         searched: debouncedSearch.trim(),
@@ -331,6 +337,7 @@ export default function FileServices(props?: FileServicesIntrf) {
         isLoading: folderLoad, isReachedEnd: folderEnd, paginatedData: folderData 
     } = infiniteScroll<FolderIntrf>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/all`,
+        enabled: !!currentUserId,
         limit: 14,
         query_key: [`all-folder-prev-${currentUserId}`],
         searched: debouncedSearch.trim(),

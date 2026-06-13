@@ -60,7 +60,8 @@ export default function FolderServices(props?: FolderServieIntrf) {
             setMessage(response.message);
             setSelectedFolderId(null);
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-child-folders-${currentUserId}-${props?.parent_folder_id}`] });
         },
         onSettled: () => setIsProcessing(false)
     });
@@ -88,7 +89,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
         onSuccess: (response) => {
             setMessage(response.message);
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
             setOpenForm(false);
         },
         onSettled: () => {
@@ -114,8 +115,8 @@ export default function FolderServices(props?: FolderServieIntrf) {
         onError: () => {},
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-child-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-child-folders-${currentUserId}-${props?.parent_folder_id}`] });
             setOpenForm(false);
         },
         onSettled: () => setIsProcessing(false)
@@ -125,6 +126,48 @@ export default function FolderServices(props?: FolderServieIntrf) {
         event.preventDefault();
         makeFolderMutation.mutate();
     }
+
+    const moveChildFolderToInsideMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (_id: string) => {
+            return await changeData<FolderIntrf>({
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/move-inside/${_id}`,
+                data: {
+                    parent_folder_id: props?.parent_folder_id
+                }
+            });
+        },
+        onError: (error: Error) => {
+            setMessage(error.message || 'Failed to move folder or check your internet connection');
+        },
+        onSuccess: (response) => {
+            setMessage(response.message);
+            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-child-folders-${currentUserId}-${props?.parent_folder_id}`] });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
+
+    const moveChildFolderToOutsideMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (_id: string) => {
+            return await changeData<FolderIntrf>({
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/move-outside/${_id}`,
+                data: {}
+            });
+        },
+        onError: (error: Error) => {
+            setMessage(error.message || 'Failed to move folder or check your internet connection');
+        },
+        onSuccess: (response) => {
+            setMessage(response.message);
+            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-child-folders-${currentUserId}-${props?.parent_folder_id}`] });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
 
     const removeAllFolderMt = useMutation({
         onMutate: () => setIsProcessing(true),
@@ -137,7 +180,36 @@ export default function FolderServices(props?: FolderServieIntrf) {
         onSuccess: (response) => {
             setMessage(response.message);
             queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`is-file-favorited-`) ||
+                        queryKey[0].startsWith("is-folder-favorited-");
+                    }
+                    return false;
+                }
+            });
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
+
+    const removeAllChildFolderMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (parent_folder_id: string) => {
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/rm-all-childs/${parent_folder_id}` });
+        },
+        onError: (error) => {
+            setMessage(error.message || 'Failed to remove all folder');
+        },
+        onSuccess: (response) => {
+            setMessage(response.message);
+            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-child-folders-${currentUserId}-${props?.parent_folder_id}`] });
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
@@ -202,7 +274,36 @@ export default function FolderServices(props?: FolderServieIntrf) {
                     return false;
                 }
             });
-            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+        },
+        onSettled: () => setIsProcessing(false)
+    });
+
+    const removeOneChildFolderMt = useMutation({
+        onMutate: () => setIsProcessing(true),
+        mutationFn: async (folder_id: string) => {
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/rm-child/${folder_id}` });
+        },
+        onError: (error) => {
+            setMessage(error.message || 'Failed to delete folder or check your internet connection');
+        },
+        onSuccess: (response) => {
+            setMessage(response.message);
+            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-child-folders-${currentUserId}-${props?.parent_folder_id}`] });
+            queryClient.removeQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`is-file-favorited-`) ||
+                        queryKey[0].startsWith(`is-folder-favorited-`);;
+                    }
+                    return false;
+                }
+            });
+            queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
         },
@@ -215,9 +316,10 @@ export default function FolderServices(props?: FolderServieIntrf) {
 
     const { fetchNextPage, isLoading, isFetchingNextPage, isReachedEnd, error, paginatedData } = infiniteScroll<FolderIntrf>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/parent-folder-only`,
+        enabled: !!currentUserId,
         limit: 14,
         query_key: debouncedSearch ? [`all-folders-${currentUserId}-${debouncedSearch}`] : [`all-folders-${currentUserId}`],
-        stale_time: 1200000,
+        stale_time: 1800000,
         searched: debouncedSearch.trim()
     });
 
@@ -226,9 +328,10 @@ export default function FolderServices(props?: FolderServieIntrf) {
         isReachedEnd: isFavoritedReachedEnd, error: favoritedError, paginatedData: favoritedPaginatedData 
     } = infiniteScroll<FolderIntrf>({
         api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/favorited`,
+        enabled: !!currentUserId,
         limit: 14,
         query_key: [`all-favorited-folders-${currentUserId}`],
-        stale_time: 1200000
+        stale_time: 1800000
     });
 
     const foldersData = { fetchNextPage, isLoading, isFetchingNextPage, isReachedEnd, error, paginatedData }
@@ -237,10 +340,11 @@ export default function FolderServices(props?: FolderServieIntrf) {
         fetchNextPage: fetchChildFolder, isLoading: isChildFolderLoading, isFetchingNextPage: isChildFolderFetchingNextPage, 
         isReachedEnd: isChildFolderReachedEnd, error: childFolderError, paginatedData: childFolderPaginatedData 
     } = infiniteScroll<FolderIntrf>({
-        api_url: props && props.parent_folder_id ? `${import.meta.env.VITE_API_BASE_URL}/folders/all-child-folder/${props.parent_folder_id!}` : '',
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/all-child-folder/${props?.parent_folder_id!}`,
+        enabled: !!props?.parent_folder_id,
         limit: 14,
-        query_key: [`all-child-folders-${currentUserId}`],
-        stale_time: 1200000
+        query_key: [`all-child-folders-${currentUserId}-${props?.parent_folder_id}`],
+        stale_time: 1800000
     });
 
     const childFoldersData = { fetchChildFolder, isChildFolderLoading, isChildFolderFetchingNextPage, isChildFolderReachedEnd, childFolderError, childFolderPaginatedData }
@@ -255,7 +359,8 @@ export default function FolderServices(props?: FolderServieIntrf) {
 
     return { 
         addToFavoriteMt, changeFolderName, childFoldersData, foldersData, favoritedFoldersData, folderFormToggle, folderName, getData, 
-        isProcessing, makeFolder, makeChildFolderMt, message, openForm, removeAllFolderMt, removeFromFavoritedMt, removeOneFolderMt, 
-        searchValue, selectedFolderId, setFolderName, setMessage, selectFolder, setSearchValue 
+        isProcessing, makeFolder, makeChildFolderMt, message, moveChildFolderToInsideMt, moveChildFolderToOutsideMt, openForm, 
+        removeAllChildFolderMt, removeAllFolderMt, removeOneChildFolderMt, removeFromFavoritedMt, removeOneFolderMt, searchValue, 
+        selectedFolderId, setFolderName, setMessage, selectFolder, setSearchValue 
     }
 }
