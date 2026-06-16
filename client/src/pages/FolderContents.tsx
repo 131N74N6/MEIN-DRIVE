@@ -11,7 +11,7 @@ import FolderServices from "../services/folder.service";
 import ChildFolderForm from "../components/ChildFolderForm";
 import FolderList from "../components/FolderList";
 
-export default function Files() {
+export default function FolderContents() {
     const { folder_id } = useParams();
 
     const { 

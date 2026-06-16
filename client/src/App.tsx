@@ -8,7 +8,7 @@ import FavoritedFiles from "./pages/FavoritedFiles";
 import AddFiles from "./pages/AddFiles";
 import Profile from "./pages/Profile";
 import Folders from "./pages/Folders";
-import Files from "./pages/Files";
+import FolderContents from "./pages/FolderContents";
 import FavoritedFolders from "./pages/FavoritedFolders";
 
 const queryClient = new QueryClient();
@@ -25,8 +25,8 @@ export default function App() {
                     <Route path='/favorited-files' element={<ProtectedRoute><FavoritedFiles/></ProtectedRoute>}/>
                     <Route path='/favorited-folders' element={<ProtectedRoute><FavoritedFolders/></ProtectedRoute>}/>
                     <Route path='/folders' element={<ProtectedRoute><Folders/></ProtectedRoute>}/>
-                    <Route path='/child-folder-container/:folder_id' element={<ProtectedRoute><Files/></ProtectedRoute>}/>
-                    <Route path='/folder-files/:folder_id' element={<ProtectedRoute><Files/></ProtectedRoute>}/>
+                    <Route path='/folder-content/branch/:folder_id' element={<ProtectedRoute><FolderContents/></ProtectedRoute>}/>
+                    <Route path='/folder-content/:folder_id' element={<ProtectedRoute><FolderContents/></ProtectedRoute>}/>
                     <Route path='/add-file' element={<ProtectedRoute><AddFiles/></ProtectedRoute>}/>
                     <Route path="/" element={<Navigate to="/home" replace/>}/>
                     <Route path="*" element={<Navigate to="/sign-in" replace/>}/>

@@ -24,7 +24,7 @@ export default function FolderItemOption(props: FolderOptionIntrf) {
             >
                 <div className="flex gap-4">
                     <Trash/>
-                    <div className="font-medium">Remove this Folder</div>
+                    <div className="font-medium">Delete this Folder</div>
                 </div>
             </button>
             <button 

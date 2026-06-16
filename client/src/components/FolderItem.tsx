@@ -92,7 +92,7 @@ export default function FolderItem(props: FolderItemIntrf) {
             ) : (
                 <>
                     <div className="flex gap-2 flex-col">
-                        <Link to={`/child-folder-container/${props._id}`}>
+                        <Link to={`/folder-content/branch/${props._id}`}>
                             <div className="flex justify-center items-center aspect-square text-gray-500 text-[2rem] border border-gray-500 rounded">
                                 <Folder></Folder>
                             </div>
