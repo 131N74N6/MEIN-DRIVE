@@ -3,6 +3,7 @@ import { Folder } from "../models/folder.model";
 import { File } from "../models/file.model";
 import { v2 } from "cloudinary";
 import { AuthRequest } from "../middleware/auth.middleware";
+import mongoose from "mongoose";
 
 export async function addToFavorite(req: Request, res: Response) {
     try {
@@ -35,10 +36,12 @@ export async function changeFolderName(req: AuthRequest, res: Response) {
 export async function deleteAllFolders(req: AuthRequest, res: Response) {
     try {
         const getCurrentUserId = req.user?.user_id;
-        const getAllFiles = await File.find({ user_id: getCurrentUserId, folder_name: { $ne: null, $exists: true } });
 
         const getAllFolders = await Folder.find({ user_id: getCurrentUserId });
         if (getAllFolders.length === 0) return res.status(404).json({ message: 'no folders found' });
+        
+        const folderIds = getAllFolders.map((folder) => folder._id);
+        const getAllFiles = await File.find({ user_id: getCurrentUserId, folder_id: { $in: folderIds } });
 
         const deletePromise = getAllFiles.map((file) => {
             return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
@@ -46,7 +49,7 @@ export async function deleteAllFolders(req: AuthRequest, res: Response) {
 
         await Promise.all([
             ...deletePromise,
-            File.deleteMany({ user_id: getCurrentUserId, folder_id: { $ne: null, $exists: true } }),
+            File.deleteMany({ user_id: getCurrentUserId, folder_id: { $in: folderIds } }),
             Folder.deleteMany({ user_id: getCurrentUserId })
         ]);
 
@@ -59,10 +62,12 @@ export async function deleteAllFolders(req: AuthRequest, res: Response) {
 export async function deleteAllChildFolders(req: AuthRequest, res: Response) {
     try {
         const getCurrentUserId = req.user?.user_id;
-        const getAllFiles = await File.find({ user_id: getCurrentUserId, folder_name: { $ne: null, $exists: true } });
 
         const getAllFolders = await Folder.find({ user_id: getCurrentUserId, parent_folder_id: req.params.parent_folder_id });
         if (getAllFolders.length === 0) return res.status(404).json({ message: 'no folders found' });
+
+        const parentFolderIds = getAllFolders.map((parentFolderId) => parentFolderId.parent_folder_id);
+        const getAllFiles = await File.find({ user_id: getCurrentUserId, folder_id: { $in: parentFolderIds } });
 
         const deletePromise = getAllFiles.map((file) => {
             return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
@@ -70,7 +75,7 @@ export async function deleteAllChildFolders(req: AuthRequest, res: Response) {
 
         await Promise.all([
             ...deletePromise,
-            File.deleteMany({ user_id: getCurrentUserId, folder_id: { $ne: null, $exists: true } }),
+            File.deleteMany({ user_id: getCurrentUserId, folder_id: { $in: parentFolderIds } }),
             Folder.deleteMany({ parent_folder_id: req.params.parent_folder_id })
         ]);
 
@@ -82,8 +87,25 @@ export async function deleteAllChildFolders(req: AuthRequest, res: Response) {
 
 export async function deleteOneFolder(req: Request, res: Response) {
     try {
-        const getCurrentFolderId = req.params._id;
-        const getAllFiles = await File.find({ folder_id: getCurrentFolderId });
+        const getFolderId = req.params._id;
+
+        const folderTree = await Folder.aggregate([
+            { $match: { _id: new mongoose.Types.ObjectId(getFolderId) } },
+            { $graphLookup: {
+                from: "folders",
+                startWith: "$_id",
+                connectFromField: "_id",
+                connectToField: "parent_folder_id",
+                as: "descendants"
+            } }
+        ]);
+
+        if (folderTree.length === 0) return res.status(404).json({ message: 'folder not found' });
+
+        const descendants = folderTree[0].descendants || [];
+        const allFolderIds = [getFolderId, ...descendants.map((f: any) => f._id.toString())];
+
+        const getAllFiles = await File.find({ folder_id: { $in: allFolderIds } });
 
         const deletePromise = getAllFiles.map((file) => {
             return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
@@ -91,9 +113,8 @@ export async function deleteOneFolder(req: Request, res: Response) {
 
         await Promise.all([
             ...deletePromise,
-            File.deleteMany({ folder_id: getCurrentFolderId }),
-            Folder.deleteMany({ parent_folder_id: getCurrentFolderId }),
-            Folder.deleteOne({ _id: getCurrentFolderId })
+            File.deleteMany({ folder_id: { $in: allFolderIds } }),
+            Folder.deleteOne({ _id: { $in: allFolderIds } })
         ]);
 
         res.status(200).json({ message: 'one folder deleted' });
@@ -104,8 +125,8 @@ export async function deleteOneFolder(req: Request, res: Response) {
 
 export async function deleteOneChildFolder(req: Request, res: Response) {
     try {
-        const getCurrentFolderId = req.params._id;
-        const getAllFiles = await File.find({ folder_id: getCurrentFolderId });
+        const getFolderId = req.params._id;
+        const getAllFiles = await File.find({ folder_id: getFolderId });
 
         const deletePromise = getAllFiles.map((file) => {
             return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
@@ -113,8 +134,8 @@ export async function deleteOneChildFolder(req: Request, res: Response) {
 
         await Promise.all([
             ...deletePromise,
-            File.deleteMany({ folder_id: getCurrentFolderId }),
-            Folder.deleteMany({ _id: getCurrentFolderId }),
+            File.deleteMany({ folder_id: getFolderId }),
+            Folder.deleteMany({ _id: getFolderId }),
         ]);
 
         res.status(200).json({ message: 'one folder deleted' });
@@ -135,6 +156,7 @@ export async function getCurrentUserFolder(req: AuthRequest, res: Response) {
                 user_id: req.user?.user_id,
                 folder_name: { $regex: new RegExp(searched, 'i') }
             }).limit(limit).skip(skip);
+
             res.status(200).json(getAllFolders);
         } else {
             const getAllFolders = await Folder.find({ user_id: req.user?.user_id }).limit(limit).skip(skip);
@@ -172,6 +194,7 @@ export async function getChildFolders(req: AuthRequest, res:Response) {
             user_id: req.user?.user_id, 
             parent_folder_id: { $eq: req.params.parent_folder_id, $exists: true } 
         }).limit(limit).skip(skip);
+
         res.status(200).json(getAllFolders);        
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
@@ -191,6 +214,7 @@ export async function geFavoritedFolders(req: AuthRequest, res: Response) {
                 is_favorited: true,
                 folder_name: { $regex: new RegExp(searched, 'i') }
             }).limit(limit).skip(skip);
+            
             res.status(200).json(getFavoriteFolders);
         } else {
             const getFavoriteFolders = await Folder.find({ user_id: req.user?.user_id, is_favorited: true }).limit(limit).skip(skip);
