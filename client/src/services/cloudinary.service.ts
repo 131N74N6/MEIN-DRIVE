@@ -7,7 +7,7 @@ async function uploadToCloudinary(chosenFile: File, folderName: string): Promise
     const formData = new FormData();
     formData.append('cloud_name', CLOUDINARY_CLOUD_NAME);
     formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-    formData.append('public_id', `${Date.now()}`);
+    formData.append('public_id', `${Date.now()}-${chosenFile.name}`);
     formData.append('file', chosenFile);
     formData.append('folder', folderName);
 

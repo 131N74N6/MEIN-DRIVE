@@ -67,14 +67,22 @@ export default function FileServices(props?: FileServicesIntrf) {
         },
         onSuccess: (response) => {
             setMessage(response.message);
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.invalidateQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`all-files-${currentUserId}`) ||
+                        queryKey[0].startsWith(`all-favorited-files-${currentUserId}`);
+                    }
+                    return false;
+                }
+            });
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
                     if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`is-file-favorited-`) || 
-                        queryKey[0].startsWith(`is-file-favorited-${currentUserId}`);
+                        return queryKey[0].startsWith('is-file-favorited-') ||
+                        queryKey[0].startsWith(`files-in-folder-${currentUserId}-`);
                     }
                     return false;
                 }
@@ -93,8 +101,16 @@ export default function FileServices(props?: FileServicesIntrf) {
         },
         onSuccess: (response) => {
             setMessage(response.message);
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.invalidateQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`all-files-${currentUserId}`) ||
+                        queryKey[0].startsWith(`all-favorited-files-${currentUserId}`);
+                    }
+                    return false;
+                }
+            });
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
@@ -119,8 +135,16 @@ export default function FileServices(props?: FileServicesIntrf) {
         },
         onSuccess: (response) => {
             setMessage(response.message);
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.invalidateQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`all-files-${currentUserId}`) ||
+                        queryKey[0].startsWith(`all-favorited-files-${currentUserId}`);
+                    }
+                    return false;
+                }
+            });
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
@@ -177,9 +201,17 @@ export default function FileServices(props?: FileServicesIntrf) {
             setOpenFolderList(false);
             setChosenFileId(null);
             setChosenFolder(null);
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`files-in-folder-${currentUserId}-${props?.folder_id}`] });
+            queryClient.invalidateQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`) ||
+                        queryKey[0].startsWith(`all-files-${currentUserId}`) ||
+                        queryKey[0].startsWith(`all-favorited-files-${currentUserId}`);
+                    }
+                    return false;
+                }
+            });
         },
         onSettled: () => {
             setIsProcessing(false);
@@ -199,9 +231,17 @@ export default function FileServices(props?: FileServicesIntrf) {
         },
         onSuccess: (response) => {
             setMessage(response.message);
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`files-in-folder-${currentUserId}-${props?.folder_id}`] });
+            queryClient.invalidateQueries({
+                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
+                    const queryKey = query.queryKey;
+                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
+                        return queryKey[0].startsWith(`files-in-folder-${currentUserId}-`) ||
+                        queryKey[0].startsWith(`all-files-${currentUserId}`) ||
+                        queryKey[0].startsWith(`all-favorited-files-${currentUserId}`);
+                    }
+                    return false;
+                }
+            });
         },
         onSettled: () => setIsProcessing(false)
     });
@@ -265,7 +305,7 @@ export default function FileServices(props?: FileServicesIntrf) {
             }
 
             for (let y = 0; y < uploadedFiles.length; y++) {
-                return await insertData<FilesFormIntrf>({
+                await insertData<FilesFormIntrf>({
                     api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add`,
                     data: {
                         created_at: new Date().toISOString(),
@@ -284,8 +324,7 @@ export default function FileServices(props?: FileServicesIntrf) {
         onError: (error) => {
             setMessage(error.message || 'Failed to upload or check your internet connection');
         },
-        onSuccess: (response) => {
-            setMessage(response.message)
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             navigate('/home');
         },

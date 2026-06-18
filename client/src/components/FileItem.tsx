@@ -1,10 +1,12 @@
 import type { FileItemProps } from "../client_models/file.client_models";
-import { EllipsisVertical } from "lucide-react";
-import { FileIcon } from "./FileIcon";
+import { EllipsisVertical, View } from "lucide-react";
+import FileIcon from "./FileIcon";
 import { useState } from "react";
 import FileItemOption from "./FileItemOption";
+import { useNavigate } from "react-router-dom";
 
 export default function FileItem(props: FileItemProps) {
+    const navigate = useNavigate();
     const [showOption, setShowOption] = useState<boolean>(false);
 
     const { data: isFavorited } = props.get_data<boolean>({
@@ -39,14 +41,24 @@ export default function FileItem(props: FileItemProps) {
                 <>
                     <FileIcon key={props.file._id} {...props.file}/>
                     <hr className="bg-gray-500"/>
-                    <button 
-                        type="button" 
-                        disabled={props.is_processing}
-                        onClick={showMoreOptions}
-                        className='cursor-pointer font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed text-gray-500'
-                    >
-                        <EllipsisVertical/>
-                    </button>
+                    <div className="flex gap-2">
+                        <button 
+                            type="button" 
+                            disabled={props.is_processing}
+                            onClick={showMoreOptions}
+                            className='cursor-pointer font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed text-gray-500'
+                        >
+                            <EllipsisVertical/>
+                        </button>
+                        <button 
+                            type="button" 
+                            disabled={props.is_processing}
+                            onClick={() => navigate(`/file/${props.file._id}`)}
+                            className='cursor-pointer font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed text-gray-500'
+                        >
+                            <View/>
+                        </button>
+                    </div>
                 </>
             )}
         </div>

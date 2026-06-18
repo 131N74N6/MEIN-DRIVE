@@ -108,14 +108,14 @@ export async function getAllFiles(req: AuthRequest, res: Response) {
 
         if (searched === undefined) {
             const getAllFiles = await File.find({ user_id: getUserId }).limit(limit).skip(skip);
-            res.json(getAllFiles);
+            res.status(200).json(getAllFiles);
         } else {
             const getAllFiles = await File.find({ 
                 file_name: { $regex: new RegExp(searched, 'i') }, 
                 user_id: getUserId 
             }).limit(limit).skip(skip);
 
-            res.json(getAllFiles);
+            res.status(200).json(getAllFiles);
         }
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
@@ -159,9 +159,13 @@ export async function getFavoritedFiles(req: AuthRequest, res: Response) {
         const limit = parseInt(req.query.limit as string) || 14;
         const skip = (page - 1) * limit;
 
-        if (searched === undefined) {
+        const favoritedFilesTotal = await File.find({ user_id: getUserId, is_favorited: true }).countDocuments();
+        if (favoritedFilesTotal === 0) return res.status(404).json({ message: "No favorited files found" });
+
+        if (searched === undefined || searched === "") {
             const getFavoriteFiles = await File.find({ user_id: getUserId, is_favorited: true }).limit(limit).skip(skip);
-            res.json(getFavoriteFiles);
+            
+            res.status(200).json(getFavoriteFiles);
         } else {
             const getFavoriteFiles = await File.find({ 
                 file_name: { $regex: new RegExp(searched, 'i') }, 
@@ -169,8 +173,17 @@ export async function getFavoritedFiles(req: AuthRequest, res: Response) {
                 is_favorited: true
             }).limit(limit).skip(skip);
 
-            res.json(getFavoriteFiles);
+            res.status(200).json(getFavoriteFiles);
         }
+    } catch (error) {
+        res.status(500).json({ message: 'internal server error' });
+    }
+}
+
+export async function getSelectedFiles(req: Request, res: Response) {
+    try {
+        const getTargetedFile = await File.find({ _id: req.params._id }, { file_type: 0, folder_id: 0, is_favorited: 0, user_id: 0 });
+        res.status(200).json(getTargetedFile);
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }

@@ -38,7 +38,7 @@ export default function Profile() {
     }
 
     return (
-        <div className="h-screen flex md:flex-row flex-col gap-4 p-4">
+        <section className="h-screen flex md:flex-row flex-col gap-4 p-4">
             {userLoading ? (
                 <div className="flex w-full md:w-3/4 h-full justify-center items-center">
                     <Loading/>
@@ -126,6 +126,6 @@ export default function Profile() {
             )}
             <Navbar1/>
             <Navbar2/>
-        </div>
+        </section>
     );
 }

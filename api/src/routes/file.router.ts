@@ -2,7 +2,8 @@ import { Router } from "express";
 import { 
     deleteAllFiles, deleteSelectedFile, getAllFiles, addNewFile, getFavoritedFiles,
     addToFavorite, removeFromFavorite, addToFolder, getFilesInFolder, isFileFavorited,
-    deleteAllFilesInFolder, moveOutsideFolder
+    deleteAllFilesInFolder, moveOutsideFolder,
+    getSelectedFiles
 } from "../controllers/file.controller";
 import { verifyToken } from "../middleware/auth.middleware";
 
@@ -13,6 +14,7 @@ fileRoutes.delete('/rm/:_id', verifyToken, deleteSelectedFile);
 fileRoutes.delete('/rm-all-in-folder/:folder_id', verifyToken, deleteAllFilesInFolder)
 
 fileRoutes.get('/all', verifyToken, getAllFiles);
+fileRoutes.get('/selected/:_id', verifyToken, getSelectedFiles);
 fileRoutes.get('/favorited', verifyToken, getFavoritedFiles);
 fileRoutes.get('/is-favorited/:_id', verifyToken, isFileFavorited);
 fileRoutes.get('/files-in-folder/:folder_id', verifyToken, getFilesInFolder);
