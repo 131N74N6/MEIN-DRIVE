@@ -4,11 +4,11 @@ import {
     addToFavorite, removeFromFavorite, addToFolder, getFilesInFolder, isFileFavorited,
     deleteAllFilesInFolder, moveOutsideFolder
 } from "../controllers/file.controller";
-import { checkOwnership, verifyToken } from "../middleware/auth.middleware";
+import { verifyToken } from "../middleware/auth.middleware";
 
 const fileRoutes = Router();
 
-fileRoutes.delete('/rm-all/:user_id', verifyToken, checkOwnership, deleteAllFiles);
+fileRoutes.delete('/rm-all', verifyToken, deleteAllFiles);
 fileRoutes.delete('/rm/:_id', verifyToken, deleteSelectedFile);
 fileRoutes.delete('/rm-all-in-folder/:folder_id', verifyToken, deleteAllFilesInFolder)
 

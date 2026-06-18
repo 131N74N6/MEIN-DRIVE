@@ -305,7 +305,7 @@ export default function FileServices(props?: FileServicesIntrf) {
         limit: 14,
         query_key: debouncedSearch ? [`all-files-${currentUserId}-${debouncedSearch}`] : [`all-files-${currentUserId}`],
         searched: debouncedSearch.trim(),
-        stale_time: 1200000
+        stale_time: Infinity
     });
 
     const { 
@@ -317,7 +317,7 @@ export default function FileServices(props?: FileServicesIntrf) {
         limit: 14,
         query_key: debouncedSearch ? [`files-in-folder-${currentUserId}-${props?.folder_id}-${debouncedSearch}`] : [`files-in-folder-${currentUserId}-${props?.folder_id}`],
         searched: debouncedSearch.trim(),
-        stale_time: 1800000
+        stale_time: Infinity
     });
 
     const { 
@@ -329,7 +329,7 @@ export default function FileServices(props?: FileServicesIntrf) {
         limit: 14,
         query_key: debouncedSearch ? [`all-favorited-files-${currentUserId}-${debouncedSearch}`] : [`all-favorited-files-${currentUserId}`],
         searched: debouncedSearch.trim(),
-        stale_time: 1200000
+        stale_time: Infinity
     });
 
     const { 
@@ -341,7 +341,7 @@ export default function FileServices(props?: FileServicesIntrf) {
         limit: 14,
         query_key: [`all-folder-prev-${currentUserId}`],
         searched: debouncedSearch.trim(),
-        stale_time: 1800000
+        stale_time: Infinity
     });
 
     const filesInFolderData = { fileError2, fileNext2, fileHasNext2, fileLoad2, fileEnd2, fileData2 };

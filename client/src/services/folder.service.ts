@@ -194,6 +194,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-child-folders-${currentUserId}-${props?.parent_folder_id}`] });
         },
         onSettled: () => setIsProcessing(false)
     });
@@ -280,36 +281,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
             queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${currentUserId}`] });
-        },
-        onSettled: () => setIsProcessing(false)
-    });
-
-    const removeOneChildFolderMt = useMutation({
-        onMutate: () => setIsProcessing(true),
-        mutationFn: async (folder_id: string) => {
-            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/rm-child/${folder_id}` });
-        },
-        onError: (error) => {
-            setMessage(error.message || 'Failed to delete folder or check your internet connection');
-        },
-        onSuccess: (response) => {
-            setMessage(response.message);
-            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
             queryClient.invalidateQueries({ queryKey: [`all-child-folders-${currentUserId}-${props?.parent_folder_id}`] });
-            queryClient.removeQueries({
-                predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
-                    const queryKey = query.queryKey;
-                    if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith(`is-file-favorited-`) ||
-                        queryKey[0].startsWith(`is-folder-favorited-`);;
-                    }
-                    return false;
-                }
-            });
-            queryClient.invalidateQueries({ queryKey: [`all-folder-prev-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${currentUserId}`] });
         },
         onSettled: () => setIsProcessing(false)
     });
@@ -323,7 +295,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
         enabled: !!currentUserId,
         limit: 14,
         query_key: debouncedSearch ? [`all-folders-${currentUserId}-${debouncedSearch}`] : [`all-folders-${currentUserId}`],
-        stale_time: 1800000,
+        stale_time: Infinity,
         searched: debouncedSearch.trim()
     });
 
@@ -335,7 +307,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
         enabled: !!currentUserId,
         limit: 14,
         query_key: [`all-favorited-folders-${currentUserId}`],
-        stale_time: 1800000
+        stale_time: Infinity
     });
 
     const foldersData = { fetchNextPage, isLoading, isFetchingNextPage, isReachedEnd, error, paginatedData }
@@ -364,7 +336,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
     return { 
         addToFavoriteMt, changeFolderName, childFoldersData, foldersData, favoritedFoldersData, folderFormToggle, folderName, getData, 
         isProcessing, makeFolder, makeChildFolderMt, message, moveChildFolderToInsideMt, moveChildFolderToOutsideMt, openForm, 
-        removeAllChildFolderMt, removeAllFolderMt, removeOneChildFolderMt, removeFromFavoritedMt, removeOneFolderMt, searchValue, 
+        removeAllChildFolderMt, removeAllFolderMt, removeFromFavoritedMt, removeOneFolderMt, searchValue, 
         selectedFolderId, setFolderName, setMessage, selectFolder, setSearchValue 
     }
 }

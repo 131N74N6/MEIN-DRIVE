@@ -62,12 +62,25 @@ export async function deleteAllFolders(req: AuthRequest, res: Response) {
 export async function deleteAllChildFolders(req: AuthRequest, res: Response) {
     try {
         const getCurrentUserId = req.user?.user_id;
+        const getParentFolderId = req.params.parent_folder_id;
 
-        const getAllFolders = await Folder.find({ user_id: getCurrentUserId, parent_folder_id: req.params.parent_folder_id });
-        if (getAllFolders.length === 0) return res.status(404).json({ message: 'no folders found' });
+        const folderTree = await Folder.aggregate([
+            { $match: { _id: new mongoose.Types.ObjectId(getParentFolderId) } },
+            { $graphLookup: {
+                from: "folders", 
+                startWith: "$_id",
+                connectFromField: "_id",
+                connectToField: "parent_folder_id",
+                as: "descendants"
+            }}
+        ]);
 
-        const parentFolderIds = getAllFolders.map((parentFolderId) => parentFolderId.parent_folder_id);
-        const getAllFiles = await File.find({ user_id: getCurrentUserId, folder_id: { $in: parentFolderIds } });
+        if (folderTree.length === 0) return res.status(404).json({ message: 'folder not found' });
+
+        const descendants = folderTree[0].descendants || [];
+        const descendantIds = descendants.map((f: any) => f._id.toString());
+
+        const getAllFiles = await File.find({ user_id: getCurrentUserId, folder_id: { $in: descendantIds } });
 
         const deletePromise = getAllFiles.map((file) => {
             return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
@@ -75,8 +88,8 @@ export async function deleteAllChildFolders(req: AuthRequest, res: Response) {
 
         await Promise.all([
             ...deletePromise,
-            File.deleteMany({ user_id: getCurrentUserId, folder_id: { $in: parentFolderIds } }),
-            Folder.deleteMany({ parent_folder_id: req.params.parent_folder_id })
+            File.deleteMany({ user_id: getCurrentUserId, folder_id: { $in: descendantIds } }),
+            Folder.deleteMany({ _id: { $in : descendantIds } })
         ]);
 
         res.status(200).json({ message: 'all folders deleted' });
@@ -97,7 +110,7 @@ export async function deleteOneFolder(req: Request, res: Response) {
                 connectFromField: "_id",
                 connectToField: "parent_folder_id",
                 as: "descendants"
-            } }
+            }}
         ]);
 
         if (folderTree.length === 0) return res.status(404).json({ message: 'folder not found' });
@@ -115,27 +128,6 @@ export async function deleteOneFolder(req: Request, res: Response) {
             ...deletePromise,
             File.deleteMany({ folder_id: { $in: allFolderIds } }),
             Folder.deleteOne({ _id: { $in: allFolderIds } })
-        ]);
-
-        res.status(200).json({ message: 'one folder deleted' });
-    } catch (error) {
-        res.status(500).json({ message: 'internal server error' });
-    }
-}
-
-export async function deleteOneChildFolder(req: Request, res: Response) {
-    try {
-        const getFolderId = req.params._id;
-        const getAllFiles = await File.find({ folder_id: getFolderId });
-
-        const deletePromise = getAllFiles.map((file) => {
-            return v2.uploader.destroy(file.files.public_id, { resource_type: file.files.resource_type });
-        });
-
-        await Promise.all([
-            ...deletePromise,
-            File.deleteMany({ folder_id: getFolderId }),
-            Folder.deleteMany({ _id: getFolderId }),
         ]);
 
         res.status(200).json({ message: 'one folder deleted' });

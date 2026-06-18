@@ -5,9 +5,9 @@ import { Folder } from "../models/folder.model";
 import { v2 } from "cloudinary";
 import { AuthRequest } from "../middleware/auth.middleware";
 
-export async function changeUserInfo(req: Request, res: Response) {
+export async function changeUserInfo(req: AuthRequest, res: Response) {
     try {
-        await User.updateOne({ _id: req.params.user_id }, {
+        await User.updateOne({ _id: req.user?.user_id }, {
             $set: {
                 email: req.body.email,
                 username: req.body.username
@@ -19,9 +19,9 @@ export async function changeUserInfo(req: Request, res: Response) {
     }
 }
 
-export async function deleteCurrentUser(req: Request, res: Response) {
+export async function deleteCurrentUser(req: AuthRequest, res: Response) {
     try {
-        const currentUserId = req.params.user_id;
+        const currentUserId = req.user?.user_id;
         const getCurrentUserFiles = await File.find({ user_id: currentUserId });
 
         const deletePromise = getCurrentUserFiles.map(userFile => {

@@ -59,9 +59,9 @@ export async function deleteAllFilesInFolder(req: Request, res: Response) {
     }
 }
 
-export async function deleteAllFiles(req: Request, res: Response) {
+export async function deleteAllFiles(req: AuthRequest, res: Response) {
     try {
-        const getUserId = req.params.user_id;
+        const getUserId = req.user?.user_id;
         const findUserFiles = await File.find({ user_id: getUserId });
 
         if (findUserFiles.length === 0) return res.status(400).json({ message: "no files added" });

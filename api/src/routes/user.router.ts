@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { changeUserInfo, deleteCurrentUser, getUserData } from "../controllers/user.controller";
-import { checkOwnership, verifyToken } from "../middleware/auth.middleware";
+import { verifyToken } from "../middleware/auth.middleware";
 
 const userRoutes = Router();
 
-userRoutes.delete('/delete-myself/:user_id', verifyToken, checkOwnership, deleteCurrentUser);
+userRoutes.delete('/rm-myself', verifyToken, deleteCurrentUser);
 userRoutes.get('/user-data', verifyToken, getUserData);
-userRoutes.put('/change/:user_id', verifyToken, checkOwnership, changeUserInfo);
+userRoutes.put('/change', verifyToken, changeUserInfo);
 
 export default userRoutes;

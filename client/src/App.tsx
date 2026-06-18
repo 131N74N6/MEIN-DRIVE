@@ -20,7 +20,7 @@ export default function App() {
                 <Routes>
                     <Route path='/sign-in' element={<SignIn/>}/>
                     <Route path='/sign-up' element={<SignUp/>}/>
-                    <Route path='/profile/:user_id' element={<ProtectedRoute><Profile/></ProtectedRoute>}/>
+                    <Route path='/profile' element={<ProtectedRoute><Profile/></ProtectedRoute>}/>
                     <Route path='/home' element={<ProtectedRoute><Home/></ProtectedRoute>}/>
                     <Route path='/favorited-files' element={<ProtectedRoute><FavoritedFiles/></ProtectedRoute>}/>
                     <Route path='/favorited-folders' element={<ProtectedRoute><FavoritedFolders/></ProtectedRoute>}/>

@@ -1,11 +1,9 @@
-import { useParams } from "react-router-dom";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 import Loading from "../components/Loading";
 import UserServices from "../services/user.service";
 import { useEffect } from "react";
 
 export default function Profile() {
-    const { user_id } = useParams();
     const { 
         changeProfileMt, 
         deleteAccountMt, 
@@ -20,7 +18,7 @@ export default function Profile() {
         userData, 
         userLoading, 
         userError 
-    } = UserServices(user_id!);
+    } = UserServices();
     
     useEffect(() => {
         if (message) {

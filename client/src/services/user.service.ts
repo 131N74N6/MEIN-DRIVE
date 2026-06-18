@@ -4,7 +4,8 @@ import DataModifier from "./data.service";
 import { useEffect, useState } from "react";
 import type { CurrentUserIntrf } from "../models/user_model";
 
-export default function UserServices(user_id?: string) {
+export default function UserServices() {
+    const { currentUserId } = AuthServices();
     const { changeData, deleteData, message, setMessage } = DataModifier();
     const { signOut, userData, userError, userLoading } = AuthServices();
     const queryClient = useQueryClient();
@@ -19,32 +20,33 @@ export default function UserServices(user_id?: string) {
     }
 
     useEffect(() => {
-        if (user_id && userData) setNewProfile({ email: userData.email, username: userData.username });
+        if (currentUserId && userData) setNewProfile({ email: userData.email, username: userData.username });
         else return;
-    }, [user_id, userData, editMode]);
+    }, [currentUserId, userData, editMode]);
 
     const deleteAccountMt = useMutation({
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
-            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/users/delete-myself/${user_id}` });
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/users/rm-myself` });
         },
         onError: (error) => {
             setMessage(error.message || 'Failed to delete or check your internet connection');
         },
         onSuccess: async () => {
             queryClient.invalidateQueries({ queryKey: ['current-user'] });
-            queryClient.invalidateQueries({ queryKey: [`all-files-${user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-folders-${user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${user_id}`] });
-            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${user_id}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-favorited-folders-${currentUserId}`] });
+            queryClient.invalidateQueries({ queryKey: [`all-folders-prev-${currentUserId}`] });
             queryClient.removeQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
                     if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
                         return queryKey[0].startsWith(`files-in-folder-`) ||
                         queryKey[0].startsWith(`is-file-favorited-`) || 
-                        queryKey[0].startsWith("is-folder-favorited-")
+                        queryKey[0].startsWith("is-folder-favorited-") ||
+                        queryKey[0].startsWith(`all-child-folders-${currentUserId}`)
                     }
                     return false;
                 }
@@ -58,7 +60,7 @@ export default function UserServices(user_id?: string) {
         onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
             return await changeData<CurrentUserIntrf>({ 
-                api_url: `${import.meta.env.VITE_API_BASE_URL}/users/change/${user_id}`,
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/users/change`,
                 data: {
                     email: newProfile.email.trim(),
                     username: newProfile.username.trim()
@@ -78,7 +80,7 @@ export default function UserServices(user_id?: string) {
     });
 
     return { 
-        changeProfileMt, deleteAccountMt, editMode, handleInputChange, isProcessing, message,
+        changeProfileMt, currentUserId, deleteAccountMt, editMode, handleInputChange, isProcessing, message,
         newProfile, setEditMode, setIsProcessing, setMessage, setNewProfile, userData, userError, userLoading 
     }
 }

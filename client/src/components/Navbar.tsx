@@ -3,12 +3,12 @@ import useAuth from "../services/auth.service";
 import { CircleUser, DoorOpen, FileHeart, FilePlusCorner, Folder, FolderHeart, Home } from "lucide-react";
 
 export function Navbar1() {
-    const { currentUserId, signOut } = useAuth();
+    const { signOut } = useAuth();
     const navigate = useNavigate();
 
     return (
         <nav className="md:w-1/4 md:flex flex-col gap-[1rem] rounded p-[1rem] hidden shrink-0 shadow-[0_0_4px_#1a1a1a] bg-white">
-            <div className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] cursor-pointer" onClick={() => navigate(`/profile/${currentUserId}`)}>
+            <div className="text-gray-700 font-[500] text-[1rem] flex gap-[0.7rem] cursor-pointer" onClick={() => navigate('/profile')}>
                 <CircleUser></CircleUser>
                 <span>Your Profile</span>
             </div>
@@ -41,7 +41,7 @@ export function Navbar1() {
 }
 
 export function Navbar2() {
-    const { currentUserId, signOut } = useAuth();
+    const { signOut } = useAuth();
     const navigate = useNavigate();
 
     return (
@@ -61,7 +61,7 @@ export function Navbar2() {
             <Link to={'/add-file'} className="text-gray-700 font-[500] text-[1rem]">
                 <FilePlusCorner></FilePlusCorner>
             </Link>
-            <div className="text-gray-700 font-[500] text-[1rem] cursor-pointer" onClick={() => navigate(`/profile/${currentUserId}`)}>
+            <div className="text-gray-700 font-[500] text-[1rem] cursor-pointer" onClick={() => navigate('/profile')}>
                 <CircleUser></CircleUser>
             </div>
             <button onClick={signOut} className="cursor-pointer text-gray-700 font-[500] text-[1rem]">
