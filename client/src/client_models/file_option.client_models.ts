@@ -1,5 +1,5 @@
 import type { UseMutationResult } from "@tanstack/react-query";
-import type { FilesDataProps } from "./file_model";
+import type { FilesDataProps } from "./file.client_models";
 
 export type FileOptionIntrf = {
     file: FilesDataProps;

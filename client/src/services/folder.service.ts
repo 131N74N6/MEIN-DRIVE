@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient, type Query } from "@tanstack/react-query";
-import type { ChildFolderIntrf, FolderFormProps, FolderIntrf, FolderServieIntrf } from "../models/folder_model";
+import type { ChildFolderIntrf, FolderFormProps, FolderIntrf, FolderServieIntrf } from "../client_models/folder.client_models";
 import { useState } from "react";
 import useDebounce from "../hooks/useDebounce";
 import DataModifier from "./data.service";
-import type { FilesDataProps } from "../models/file_model";
+import type { FilesDataProps } from "../client_models/file.client_models";
 import AuthServices from "./auth.service";
 
 export default function FolderServices(props?: FolderServieIntrf) {

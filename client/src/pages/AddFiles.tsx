@@ -1,6 +1,6 @@
 import Notification from "../components/Notification";
 import { X } from "lucide-react";
-import { FileIconPreview } from "../components/FileIcon";
+import FileIconPreview from "../components/FileIconPreview";
 import FileServices from "../services/file.service";
 import { useEffect } from "react";
 

@@ -1,5 +1,5 @@
 import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, UseMutationResult } from "@tanstack/react-query";
-import type { GetDataProps } from "./data_model";
+import type { GetDataProps } from "./data.client_models";
 
 export type MediaFilesProps = {
     file: File;

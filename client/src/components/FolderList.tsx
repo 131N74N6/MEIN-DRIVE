@@ -1,4 +1,4 @@
-import type { FolderListIntrf } from "../models/folder_model";
+import type { FolderListIntrf } from "../client_models/folder.client_models";
 import FolderItem from "./FolderItem";
 import Loading from "./Loading";
 

@@ -1,5 +1,5 @@
 import { MoveLeft, Pen, Star, Trash, X } from "lucide-react";
-import type { FolderOptionIntrf } from "../models/folder_model";
+import type { FolderOptionIntrf } from "../client_models/folder.client_models";
 
 export default function FolderItemOption(props: FolderOptionIntrf) {
     return (

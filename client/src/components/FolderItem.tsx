@@ -1,5 +1,5 @@
 import { EllipsisVertical, Folder, LucideCheckSquare2, X } from "lucide-react";
-import type { FolderItemIntrf } from "../models/folder_model";
+import type { FolderItemIntrf } from "../client_models/folder.client_models";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useShowOption from "../hooks/useShowOption";

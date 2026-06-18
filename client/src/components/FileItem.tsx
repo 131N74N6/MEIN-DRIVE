@@ -1,4 +1,4 @@
-import type { FileItemProps } from "../models/file_model";
+import type { FileItemProps } from "../client_models/file.client_models";
 import { EllipsisVertical } from "lucide-react";
 import { FileIcon } from "./FileIcon";
 import { useState } from "react";

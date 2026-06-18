@@ -1,6 +1,6 @@
 import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, UseMutationResult } from "@tanstack/react-query";
 import type { Dispatch, SetStateAction } from "react";
-import type { GetDataProps } from "./data_model";
+import type { GetDataProps } from "./data.client_models";
 
 export type FolderIntrf = {
     _id: string;

@@ -4,9 +4,9 @@ import AuthServices from "./auth.service";
 import DataModifier from "./data.service";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
-import type { FilesDataProps, FileServicesIntrf, FilesFormIntrf, MediaFilesProps } from "../models/file_model";
+import type { FilesDataProps, FileServicesIntrf, FilesFormIntrf, MediaFilesProps } from "../client_models/file.client_models";
 import useDebounce from "../hooks/useDebounce";
-import type { FolderIntrf } from "../models/folder_model";
+import type { FolderIntrf } from "../client_models/folder.client_models";
 
 export default function FileServices(props?: FileServicesIntrf) {
     const { currentUserId } = AuthServices();

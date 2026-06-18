@@ -43,7 +43,7 @@ export default function FolderContents() {
         moveChildFolderToOutsideMt, 
         openForm, 
         removeAllChildFolderMt, 
-        removeOneChildFolderMt, 
+        removeOneFolderMt, 
         selectFolder, 
         selectedFolderId, 
         setFolderName 
@@ -133,7 +133,7 @@ export default function FolderContents() {
                             isFetchingNextPage={childFoldersData.isChildFolderFetchingNextPage}
                             isReachedEnd={childFoldersData.isChildFolderReachedEnd} 
                             move_outside_parent_folder={moveChildFolderToOutsideMt}
-                            on_delete={removeOneChildFolderMt}
+                            on_delete={removeOneFolderMt}
                             on_edit={changeFolderName}
                             on_select={selectFolder}
                             parent_folder_id={folder_id!}
