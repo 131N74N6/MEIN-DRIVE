@@ -16,42 +16,49 @@ export default function FolderContents() {
 
     const { 
         addToFavoriteMt: addFileToFavorite, 
-        closeFolderList, 
+        closeFolderList: closeFolderList1, 
         deleteAllFilesInFolderMt, 
         deleteOneFileMt, 
         filesInFolderData, 
         foldersPreviewData, 
         getData, 
         insertFileToFolderMt, 
-        isProcessing, 
+        isFileProcessing, 
         message, 
         moveOutsideFolderMt, 
-        openFolderList, 
-        removeFromFavoritedMt, 
+        openFolderList: openFolderList1, 
+        removeFromFavoritedMt: removeFileFromFavoriteMt, 
         setChosenFolder, 
         setMessage, 
-        showFolderList 
+        showFolderList: showFolderList1 
     } = FileServices({ folder_id: folder_id });
 
     const { 
         addToFavoriteMt: addFolderToFavorite, 
         changeFolderName, 
         childFoldersData, 
+        closeFolderList: closeFolderList2, 
         folderName, 
         folderFormToggle, 
+        isFolderProcessing,
         makeChildFolderMt, 
+        moveChildFolderToInsideMt,
         moveChildFolderToOutsideMt, 
         openForm, 
+        openFolderList: openFolderList2,
         removeAllChildFolderMt, 
         removeOneFolderMt, 
+        removeFromFavoritedMt: removeFolderFromFavoriteMt,
         selectFolder, 
         selectedFolderId, 
-        setFolderName 
+        setSelectedParentFolderId,
+        setFolderName, 
+        showFolderList: showFolderList2
     } = FolderServices({ parent_folder_id: folder_id! });
     
     useEffect(() => {
         if (message) {
-            const timer = setTimeout(() => setMessage(null), 3000);
+            const timer = setTimeout(() => setMessage(null), 1500);
             return () => clearTimeout(timer);
         }
     }, [message, setMessage]);
@@ -59,17 +66,35 @@ export default function FolderContents() {
     return (
         <section className="flex md:flex-row flex-col h-screen gap-4 p-4 bg-white z-10 relative">
             {message ? Notification(message) : null}
-            {openFolderList ? (
+            {openFolderList1 ? (
                 <FolderListPreview 
+                    for="files"
                     error={foldersPreviewData.folderError}
                     fetchNextPage={foldersPreviewData.folderNext} 
                     folder_prev={foldersPreviewData.folderData} 
                     isLoading={foldersPreviewData.folderLoad}
                     isFetchingNextPage={foldersPreviewData.folderHasNext} 
                     isReachedEnd={foldersPreviewData.folderEnd}
+                    message={message!}
                     move={insertFileToFolderMt}
-                    toggle={closeFolderList}
+                    toggle={closeFolderList1}
                     set_chosen_folder={setChosenFolder}
+                /> 
+            ) : null}
+            {openFolderList2 ? (
+                <FolderListPreview 
+                    chosen_folder_id={selectedFolderId}
+                    error={foldersPreviewData.folderError}
+                    for="folders"
+                    fetchNextPage={foldersPreviewData.folderNext} 
+                    folder_prev={foldersPreviewData.folderData} 
+                    isLoading={foldersPreviewData.folderLoad}
+                    isFetchingNextPage={foldersPreviewData.folderHasNext} 
+                    isReachedEnd={foldersPreviewData.folderEnd}
+                    message={message!}
+                    move={moveChildFolderToInsideMt}
+                    toggle={closeFolderList2}
+                    set_chosen_folder={setSelectedParentFolderId}
                 /> 
             ) : null}
             {openForm ? (
@@ -77,7 +102,7 @@ export default function FolderContents() {
                     closed_form={folderFormToggle} 
                     message={message} 
                     folder_name={folderName} 
-                    is_making={isProcessing} 
+                    is_making={isFileProcessing || isFolderProcessing} 
                     set_folder_name={setFolderName} 
                     submit_folder={makeChildFolderMt}
                     parent_folder_id={folder_id!}
@@ -87,7 +112,7 @@ export default function FolderContents() {
                 <div className="flex gap-4 items-center pt-4 px-4">
                     <button 
                         type="button" 
-                        disabled={isProcessing}
+                        disabled={isFileProcessing || isFolderProcessing || childFoldersData.isChildFolderLoading || filesInFolderData.fileLoad2}
                         className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium flex justify-center bg-gray-700 text-white text-[0.9rem] p-2 rounded" 
                         onClick={() => deleteAllFilesInFolderMt.mutate()}
                     >
@@ -98,7 +123,7 @@ export default function FolderContents() {
                     </button>
                     <button 
                         type="button" 
-                        disabled={isProcessing}
+                        disabled={isFileProcessing || isFolderProcessing || childFoldersData.isChildFolderLoading || filesInFolderData.fileLoad2}
                         className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium flex justify-center bg-gray-700 text-white text-[0.9rem] p-2 rounded" 
                         onClick={() => removeAllChildFolderMt.mutate(folder_id!)}
                     >
@@ -109,7 +134,7 @@ export default function FolderContents() {
                     </button>
                     <button 
                         type="button" 
-                        disabled={isProcessing}
+                        disabled={isFileProcessing || isFolderProcessing}
                         className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium flex justify-center bg-gray-700 text-white text-[0.9rem] p-2 rounded" 
                         onClick={folderFormToggle}
                     >
@@ -119,47 +144,56 @@ export default function FolderContents() {
                         </div>
                     </button>
                 </div>
-                {filesInFolderData.fileLoad2 && childFoldersData.isChildFolderLoading ? (
+                {childFoldersData.isChildFolderLoading ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
                     </div>
-                ) : filesInFolderData.fileData2 && childFoldersData.childFolderPaginatedData ? (
-                    <>
-                        <FolderList 
-                            add_to_favorite={addFolderToFavorite}
-                            fetchNextPage={childFoldersData.fetchChildFolder} 
-                            folders={childFoldersData.childFolderPaginatedData} 
-                            get_data={getData}
-                            isFetchingNextPage={childFoldersData.isChildFolderFetchingNextPage}
-                            isReachedEnd={childFoldersData.isChildFolderReachedEnd} 
-                            move_outside_parent_folder={moveChildFolderToOutsideMt}
-                            on_delete={removeOneFolderMt}
-                            on_edit={changeFolderName}
-                            on_select={selectFolder}
-                            parent_folder_id={folder_id!}
-                            remove_from_favorite={removeFromFavoritedMt}
-                            is_processing={isProcessing}
-                            selected_folder_id={selectedFolderId}
-                        />
-                        <FileList 
-                            add_to_favorite={addFileToFavorite}
-                            fetchNextPage={filesInFolderData.fileNext2} 
-                            files={filesInFolderData.fileData2} 
-                            get_data={getData}
-                            isFetchingNextPage={filesInFolderData.fileHasNext2}
-                            is_processing={isProcessing}
-                            isReachedEnd={filesInFolderData.fileEnd2} 
-                            move_outside_folder={moveOutsideFolderMt}
-                            on_delete={deleteOneFileMt}
-                            remove_from_favorite={removeFromFavoritedMt}
-                            showFolderList={showFolderList}
-                        />
-                    </>
-                ) : filesInFolderData.fileError2 && childFoldersData.childFolderError ? (
+                ) : childFoldersData.childFolderPaginatedData ? (
+                    <FolderList 
+                        add_to_favorite={addFolderToFavorite}
+                        fetchNextPage={childFoldersData.fetchChildFolder} 
+                        folders={childFoldersData.childFolderPaginatedData} 
+                        get_data={getData}
+                        isFetchingNextPage={childFoldersData.isChildFolderFetchingNextPage}
+                        is_processing={isFileProcessing || isFolderProcessing}
+                        isReachedEnd={childFoldersData.isChildFolderReachedEnd} 
+                        move_outside_parent_folder={moveChildFolderToOutsideMt}
+                        on_delete={removeOneFolderMt}
+                        on_edit={changeFolderName}
+                        on_select={selectFolder}
+                        remove_from_favorite={removeFolderFromFavoriteMt}
+                        selected_folder_id={selectedFolderId}
+                        show_folder_list={showFolderList2}
+                    />
+                ) : childFoldersData.childFolderError ? (
                     <div className="flex justify-center items-center h-full bg-white">
-                        <div className="flex flex-col gap-3">
-                            <span className="text-[2rem] font-[600] text-gray-700">{filesInFolderData.fileError2.message}</span>
-                            <span className="text-[2rem] font-[600] text-gray-700">{childFoldersData.childFolderError.message}</span>
+                        <div className="text-[2rem] font-[600] text-gray-700">
+                            {childFoldersData.childFolderError.message}
+                        </div>
+                    </div>
+                ) : null}
+                {filesInFolderData.fileLoad2 ? (
+                    <div className="flex justify-center items-center h-full">
+                        <Loading/>
+                    </div>
+                ) : filesInFolderData.fileData2 ? (
+                    <FileList 
+                        add_to_favorite={addFileToFavorite}
+                        fetchNextPage={filesInFolderData.fileNext2} 
+                        files={filesInFolderData.fileData2} 
+                        get_data={getData}
+                        isFetchingNextPage={filesInFolderData.fileHasNext2}
+                        is_processing={isFileProcessing || isFolderProcessing}
+                        isReachedEnd={filesInFolderData.fileEnd2} 
+                        move_outside_folder={moveOutsideFolderMt}
+                        on_delete={deleteOneFileMt}
+                        remove_from_favorite={removeFileFromFavoriteMt}
+                        showFolderList={showFolderList1}
+                    />
+                ) : filesInFolderData.fileError2 ? (
+                    <div className="flex justify-center items-center h-full bg-white">
+                        <div className="text-[2rem] font-[600] text-gray-700">
+                            {filesInFolderData.fileError2.message}
                         </div>
                     </div>
                 ) : null}

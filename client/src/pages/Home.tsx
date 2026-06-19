@@ -17,13 +17,13 @@ export default function Home() {
         foldersPreviewData, 
         getData, 
         insertFileToFolderMt, 
-        isProcessing, 
+        isFileProcessing, 
         message, 
         moveOutsideFolderMt, 
         openFolderList, 
         removeFromFavoritedMt, 
         searchValue, 
-        setChosenFolder, 
+        setChosenFolder,
         setMessage, 
         setSearchValue, 
         showFolderList 
@@ -31,7 +31,7 @@ export default function Home() {
         
     useEffect(() => {
         if (message) {
-            const timer = setTimeout(() => setMessage(null), 3000);
+            const timer = setTimeout(() => setMessage(null), 1500);
             return () => clearTimeout(timer);
         }
     }, [message, setMessage]);
@@ -42,11 +42,13 @@ export default function Home() {
             {openFolderList ? (
                 <FolderListPreview 
                     error={foldersPreviewData.folderError}
+                    for="files"
                     fetchNextPage={foldersPreviewData.folderNext} 
                     folder_prev={foldersPreviewData.folderData} 
                     isLoading={foldersPreviewData.folderLoad}
                     isFetchingNextPage={foldersPreviewData.folderHasNext} 
                     isReachedEnd={foldersPreviewData.folderEnd}
+                    message={message!}
                     move={insertFileToFolderMt}
                     toggle={closeFolderList}
                     set_chosen_folder={setChosenFolder}
@@ -63,7 +65,7 @@ export default function Home() {
                     />
                     <button 
                         type="button" 
-                        disabled={isProcessing}
+                        disabled={isFileProcessing || allFiles.fileLoad}
                         className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" 
                         onClick={() => deleteAllFilesMt.mutate()}
                     >
@@ -81,7 +83,7 @@ export default function Home() {
                         files={allFiles.fileData} 
                         get_data={getData}
                         isFetchingNextPage={allFiles.fileHasNext}
-                        is_processing={isProcessing}
+                        is_processing={isFileProcessing}
                         isReachedEnd={allFiles.fileEnd} 
                         move_outside_folder={moveOutsideFolderMt}
                         on_delete={deleteOneFileMt}

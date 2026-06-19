@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { FolderListPrevIntrf } from "../client_models/folder.client_models";
+import type { FolderListPrevIntrf } from "../client_models/folder.client_model";
 import FolderItemPreview from "./FolderItemPreview";
 import Loading from "./Loading";
 
@@ -13,45 +13,94 @@ export default function FolderListPreview(props: FolderListPrevIntrf) {
             </section>
         );
     }
-    
-    return (
-        <div className="flex justify-center items-center fixed inset-0 z-20 border bg-[rgba(0,0,0,0.66)] p-3">
-            <div className="flex flex-col gap-[1rem] w-170 h-180 px-4 pt-4 overflow-y-auto bg-white">
-                <>
-                    <button 
-                        onClick={props.toggle}
-                        type="button" 
-                        className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        <X></X>
-                    </button>
-                </>
-                <div className="flex flex-col gap-4">
-                    {props.folder_prev.map((folder, index) => (
-                        <FolderItemPreview 
-                            key={`folder-${index}`} 
-                            move={props.move} 
-                            _id={folder._id} 
-                            folder_name={folder.folder_name}
-                            set_chosen_folder={props.set_chosen_folder}
-                        />
-                    ))}
-                </div>
-                <div className="flex justify-center">
-                    {props.isFetchingNextPage ?  <Loading/> : props.folder_prev.length < 14 ? (
-                        <></>
-                    ) : props.isReachedEnd ? (
-                        <p className="text-gray-700 font-[500] text-center text-[1rem]">No More Files to Show</p>
-                    ) : (
+
+    if (props.for === "files") {
+        return (
+            <div className="flex justify-center items-center fixed inset-0 z-20 border bg-[rgba(0,0,0,0.66)] p-3">
+                <div className="flex flex-col gap-[1rem] w-170 h-180 px-4 pt-4 overflow-y-auto bg-white">
+                    {props.message ? <div className="text-red-600 font-medium text-center">{props.message}</div> : null}
+                    <>
                         <button 
-                            type="button" onClick={() => props.fetchNextPage()} 
-                            className="bg-blue-600 cursor-pointer w-[90px] text-white font-[500] p-[0.4rem] text-[0.9rem]"
+                            onClick={props.toggle}
+                            type="button" 
+                            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            <span>Show More</span>
+                            <X></X>
                         </button>
-                    )}
+                    </>
+                    <div className="flex flex-col gap-4">
+                        {props.folder_prev.map((folder, index) => (
+                            <FolderItemPreview 
+                                key={`folder-${index}`} 
+                                move={props.move} 
+                                _id={folder._id} 
+                                folder_name={folder.folder_name}
+                                set_chosen_folder={props.set_chosen_folder!}
+                            />
+                        ))}
+                    </div>
+                    <div className="flex justify-center">
+                        {props.isFetchingNextPage ?  <Loading/> : props.folder_prev.length < 14 ? (
+                            <></>
+                        ) : props.isReachedEnd ? (
+                            <p className="text-gray-700 font-[500] text-center text-[1rem]">No More Files to Show</p>
+                        ) : (
+                            <button 
+                                type="button" onClick={() => props.fetchNextPage()} 
+                                className="bg-blue-600 cursor-pointer w-[90px] text-white font-[500] p-[0.4rem] text-[0.9rem]"
+                            >
+                                <span>Show More</span>
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    }
+    
+    if (props.for === "folders") {
+        return (
+            <div className="flex justify-center items-center fixed inset-0 z-20 border bg-[rgba(0,0,0,0.66)] p-3">
+                <div className="flex flex-col gap-[1rem] w-170 h-180 px-4 pt-4 overflow-y-auto bg-white">
+                    {props.message ? <div className="text-red-600 font-medium text-center">{props.message}</div> : null}
+                    <>
+                        <button 
+                            onClick={props.toggle}
+                            type="button" 
+                            className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            <X></X>
+                        </button>
+                    </>
+                    <div className="flex flex-col gap-4">
+                        {props.folder_prev.map((folder, index) => (
+                            folder._id === props.chosen_folder_id ? null : (
+                                <FolderItemPreview 
+                                    key={`folder-${index}`} 
+                                    move={props.move} 
+                                    _id={folder._id} 
+                                    folder_name={folder.folder_name}
+                                    set_chosen_folder={props.set_chosen_folder!}
+                                />
+                            )
+                        ))}
+                    </div>
+                    <div className="flex justify-center">
+                        {props.isFetchingNextPage ?  <Loading/> : props.folder_prev.length < 14 ? (
+                            <></>
+                        ) : props.isReachedEnd ? (
+                            <p className="text-gray-700 font-[500] text-center text-[1rem]">No More Files to Show</p>
+                        ) : (
+                            <button 
+                                type="button" onClick={() => props.fetchNextPage()} 
+                                className="bg-blue-600 cursor-pointer w-[90px] text-white font-[500] p-[0.4rem] text-[0.9rem]"
+                            >
+                                <span>Show More</span>
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
 }

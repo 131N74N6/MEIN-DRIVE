@@ -10,6 +10,7 @@ import Profile from "./pages/Profile";
 import Folders from "./pages/Folders";
 import FolderContents from "./pages/FolderContents";
 import FavoritedFolders from "./pages/FavoritedFolders";
+import FileDetail from "./pages/FileDetail";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ export default function App() {
                     <Route path='/folder-content/branch/:folder_id' element={<ProtectedRoute><FolderContents/></ProtectedRoute>}/>
                     <Route path='/folder-content/:folder_id' element={<ProtectedRoute><FolderContents/></ProtectedRoute>}/>
                     <Route path='/add-file' element={<ProtectedRoute><AddFiles/></ProtectedRoute>}/>
+                    <Route path='/file/:id' element={<ProtectedRoute><FileDetail/></ProtectedRoute>}/>
                     <Route path="/" element={<Navigate to="/home" replace/>}/>
                     <Route path="*" element={<Navigate to="/sign-in" replace/>}/>
                 </Routes>

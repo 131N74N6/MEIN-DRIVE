@@ -2,7 +2,7 @@ import { Query, useMutation, useQueryClient } from "@tanstack/react-query";
 import AuthServices from "./auth.service";
 import DataModifier from "./data.service";
 import { useEffect, useState } from "react";
-import type { CurrentUserIntrf } from "../client_models/user.client_models";
+import type { CurrentUserIntrf } from "../client_models/user.client_model";
 
 export default function UserServices() {
     const { currentUserId } = AuthServices();

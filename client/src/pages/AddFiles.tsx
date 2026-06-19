@@ -8,7 +8,6 @@ export default function AddFiles() {
     const { 
         fileInputRef, 
         handleChosenFiles, 
-        isProcessing, 
         mediaFiles, 
         message, 
         navigate, 
@@ -19,7 +18,7 @@ export default function AddFiles() {
 
     useEffect(() => {
         if (message) {
-            const timer = setTimeout(() => setMessage(null), 3000);
+            const timer = setTimeout(() => setMessage(null), 1500);
             return () => clearTimeout(timer);
         }
     }, [message, setMessage]);
@@ -46,7 +45,7 @@ export default function AddFiles() {
                                     <FileIconPreview {...mediaFile}/>
                                     <button
                                         type="button"
-                                        disabled={isProcessing}
+                                        disabled={uploadFilesMutation.isPending}
                                         onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
                                             e.stopPropagation();
                                             removeChosenFiles(index);
@@ -63,18 +62,18 @@ export default function AddFiles() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.5rem]">
                     <button 
                         type="button" 
-                        disabled={isProcessing}
+                        disabled={uploadFilesMutation.isPending}
                         className="rounded-md bg-gray-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50" 
                         onClick={() => navigate('/home')}
                     >
-                        {isProcessing ? 'Uploading' : 'Back'}
+                        {uploadFilesMutation.isPending ? 'Uploading' : 'Back'}
                     </button>
                     <button 
                         type="submit" 
-                        disabled={isProcessing}
+                        disabled={uploadFilesMutation.isPending}
                         className="rounded-md bg-blue-700 text-white text-[0.9rem] p-[0.4rem] font-[500] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" 
                     >
-                        {isProcessing ? 'Uploading' : 'Upload'}
+                        {uploadFilesMutation.isPending ? 'Uploading' : 'Upload'}
                     </button>
                 </div>
             </form>

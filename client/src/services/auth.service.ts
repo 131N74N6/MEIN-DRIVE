@@ -1,5 +1,5 @@
 import { useState } from "react"
-import type { SignUpProps, CurrentUserIntrf, SignInProps } from "../client_models/user.client_models";
+import type { SignUpProps, CurrentUserIntrf, SignInProps } from "../client_models/user.client_model";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 

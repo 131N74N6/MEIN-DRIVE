@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "../client_models/data.client_models";
+import type { ChangeDataProps, DeleteDataProps, GetDataProps, InfiniteScrollProps, InputDataProps } from "../client_models/data.client_model";
 import useAuth from "./auth.service";
 
 export default function DataModifier() {

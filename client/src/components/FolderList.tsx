@@ -1,4 +1,4 @@
-import type { FolderListIntrf } from "../client_models/folder.client_models";
+import type { FolderListIntrf } from "../client_models/folder.client_model";
 import FolderItem from "./FolderItem";
 import Loading from "./Loading";
 
@@ -8,8 +8,8 @@ export default function FolderList(props: FolderListIntrf) {
             <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-4">
                 {props.folders.map((folder, index) => (
                     <FolderItem 
-                        {...folder} 
                         add_to_favorite={props.add_to_favorite}
+                        folder={folder}
                         get_data={props.get_data}
                         is_processing={props.is_processing}
                         is_selected={props.selected_folder_id === folder._id}
@@ -18,9 +18,8 @@ export default function FolderList(props: FolderListIntrf) {
                         on_delete={props.on_delete}
                         on_edit={props.on_edit} 
                         on_select={props.on_select} 
-                        parent_folder_id={props.parent_folder_id}
                         remove_from_favorite={props.remove_from_favorite}
-                        selected_folder_id={props.selected_folder_id}
+                        show_folder_list={props.show_folder_list}
                     />
                 ))}
             </div>

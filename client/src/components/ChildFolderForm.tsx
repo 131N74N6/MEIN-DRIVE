@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { ChildFolderFormIntrf } from "../client_models/folder.client_models";
+import type { ChildFolderFormIntrf } from "../client_models/folder.client_model";
 
 export default function ChildFolderForm(props: ChildFolderFormIntrf) {
     function makeFolder(event: React.FormEvent) {

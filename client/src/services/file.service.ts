@@ -4,9 +4,9 @@ import AuthServices from "./auth.service";
 import DataModifier from "./data.service";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
-import type { FilesDataProps, FileServicesIntrf, FilesFormIntrf, MediaFilesProps } from "../client_models/file.client_models";
+import type { FilesDataProps, FileServicesIntrf, FilesFormIntrf, MediaFilesProps } from "../client_models/file.client_model";
 import useDebounce from "../hooks/useDebounce";
-import type { FolderIntrf } from "../client_models/folder.client_models";
+import type { FolderIntrf } from "../client_models/folder.client_model";
 
 export default function FileServices(props?: FileServicesIntrf) {
     const { currentUserId } = AuthServices();
@@ -15,7 +15,6 @@ export default function FileServices(props?: FileServicesIntrf) {
     const navigate = useNavigate();
 
     const [mediaFiles, setMediaFiles] = useState<MediaFilesProps[]>([]);
-    const [isProcessing, setIsProcessing] = useState<boolean>(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [searchValue, setSearchValue] = useState<string>('');
     const debouncedSearch = useDebounce<string>(searchValue, 500);
@@ -25,7 +24,6 @@ export default function FileServices(props?: FileServicesIntrf) {
     const [chosenFolder, setChosenFolder] = useState<string | null>(null);
 
     const addToFavoriteMt = useMutation({
-        onMutate: () => setIsProcessing(true),
         mutationFn: async (id: string) => {
             return await changeData<FilesDataProps>({
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/files/add-to-favorited/${id}`,
@@ -47,8 +45,7 @@ export default function FileServices(props?: FileServicesIntrf) {
                     return false;
                 }
             });
-        },
-        onSettled: () => setIsProcessing(false)
+        }
     });
 
     function closeFolderList() {
@@ -58,9 +55,8 @@ export default function FileServices(props?: FileServicesIntrf) {
     }
     
     const deleteAllFilesInFolderMt = useMutation({
-        onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
-            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/erase-all-in-folder/${props?.folder_id}` });
+            return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/rm-all-in-folder/${props?.folder_id}` });
         },
         onError: (error) => {
             setMessage(error.message || 'Failed to delete or check your internet connection.');
@@ -87,12 +83,10 @@ export default function FileServices(props?: FileServicesIntrf) {
                     return false;
                 }
             });
-        },
-        onSettled: () => setIsProcessing(false)
+        }
     });
     
     const deleteAllFilesMt = useMutation({
-        onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
             return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/rm-all` });
         },
@@ -121,12 +115,10 @@ export default function FileServices(props?: FileServicesIntrf) {
                     return false; 
                 }
             });
-        },
-        onSettled: () => setIsProcessing(false)
+        }
     });
 
     const deleteOneFileMt = useMutation({
-        onMutate: () => setIsProcessing(true),
         mutationFn: async (id: string) => {
             return await deleteData({ api_url: `${import.meta.env.VITE_API_BASE_URL}/files/rm/${id}` });
         },
@@ -155,8 +147,7 @@ export default function FileServices(props?: FileServicesIntrf) {
                     return false; 
                 }
             });
-        },
-        onSettled: () => setIsProcessing(false)
+        }
     });
 
     const getResourceType = (fileType: string): 'image' | 'video' | 'raw' => {
@@ -185,7 +176,6 @@ export default function FileServices(props?: FileServicesIntrf) {
     }
 
     const insertFileToFolderMt = useMutation({
-        onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
             if (!chosenFolder || !chosenFileId) return;
             return await changeData<FilesDataProps>({
@@ -212,14 +202,10 @@ export default function FileServices(props?: FileServicesIntrf) {
                     return false;
                 }
             });
-        },
-        onSettled: () => {
-            setIsProcessing(false);
         }
     });
 
     const moveOutsideFolderMt = useMutation({
-        onMutate: () => setIsProcessing(true),
         mutationFn: async (_id: string) => {
             return await changeData<FilesDataProps>({
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/files/remove-from-folder/${_id}`,
@@ -242,8 +228,7 @@ export default function FileServices(props?: FileServicesIntrf) {
                     return false;
                 }
             });
-        },
-        onSettled: () => setIsProcessing(false)
+        }
     });
 
     function removeChosenFiles(index: number) {
@@ -253,7 +238,6 @@ export default function FileServices(props?: FileServicesIntrf) {
     }
 
     const removeFromFavoritedMt = useMutation({
-        onMutate: () => setIsProcessing(true),
         mutationFn: async (id: string) => {
             return await changeData<FilesDataProps>({ 
                 api_url: `${import.meta.env.VITE_API_BASE_URL}/files/remove-from-favorited/${id}`, 
@@ -269,14 +253,13 @@ export default function FileServices(props?: FileServicesIntrf) {
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
                     const queryKey = query.queryKey;
                     if (Array.isArray(queryKey) && queryKey.length > 0 && typeof queryKey[0] === 'string') {
-                        return queryKey[0].startsWith('is-file-favorited-')
+                        return queryKey[0].startsWith('is-file-favorited-') ||
+                        queryKey[0].startsWith(`all-favorited-files-${currentUserId}`)
                     }
                     return false;
                 }
             });
-            queryClient.invalidateQueries({ queryKey: [`all-favorited-files-${currentUserId}`] });
-        },
-        onSettled: () => setIsProcessing(false)
+        }
     });
 
     function showFolderList(_id: string) {
@@ -285,7 +268,6 @@ export default function FileServices(props?: FileServicesIntrf) {
     }
     
     const uploadFilesMutation = useMutation({
-        onMutate: () => setIsProcessing(true),
         mutationFn: async () => {
             const folderName = 'drive_files';
             if (mediaFiles.length === 0) throw new Error('Please select at least one file');
@@ -330,7 +312,6 @@ export default function FileServices(props?: FileServicesIntrf) {
         },
         onSettled: () => {
             if (fileInputRef.current) fileInputRef.current.value = '';
-            setIsProcessing(false);
             setMediaFiles([]);
         }
     });
@@ -388,9 +369,16 @@ export default function FileServices(props?: FileServicesIntrf) {
     const allFiles = { fileError, fileNext, fileHasNext, fileLoad, fileEnd, fileData };
     const favoritedFiles = { fileError3, fileNext3, fileHasNext3, fileLoad3, fileEnd3, fileData3 };
 
+    const isFileProcessing = addToFavoriteMt.isPending || 
+    deleteAllFilesMt.isPending || 
+    deleteOneFileMt.isPending || 
+    insertFileToFolderMt.isPending || 
+    moveOutsideFolderMt.isPending || 
+    removeFromFavoritedMt.isPending;
+
     return { 
         addToFavoriteMt, allFiles, closeFolderList, deleteAllFilesInFolderMt, deleteAllFilesMt, deleteOneFileMt, fileInputRef, 
-        filesInFolderData, foldersPreviewData, favoritedFiles, getData, handleChosenFiles, insertFileToFolderMt, isProcessing, 
+        filesInFolderData, foldersPreviewData, favoritedFiles, getData, handleChosenFiles, insertFileToFolderMt, isFileProcessing,
         mediaFiles, message, moveOutsideFolderMt, navigate, openFolderList, removeChosenFiles, removeFromFavoritedMt, 
         searchValue, setChosenFolder, setMediaFiles, setMessage, setSearchValue, showFolderList, uploadFilesMutation 
     }

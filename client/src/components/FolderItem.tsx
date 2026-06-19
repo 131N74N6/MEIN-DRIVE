@@ -1,5 +1,5 @@
 import { EllipsisVertical, Folder, LucideCheckSquare2, X } from "lucide-react";
-import type { FolderItemIntrf } from "../client_models/folder.client_models";
+import type { FolderItemIntrf } from "../client_models/folder.client_model";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useShowOption from "../hooks/useShowOption";
@@ -11,29 +11,29 @@ export default function FolderItem(props: FolderItemIntrf) {
 
     useEffect(() => {
         if (props.is_selected) {
-            setFolderName(props.folder_name);
+            setFolderName(props.folder.folder_name);
         } else {
             setFolderName('');
         }
-    }, [props.is_selected, props.parent_folder_id, props.folder_name, props._id]);
+    }, [props.is_selected, props.folder.parent_folder_id, props.folder.folder_name, props.folder._id]);
 
     const { data: isFavorited } = props.get_data<boolean>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/is-favorited/${props._id}`,
-        query_key: [`is-folder-favorited-${props._id}`],
-        stale_time: 1200000
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/is-favorited/${props.folder._id}`,
+        query_key: [`is-folder-favorited-${props.folder._id}`],
+        stale_time: Infinity
     });
     
     function updateFolderName(event: React.FormEvent) {
         event.preventDefault();
-        props.on_edit.mutate({ _id: props._id, folder_name: folderName.trim() });
+        props.on_edit.mutate({ _id: props.folder._id, folder_name: folderName.trim() });
     }
 
     function handleFavoriteButton() {
-        if (isFavorited) props.remove_from_favorite.mutate(props._id);
-        else props.add_to_favorite.mutate(props._id);
+        if (isFavorited) props.remove_from_favorite.mutate(props.folder._id);
+        else props.add_to_favorite.mutate(props.folder._id);
     }
     
-    const cancel = () => props.on_select(props._id);
+    const cancel = () => props.on_select(props.folder._id);
     
     if (props.is_selected) {
         return (
@@ -78,21 +78,20 @@ export default function FolderItem(props: FolderItemIntrf) {
         <div className="border-gray-500 border rounded-md p-[0.7rem] flex flex-col gap-[0.5rem]">
             {showOption ? (
                 <FolderItemOption
-                    _id={props._id}
-                    created_at={props.created_at}
+                    folder={props.folder}
                     handle_favorite={handleFavoriteButton}
                     is_favorited={isFavorited!}
                     is_processing={props.is_processing}
                     move_outside_parent_folder={props.move_outside_parent_folder}
                     on_delete={props.on_delete}
                     on_select={props.on_select}
-                    parent_folder_id={props.parent_folder_id}
+                    show_folder_list={props.show_folder_list}
                     show_more_options={handleShowOption}
                 />
             ) : (
                 <>
                     <div className="flex gap-2 flex-col">
-                        <Link to={`/folder-content/branch/${props._id}`}>
+                        <Link to={`/folder-content/branch/${props.folder._id}`}>
                             <div className="flex justify-center items-center aspect-square text-gray-500 text-[2rem] border border-gray-500 rounded">
                                 <Folder></Folder>
                             </div>
@@ -108,7 +107,7 @@ export default function FolderItem(props: FolderItemIntrf) {
                         >
                             <EllipsisVertical/>
                         </button>
-                        <div className="line-clamp-1">{props.folder_name}</div>
+                        <div className="line-clamp-1">{props.folder.folder_name}</div>
                     </div>
                 </>
             )}

@@ -1,6 +1,6 @@
 import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, UseMutationResult } from "@tanstack/react-query";
 import type { Dispatch, SetStateAction } from "react";
-import type { GetDataProps } from "./data.client_models";
+import type { GetDataProps } from "./data.client_model";
 
 export type FolderIntrf = {
     _id: string;
@@ -21,12 +21,15 @@ export type FolderItemPrevIntrf = {
 }
 
 export type FolderListPrevIntrf = {
+    chosen_folder_id?: string | null;
     error: Error | null;
+    for: string;
     folder_prev: FolderIntrf[];
     fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>
     isLoading: boolean;
     isFetchingNextPage: boolean
     isReachedEnd: boolean;
+    message: string;
     move: UseMutationResult<void, Error, void, unknown>;
     toggle: () => void;
     set_chosen_folder: Dispatch<SetStateAction<string | null>>;
@@ -46,26 +49,23 @@ export type ChildFolderFormIntrf = {
     folder_name: string;
     is_making: boolean;
     set_folder_name: (value: React.SetStateAction<string>) => void;
-    submit_folder: UseMutationResult<void, Error, string, void>;
+    submit_folder: UseMutationResult<any, Error, string, unknown>;
     message: string | null;
     parent_folder_id: string;
 }
 
 export type FolderItemIntrf = {
+    folder: FolderIntrf;
     add_to_favorite: UseMutationResult<void, Error, string, unknown>;
-    _id: string;
-    is_selected: boolean;
     get_data: <X>(props: GetDataProps) => { data: X | undefined; error: Error | null; isLoading: boolean };
-    created_at: string;
-    folder_name: string;
+    is_selected: boolean;
     is_processing: boolean;
-    move_outside_parent_folder?: UseMutationResult<void, Error, string, void>;
-    on_delete: UseMutationResult<void, Error, string, void>;
-    on_edit: UseMutationResult<void, Error, Pick<FolderIntrf, '_id' | 'folder_name'>, void>;
+    move_outside_parent_folder?: UseMutationResult<any, Error, string, unknown>;
+    on_delete: UseMutationResult<any, Error, string, unknown>;
+    on_edit: UseMutationResult<any, Error, Pick<FolderIntrf, "_id" | "folder_name">, unknown>;
     on_select: (id: string) => void;
-    parent_folder_id?: string;
-    remove_from_favorite: UseMutationResult<any, Error, string, void>;
-    selected_folder_id: string | null;
+    remove_from_favorite: UseMutationResult<any, Error, string, unknown>;
+    show_folder_list: (_id: string) => void;
 }
 
 export type FolderListIntrf = {
@@ -76,25 +76,24 @@ export type FolderListIntrf = {
     isFetchingNextPage: boolean;
     isReachedEnd: boolean;
     is_processing: boolean;
-    move_outside_parent_folder?: UseMutationResult<void, Error, string, void>;
-    on_delete: UseMutationResult<void, Error, string, void>;
-    on_edit: UseMutationResult<void, Error, Pick<FolderIntrf, '_id' | 'folder_name'>, void>;
+    move_outside_parent_folder?: UseMutationResult<any, Error, string, unknown>;
+    on_delete: UseMutationResult<any, Error, string, unknown>;
+    on_edit: UseMutationResult<any, Error, Pick<FolderIntrf, "_id" | "folder_name">, unknown>;
     on_select: (id: string) => void;
-    parent_folder_id?: string;
-    remove_from_favorite: UseMutationResult<any, Error, string, void>;
+    remove_from_favorite: UseMutationResult<any, Error, string, unknown>;
     selected_folder_id: string | null;
+    show_folder_list: (_id: string) => void;
 }
 
 export type FolderOptionIntrf = {
-    _id: string;
-    created_at: string;
+    folder: FolderIntrf;
     handle_favorite: () => void;
     is_favorited: boolean;
     is_processing: boolean;
-    move_outside_parent_folder?: UseMutationResult<void, Error, string, void>;
-    on_delete: UseMutationResult<void, Error, string, void>;
+    move_outside_parent_folder?: UseMutationResult<any, Error, string, unknown>;
+    on_delete: UseMutationResult<any, Error, string, unknown>;
     on_select: (id: string) => void;
-    parent_folder_id?: string;
+    show_folder_list: (_id: string) => void;
     show_more_options: () => void;
 }
 

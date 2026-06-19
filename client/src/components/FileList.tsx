@@ -1,4 +1,4 @@
-import type { FileListProps } from "../client_models/file.client_models";
+import type { FileListProps } from "../client_models/file.client_model";
 import FileItem from "./FileItem";
 import Loading from "./Loading";
 

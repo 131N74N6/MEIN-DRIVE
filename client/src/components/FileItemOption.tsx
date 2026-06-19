@@ -1,5 +1,5 @@
 import { FolderUp, MoveLeft, Star, Trash, X } from "lucide-react";
-import type { FileOptionIntrf } from "../client_models/file_option.client_models";
+import type { FileOptionIntrf } from "../client_models/file.client_model";
 
 export default function FileItemOption(props: FileOptionIntrf) {
     return (

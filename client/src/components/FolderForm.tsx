@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { FolderFormIntrf } from "../client_models/folder.client_models";
+import type { FolderFormIntrf } from "../client_models/folder.client_model";
 
 export default function FolderForm(props: FolderFormIntrf) {
     return (
@@ -26,7 +26,7 @@ export default function FolderForm(props: FolderFormIntrf) {
                 >
                     Create Folder
                 </button>
-                {props.message ? <p className="text-red-600 font-medium text-center">{props.message}</p> : null}
+                {props.message ? <div className="text-red-600 font-medium text-center">{props.message}</div> : null}
             </form>
         </div>
     );

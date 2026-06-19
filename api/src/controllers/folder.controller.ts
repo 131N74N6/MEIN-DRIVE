@@ -113,8 +113,6 @@ export async function deleteOneFolder(req: Request, res: Response) {
             }}
         ]);
 
-        if (folderTree.length === 0) return res.status(404).json({ message: 'folder not found' });
-
         const descendants = folderTree[0].descendants || [];
         const allFolderIds = [getFolderId, ...descendants.map((f: any) => f._id.toString())];
 
@@ -127,7 +125,7 @@ export async function deleteOneFolder(req: Request, res: Response) {
         await Promise.all([
             ...deletePromise,
             File.deleteMany({ folder_id: { $in: allFolderIds } }),
-            Folder.deleteOne({ _id: { $in: allFolderIds } })
+            Folder.deleteMany({ _id: { $in: allFolderIds } })
         ]);
 
         res.status(200).json({ message: 'one folder deleted' });
@@ -254,23 +252,84 @@ export async function makeChildFolder(req: AuthRequest, res: Response) {
     }
 }
 
-export async function moveInsideParentFolder(req: Request, res: Response) {
+export async function moveInsideParentFolder(req: AuthRequest, res: Response) {
     try {
+        const currentUserId = req.user?.user_id;
+        const folderId = req.params._id;
+        const targetParentId = req.body.parent_folder_id;
+
+        const folderToMove = await Folder.findOne({ _id: folderId, user_id: currentUserId });
+        const targetParent = await Folder.findOne({ _id: targetParentId, user_id: currentUserId });
+
+        if (folderId === targetParentId) return res.status(400).json({ message: "Cannot move folder into itself" });
+
+        const descendantCheck = await Folder.aggregate([
+            { $match: { _id: folderToMove?._id } },
+            {
+                $graphLookup: {
+                    from: "folders",
+                    startWith: "$_id",
+                    connectFromField: "_id",
+                    connectToField: "parent_folder_id",
+                    as: "descendants",
+                    restrictSearchWithMatch: { _id: targetParent?._id }
+                }
+            }
+        ]);
+        
+        if (descendantCheck[0]?.descendants?.length > 0) {
+            return res.status(400).json({ 
+                message: "Cannot move folder into its own descendant (would create circular reference)" 
+            });
+        }
+
+        const duplicateInTarget = await Folder.findOne({
+            folder_name: folderToMove?.folder_name,
+            parent_folder_id: targetParentId,
+            user_id: currentUserId,
+            _id: { $ne: folderId }
+        });
+
+        if (duplicateInTarget) {
+            return res.status(409).json({ 
+                message: `Folder with name "${folderToMove?.folder_name}" already exists in the target folder` 
+            });
+        }
+
         await Folder.updateOne({ _id: req.params._id }, { 
             $set: { parent_folder_id: req.body.parent_folder_id }
         });
-        res.status(200).json({ message: 'removed 1 file' });
+
+        res.status(200).json({ message: 'file moved' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }
 }
 
-export async function moveOutsideParentFolder(req: Request, res: Response) {
+export async function moveOutsideParentFolder(req: AuthRequest, res: Response) {
     try {
+        const currentUserId = req.user?.user_id;
+        const folderId = req.params._id;
+
+        const folderToMove = await Folder.findOne({ _id: folderId, user_id: currentUserId });
+
+        const duplicateAtRoot = await Folder.findOne({
+            folder_name: folderToMove?.folder_name,
+            parent_folder_id: { $exists: false }, 
+            user_id: currentUserId,
+            _id: { $ne: folderId }
+        });
+
+        if (duplicateAtRoot) {
+            return res.status(409).json({ 
+                message: `Folder with name "${folderToMove?.folder_name}" already exists at root level` 
+            });
+        }
+        
         await Folder.updateOne({ _id: req.params._id }, { 
             $unset: { parent_folder_id: '' }
         });
-        res.status(200).json({ message: 'removed 1 file' });
+        res.status(200).json({ message: 'file removed' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
     }

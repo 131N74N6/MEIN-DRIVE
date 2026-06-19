@@ -1,5 +1,5 @@
 import { Folder } from "lucide-react";
-import type { FolderItemPrevIntrf } from "../client_models/folder.client_models";
+import type { FolderItemPrevIntrf } from "../client_models/folder.client_model";
 
 export default function FolderItemPreview(props: FolderItemPrevIntrf) {
     function moveToFolder() {

@@ -6,38 +6,86 @@ import FolderForm from "../components/FolderForm";
 import FolderServices from "../services/folder.service";
 import { useEffect } from "react";
 import Notification from "../components/Notification";
+import FolderListPreview from "../components/FolderListPreview";
+import FileServices from "../services/file.service";
 
 export default function FavoritedFolders() {
     const { 
+        foldersPreviewData, 
+        message: fileMessage, 
+        setMessage: setFileMessage 
+    } = FileServices();
+
+    const { 
         addToFavoriteMt, 
-        changeFolderName,favoritedFoldersData, 
+        changeFolderName, 
+        closeFolderList, 
+        favoritedFoldersData, 
         folderFormToggle, 
         folderName, 
         getData, 
-        isProcessing, 
+        isFolderProcessing, 
         makeFolder, 
-        message, 
+        message: folderMessage, 
+        openFolderList,
         openForm, 
+        moveChildFolderToInsideMt,
+        moveChildFolderToOutsideMt,
         removeAllFolderMt, 
         removeFromFavoritedMt, 
         removeOneFolderMt, 
         selectFolder, 
         selectedFolderId, 
         setFolderName, 
-        setMessage 
+        setMessage: setFolderMessage, 
+        setSelectedParentFolderId,
+        showFolderList 
     } = FolderServices();
-    
+        
     useEffect(() => {
-        if (message) {
-            const timer = setTimeout(() => setMessage(null), 3000);
+        if (fileMessage) {
+            const timer = setTimeout(() => setFileMessage(null), 1500);
             return () => clearTimeout(timer);
         }
-    }, [message, setMessage]);
+    }, [fileMessage, setFileMessage]);
+        
+    useEffect(() => {
+        if (folderMessage) {
+            const timer = setTimeout(() => setFolderMessage(null), 1500);
+            return () => clearTimeout(timer);
+        }
+    }, [folderMessage, setFolderMessage]);
     
     return (
         <section className="flex md:flex-row flex-col h-screen gap-[1rem] p-[1rem] bg-white z-10 relative">
-            {message ? Notification(message) : null}
-            {openForm ? <FolderForm closed_form={folderFormToggle} message={message} folder_name={folderName} is_making={isProcessing} set_folder_name={setFolderName} submit_folder={makeFolder}/> : null}
+            {fileMessage ? Notification(fileMessage) : null}
+            {folderMessage ? Notification(folderMessage) : null}
+            {openForm ? (
+                <FolderForm 
+                    closed_form={folderFormToggle} 
+                    message={folderMessage} 
+                    folder_name={folderName} 
+                    is_making={isFolderProcessing} 
+                    set_folder_name={setFolderName} 
+                    submit_folder={makeFolder}
+                /> 
+            ) : null}
+            {openFolderList ? (
+                <FolderListPreview 
+                    chosen_folder_id={selectedFolderId}
+                    error={foldersPreviewData.folderError}
+                    for="folders"
+                    fetchNextPage={foldersPreviewData.folderNext} 
+                    folder_prev={foldersPreviewData.folderData} 
+                    isLoading={foldersPreviewData.folderLoad}
+                    isFetchingNextPage={foldersPreviewData.folderHasNext} 
+                    isReachedEnd={foldersPreviewData.folderEnd}
+                    message={fileMessage!}
+                    move={moveChildFolderToInsideMt}
+                    toggle={closeFolderList}
+                    set_chosen_folder={setSelectedParentFolderId}
+                /> 
+            ) : null}
             <div className="w-full md:w-3/4 flex flex-col gap-x-4 h-full min-h-[200px] rounded shadow-[0_0_4px_#1a1a1a] bg-white">
                 <form className="flex gap-[1rem] items-center pt-[1rem] px-[1rem]">
                     <input
@@ -47,7 +95,7 @@ export default function FavoritedFolders() {
                     />
                     <button 
                         type="button"
-                        disabled={isProcessing}
+                        disabled={isFolderProcessing}
                         onClick={() => removeAllFolderMt.mutate()}
                         className="cursor-pointer flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -55,7 +103,7 @@ export default function FavoritedFolders() {
                     </button>
                     <button 
                         type="button"
-                        disabled={isProcessing}
+                        disabled={isFolderProcessing || favoritedFoldersData.isLoading}
                         onClick={folderFormToggle}
                         className="cursor-pointer flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -73,13 +121,15 @@ export default function FavoritedFolders() {
                         folders={favoritedFoldersData.paginatedData} 
                         get_data={getData}
                         isFetchingNextPage={favoritedFoldersData.isFetchingNextPage}
-                        is_processing={isProcessing}
+                        is_processing={isFolderProcessing}
                         isReachedEnd={favoritedFoldersData.isReachedEnd} 
+                        move_outside_parent_folder={moveChildFolderToOutsideMt}
                         on_delete={removeOneFolderMt}
                         on_edit={changeFolderName}
                         on_select={selectFolder}
                         remove_from_favorite={removeFromFavoritedMt}
                         selected_folder_id={selectedFolderId}
+                        show_folder_list={showFolderList}
                     />
                 ) : favoritedFoldersData.error ? (
                     <div className="flex justify-center items-center h-full bg-white">
