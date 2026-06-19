@@ -182,7 +182,7 @@ export async function getFavoritedFiles(req: AuthRequest, res: Response) {
 
 export async function getSelectedFiles(req: Request, res: Response) {
     try {
-        const getTargetedFile = await File.find({ _id: req.params._id }, { file_type: 0, folder_id: 0, is_favorited: 0, user_id: 0 });
+        const getTargetedFile = await File.find({ _id: req.params._id });
         res.status(200).json(getTargetedFile);
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });

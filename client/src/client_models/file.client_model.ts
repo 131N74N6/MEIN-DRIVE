@@ -31,6 +31,10 @@ export type FilesDataProps = {
     user_id: string;
 }
 
+export type FileViewerIntrf = {
+    file: FilesDataProps;
+}
+
 export type FilesFormIntrf = Omit<FilesDataProps, "folder_id" | "is_favorited">;
 
 export type FileListProps = {
