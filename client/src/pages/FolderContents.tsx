@@ -40,6 +40,7 @@ export default function FolderContents() {
         closeFolderList: closeFolderList2, 
         folderName, 
         folderFormToggle, 
+        folderToMove,
         isFolderProcessing,
         makeChildFolderMt, 
         moveChildFolderToInsideMt,
@@ -83,7 +84,7 @@ export default function FolderContents() {
             ) : null}
             {openFolderList2 ? (
                 <FolderListPreview 
-                    chosen_folder_id={selectedFolderId}
+                    chosen_folder_id={folderToMove}
                     error={foldersPreviewData.folderError}
                     for="folders"
                     fetchNextPage={foldersPreviewData.folderNext} 

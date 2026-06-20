@@ -19,7 +19,7 @@ export default function FileDetail() {
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-4 p-4 bg-white z-10 relative">
-            <div className="flex flex-col gap-4 md:w-3/4 w-full h-full rounded shadow-[0_0_4px_#1a1a1a] bg-white">
+            <div className="flex flex-col gap-4 md:w-3/4 w-full h-full rounded shadow-[0_0_4px_#1a1a1a] p-2.5 bg-white">
                 {fildeDetailLoading ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>

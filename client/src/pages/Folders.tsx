@@ -36,7 +36,8 @@ export default function Folders() {
         removeOneFolderMt, 
         searchValue, 
         selectFolder, 
-        selectedFolderId, 
+        selectedFolderId,
+        folderToMove, 
         setFolderName, 
         setMessage: setFolderMessage, 
         setSearchValue, 
@@ -64,7 +65,7 @@ export default function Folders() {
             {folderMessage ? Notification(folderMessage) : null}
             {openFolderList ? (
                 <FolderListPreview 
-                    chosen_folder_id={selectedFolderId}
+                    chosen_folder_id={folderToMove}
                     error={foldersPreviewData.folderError}
                     for="folders"
                     fetchNextPage={foldersPreviewData.folderNext} 

@@ -13,6 +13,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
     
     const [folderName, setFolderName] = useState<string>('');
     const [openForm, setOpenForm] = useState<boolean>(false);
+    const [folderToMove, setFolderToMove] = useState<string | null>(null);
     const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
     const [selectedParentFolderId, setSelectedParentFolderId] = useState<string | null>(null);
     const [searchValue, setSearchValue] = useState<string>('');
@@ -139,7 +140,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
     const moveChildFolderToInsideMt = useMutation({
         mutationFn: async () => {
             return await changeData<FolderIntrf>({
-                api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/move-inside/${selectedFolderId!}`,
+                api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/move-inside/${folderToMove!}`,
                 data: { parent_folder_id: selectedParentFolderId! }
             });
         },
@@ -148,7 +149,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
         },
         onSuccess: (response) => {
             setMessage(response.message);
-            setSelectedFolderId(null);
+            setFolderToMove(null);
             setSelectedParentFolderId(null);
             queryClient.invalidateQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
@@ -176,7 +177,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
         },
         onSuccess: (response) => {
             setMessage(response.message);
-            setSelectedFolderId(null);
+            setFolderToMove(null);
             setSelectedParentFolderId(null);
             queryClient.invalidateQueries({
                 predicate: (query: Query<unknown, Error, unknown, readonly unknown[]>) => {
@@ -370,13 +371,13 @@ export default function FolderServices(props?: FolderServieIntrf) {
     }
 
     function showFolderList(_id: string) {
-        setSelectedFolderId(_id);
+        setFolderToMove(_id);
         setOpenFolderList(true);
     }
 
     function closeFolderList() {
         setOpenFolderList(false);
-        setSelectedFolderId(null);
+        setFolderToMove(null);
         setSelectedParentFolderId(null);
     }
 
@@ -445,7 +446,7 @@ export default function FolderServices(props?: FolderServieIntrf) {
         addToFavoriteMt, changeFolderName, childFoldersData, closeFolderList, foldersData, favoritedFoldersData, folderFormToggle, folderName, 
         foldersPreviewData, getData, isFolderProcessing, makeFolder, makeChildFolderMt, message, moveChildFolderToInsideMt, 
         moveChildFolderToOutsideMt, openForm, openFolderList, removeAllChildFolderMt, removeAllFolderMt, removeFromFavoritedMt, 
-        removeOneFolderMt, removeOneChildFolderMt, searchValue, selectedFolderId, setSelectedParentFolderId, setFolderName, setMessage, 
+        removeOneFolderMt, removeOneChildFolderMt, searchValue, folderToMove, selectedFolderId, setSelectedParentFolderId, setFolderName, setMessage, 
         selectFolder, setSearchValue, showFolderList
     }
 }

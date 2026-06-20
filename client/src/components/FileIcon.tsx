@@ -1,5 +1,5 @@
 import type { FilesDataProps } from "../client_models/file.client_model";
-import { Database, FolderArchive, File, Notebook, AudioLines, Sheet, FileChartColumn, FileText, FileTypeCorner } from "lucide-react";
+import { Database, FolderArchive, File, AudioLines, Sheet, FileChartColumn, FileText, FileTypeCorner, Table, Paperclip } from "lucide-react";
 
 export default function FileIcon(props: FilesDataProps) {
     return (
@@ -30,10 +30,16 @@ export default function FileIcon(props: FilesDataProps) {
                         <AudioLines></AudioLines>
                     </div>
                 </div>
-            ) : props.file_type.startsWith('text/') ? (
+            ) : props.file_type.startsWith('text/csv') ? (
                 <div className="flex flex-col gap-2">
                     <div className="flex justify-center items-center aspect-square text-gray-500 text-[1.7rem] border border-gray-500 rounded">
-                        <Notebook></Notebook>
+                        <Table></Table>
+                    </div>
+                </div>
+            ) :props.file_type.startsWith('text/plain') ? (
+                <div className="flex flex-col gap-2">
+                    <div className="flex justify-center items-center aspect-square text-gray-500 text-[1.7rem] border border-gray-500 rounded">
+                        <Paperclip></Paperclip>
                     </div>
                 </div>
             ) : props.file_type.includes('/pdf') ? (

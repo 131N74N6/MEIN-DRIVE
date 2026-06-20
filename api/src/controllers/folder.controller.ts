@@ -329,6 +329,7 @@ export async function moveOutsideParentFolder(req: AuthRequest, res: Response) {
         await Folder.updateOne({ _id: req.params._id }, { 
             $unset: { parent_folder_id: '' }
         });
+        
         res.status(200).json({ message: 'file removed' });
     } catch (error) {
         res.status(500).json({ message: 'internal server error' });
