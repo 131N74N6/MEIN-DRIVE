@@ -9,7 +9,14 @@ import HybridDataList from "../components/HybridDataList";
 import { Navbar1, Navbar2 } from "../components/Navbar";
 
 export default function Favorited() {
-    const [error, setError] = useState<string | null>(null);
+    const [messageText, setMessageText] = useState<string | null>(null);
+        
+    useEffect(() => {
+        if (messageText) {
+            const timer = setTimeout(() => setMessageText(null), 1500);
+            return () => clearTimeout(timer);
+        }
+    }, [messageText, setMessageText]);
     
     const { 
         addToFavoriteMt, 
@@ -19,12 +26,11 @@ export default function Favorited() {
         removeFromFavoritedMt, 
         searchValue, 
         setSearchValue
-    } = HybridServices();
+    } = HybridServices({ setMessage: setMessageText });
 
     const { 
         addFileToFolderMt,
         closeFolderList, 
-        message: filesError,
         deleteOneFileMt, 
         foldersPreviewData, 
         isFileProcessing, 
@@ -32,12 +38,11 @@ export default function Favorited() {
         moveOutsideFolderMt, 
         setChosenFolder,
         showFolderList: showFolderListForFile 
-    } = FileServices();
+    } = FileServices({ setMessage: setMessageText });
     
     const { 
         changeFolderName, 
         isFolderProcessing, 
-        message: foldersError,
         moveChildFolderToInsideMt,
         moveChildFolderToOutsideMt,
         openFolderList: openFolderListForFolder,
@@ -46,19 +51,11 @@ export default function Favorited() {
         selectedFolderId,
         setSelectedParentFolderId,
         showFolderList: showFolderListForFolder 
-    } = FolderServices();
-
-        
-    useEffect(() => {
-        if (error) {
-            const timer = setTimeout(() => setError(null), 1500);
-            return () => clearTimeout(timer);
-        }
-    }, [error, setError]);
+    } = FolderServices({ setMessage: setMessageText });
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-4 p-4 bg-white z-10 relative">
-            {error ? Notification(error) : null}
+            {messageText ? Notification(messageText) : null}
             {openFolderListForFile ? (
                 <FolderListPreview 
                     error={foldersPreviewData.folderError}
@@ -68,7 +65,7 @@ export default function Favorited() {
                     isLoading={foldersPreviewData.folderLoad}
                     isFetchingNextPage={foldersPreviewData.folderHasNext} 
                     isReachedEnd={foldersPreviewData.folderEnd}
-                    message={filesError!}
+                    message={messageText!}
                     move={addFileToFolderMt}
                     toggle={closeFolderList}
                     set_chosen_folder={setChosenFolder}
@@ -83,7 +80,7 @@ export default function Favorited() {
                     isLoading={foldersPreviewData.folderLoad}
                     isFetchingNextPage={foldersPreviewData.folderHasNext} 
                     isReachedEnd={foldersPreviewData.folderEnd}
-                    message={foldersError!}
+                    message={messageText!}
                     move={moveChildFolderToInsideMt}
                     toggle={closeFolderList}
                     set_chosen_folder={setSelectedParentFolderId}
