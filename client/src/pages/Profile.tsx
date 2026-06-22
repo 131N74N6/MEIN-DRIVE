@@ -124,8 +124,8 @@ export default function Profile() {
                     {message ? <div className="text-center text-gray-700 text-2xl font-medium">{message}</div> : null}
                 </div>
             )}
-            <Navbar1/>
-            <Navbar2/>
+            {Navbar1(isProcessing)}
+            {Navbar2(isProcessing)}
         </section>
     );
 }

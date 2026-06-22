@@ -1,36 +1,30 @@
-import { Navbar1, Navbar2 } from "../components/Navbar";
-import Loading from "../components/Loading";
-import Notification from "../components/Notification";
-import FolderListPreview from "../components/FolderListPreview";
 import { useEffect, useState } from "react";
 import HybridServices from "../services/hybrid.service";
 import FileServices from "../services/file.service";
-import HybridDataList from "../components/HybridDataList";
 import FolderServices from "../services/folder.service";
+import Notification from "../components/Notification";
+import FolderListPreview from "../components/FolderListPreview";
+import Loading from "../components/Loading";
+import HybridDataList from "../components/HybridDataList";
+import { Navbar1, Navbar2 } from "../components/Navbar";
 
-export default function Home() {
-    const [messageText, setMessageText] = useState<string | null>(null);
-        
-    useEffect(() => {
-        if (messageText) {
-            const timer = setTimeout(() => setMessageText(null), 1500);
-            return () => clearTimeout(timer);
-        }
-    }, [messageText, setMessageText]);
-
+export default function Favorited() {
+    const [error, setError] = useState<string | null>(null);
+    
     const { 
         addToFavoriteMt, 
-        allFilesAndFolders, 
+        favoritedFilesAndFolders, 
         getData,
         isHybridProcessing, 
         removeFromFavoritedMt, 
         searchValue, 
         setSearchValue
-    } = HybridServices({ setMessage: setMessageText });
+    } = HybridServices();
 
     const { 
         addFileToFolderMt,
-        closeFolderList: clossFolderListForFile, 
+        closeFolderList, 
+        message: filesError,
         deleteOneFileMt, 
         foldersPreviewData, 
         isFileProcessing, 
@@ -38,12 +32,12 @@ export default function Home() {
         moveOutsideFolderMt, 
         setChosenFolder,
         showFolderList: showFolderListForFile 
-    } = FileServices({ setMessage: setMessageText });
+    } = FileServices();
     
     const { 
         changeFolderName, 
-        closeFolderList: clossFolderListForFolder,
         isFolderProcessing, 
+        message: foldersError,
         moveChildFolderToInsideMt,
         moveChildFolderToOutsideMt,
         openFolderList: openFolderListForFolder,
@@ -52,11 +46,19 @@ export default function Home() {
         selectedFolderId,
         setSelectedParentFolderId,
         showFolderList: showFolderListForFolder 
-    } = FolderServices({ setMessage: setMessageText });
+    } = FolderServices();
+
+        
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => setError(null), 1500);
+            return () => clearTimeout(timer);
+        }
+    }, [error, setError]);
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-4 p-4 bg-white z-10 relative">
-            {messageText ? Notification(messageText) : null}
+            {error ? Notification(error) : null}
             {openFolderListForFile ? (
                 <FolderListPreview 
                     error={foldersPreviewData.folderError}
@@ -66,9 +68,9 @@ export default function Home() {
                     isLoading={foldersPreviewData.folderLoad}
                     isFetchingNextPage={foldersPreviewData.folderHasNext} 
                     isReachedEnd={foldersPreviewData.folderEnd}
-                    message={messageText!}
+                    message={filesError!}
                     move={addFileToFolderMt}
-                    toggle={clossFolderListForFile}
+                    toggle={closeFolderList}
                     set_chosen_folder={setChosenFolder}
                 /> 
             ) : null}
@@ -81,9 +83,9 @@ export default function Home() {
                     isLoading={foldersPreviewData.folderLoad}
                     isFetchingNextPage={foldersPreviewData.folderHasNext} 
                     isReachedEnd={foldersPreviewData.folderEnd}
-                    message={messageText!}
+                    message={foldersError!}
                     move={moveChildFolderToInsideMt}
-                    toggle={clossFolderListForFolder}
+                    toggle={closeFolderList}
                     set_chosen_folder={setSelectedParentFolderId}
                 /> 
             ) : null}
@@ -97,23 +99,23 @@ export default function Home() {
                         placeholder="search file here"
                     />
                 </form>
-                {allFilesAndFolders.fileLoad ? (
+                {favoritedFilesAndFolders.fileLoad3 ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
                     </div>
-                ) : allFilesAndFolders.fileError ? (
+                ) : favoritedFilesAndFolders.fileError3 ? (
                     <div className="flex justify-center items-center h-full bg-white">
-                        <span className="text-[2rem] font-[600] text-gray-700">{allFilesAndFolders.fileError.message}</span>
+                        <span className="text-[2rem] font-[600] text-gray-700">{favoritedFilesAndFolders.fileError3.message}</span>
                     </div>
                 ) : (
                     <HybridDataList
                         addToFavoriteMt={addToFavoriteMt}
-                        filesAndFolders={allFilesAndFolders.fileData}
-                        fetchNextPage={allFilesAndFolders.fileNext}
+                        filesAndFolders={favoritedFilesAndFolders.fileData3}
+                        fetchNextPage={favoritedFilesAndFolders.fileNext3}
                         getData={getData}
-                        isFetchingNextPage={allFilesAndFolders.fileHasNext}
-                        isReachedEnd={allFilesAndFolders.fileEnd}
-                        isProcessing={isHybridProcessing || isFileProcessing || isFolderProcessing || allFilesAndFolders.fileLoad}
+                        isFetchingNextPage={favoritedFilesAndFolders.fileHasNext3}
+                        isReachedEnd={favoritedFilesAndFolders.fileEnd3}
+                        isProcessing={isHybridProcessing || isFileProcessing || isFolderProcessing}
                         moveFileOutsideFolder={moveOutsideFolderMt}
                         moveChildFolderOutsideParentFolder={moveChildFolderToOutsideMt}
                         onDeleteFile={deleteOneFileMt}
@@ -127,8 +129,8 @@ export default function Home() {
                     />
                 )}
             </div>
-            {Navbar1(isFileProcessing || isFolderProcessing || allFilesAndFolders.fileLoad || isHybridProcessing)}
-            {Navbar2(isFileProcessing || isFolderProcessing || allFilesAndFolders.fileLoad || isHybridProcessing)}
+            {Navbar1(isFileProcessing || isFolderProcessing || favoritedFilesAndFolders.fileLoad3 || isHybridProcessing)}
+            {Navbar2(isFileProcessing || isFolderProcessing || favoritedFilesAndFolders.fileLoad3 || isHybridProcessing)}
         </section>
     );
 }

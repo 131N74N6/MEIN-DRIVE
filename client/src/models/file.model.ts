@@ -1,5 +1,6 @@
 import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, UseMutationResult } from "@tanstack/react-query";
-import type { GetDataProps } from "./data.client_model";
+import type { GetDataProps } from "./data.model";
+import type { HybridIntrf } from "./hybrid.model";
 
 export type MediaFilesProps = {
     file: File;
@@ -32,7 +33,8 @@ export type FilesDataProps = {
 }
 
 export type FileViewerIntrf = {
-    file: FilesDataProps;
+    file: HybridIntrf;
+    is_processing: boolean;
 }
 
 export type FilesFormIntrf = Omit<FilesDataProps, "folder_id" | "is_favorited">;
@@ -80,4 +82,5 @@ export type FileServicesIntrf = {
     folder_id?: string;
     id?:string;
     user_id?: string;
+    setMessage: React.Dispatch<React.SetStateAction<string | null>>;
 }

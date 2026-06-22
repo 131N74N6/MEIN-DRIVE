@@ -1,5 +1,5 @@
 import { Navbar1, Navbar2 } from "../components/Navbar";
-import FileList from "../components/FileList";
+import FileList from "../components/HybridDataList";
 import Loading from "../components/Loading";
 import Notification from "../components/Notification";
 import { Trash } from "lucide-react";

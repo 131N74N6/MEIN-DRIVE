@@ -1,14 +1,14 @@
-import { Navbar1, Navbar2 } from "../components/Navbar";
-import Loading from "../components/Loading";
-import Notification from "../components/Notification";
-import FolderListPreview from "../components/FolderListPreview";
 import { useEffect, useState } from "react";
 import HybridServices from "../services/hybrid.service";
 import FileServices from "../services/file.service";
+import Notification from "../components/Notification";
+import FolderListPreview from "../components/FolderListPreview";
+import { Trash } from "lucide-react";
+import Loading from "../components/Loading";
 import HybridDataList from "../components/HybridDataList";
-import FolderServices from "../services/folder.service";
+import { Navbar1, Navbar2 } from "../components/Navbar";
 
-export default function Home() {
+export default function Files() {
     const [messageText, setMessageText] = useState<string | null>(null);
         
     useEffect(() => {
@@ -17,42 +17,29 @@ export default function Home() {
             return () => clearTimeout(timer);
         }
     }, [messageText, setMessageText]);
-
+        
     const { 
         addToFavoriteMt, 
-        allFilesAndFolders, 
         getData,
         isHybridProcessing, 
         removeFromFavoritedMt, 
-        searchValue, 
-        setSearchValue
     } = HybridServices({ setMessage: setMessageText });
 
     const { 
         addFileToFolderMt,
-        closeFolderList: clossFolderListForFile, 
+        allFilesOnly,
+        closeFolderList, 
+        deleteAllFilesMt, 
         deleteOneFileMt, 
         foldersPreviewData, 
         isFileProcessing, 
         openFolderList: openFolderListForFile,
         moveOutsideFolderMt, 
+        searchValue,
         setChosenFolder,
+        setSearchValue,
         showFolderList: showFolderListForFile 
     } = FileServices({ setMessage: setMessageText });
-    
-    const { 
-        changeFolderName, 
-        closeFolderList: clossFolderListForFolder,
-        isFolderProcessing, 
-        moveChildFolderToInsideMt,
-        moveChildFolderToOutsideMt,
-        openFolderList: openFolderListForFolder,
-        removeOneFolderMt, 
-        selectFolder, 
-        selectedFolderId,
-        setSelectedParentFolderId,
-        showFolderList: showFolderListForFolder 
-    } = FolderServices({ setMessage: setMessageText });
 
     return (
         <section className="flex md:flex-row flex-col h-screen gap-4 p-4 bg-white z-10 relative">
@@ -68,23 +55,8 @@ export default function Home() {
                     isReachedEnd={foldersPreviewData.folderEnd}
                     message={messageText!}
                     move={addFileToFolderMt}
-                    toggle={clossFolderListForFile}
+                    toggle={closeFolderList}
                     set_chosen_folder={setChosenFolder}
-                /> 
-            ) : null}
-            {openFolderListForFolder ? (
-                <FolderListPreview 
-                    error={foldersPreviewData.folderError}
-                    for="folders"
-                    fetchNextPage={foldersPreviewData.folderNext} 
-                    folder_prev={foldersPreviewData.folderData} 
-                    isLoading={foldersPreviewData.folderLoad}
-                    isFetchingNextPage={foldersPreviewData.folderHasNext} 
-                    isReachedEnd={foldersPreviewData.folderEnd}
-                    message={messageText!}
-                    move={moveChildFolderToInsideMt}
-                    toggle={clossFolderListForFolder}
-                    set_chosen_folder={setSelectedParentFolderId}
                 /> 
             ) : null}
             <div className="flex flex-col gap-4 md:w-3/4 h-[100%] min-h-[200px] w-full rounded shadow-[0_0_4px_#1a1a1a] bg-white">
@@ -96,39 +68,41 @@ export default function Home() {
                         className="border rounded border-gray-700 p-[0.45rem] w-full text-[0.9rem] outline-0 font-[500]"
                         placeholder="search file here"
                     />
+                    <button 
+                        type="button" 
+                        disabled={isFileProcessing || allFilesOnly.fileLoad}
+                        className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex justify-center w-[90px] bg-gray-700 text-white text-[0.9rem] p-[0.4rem] rounded" 
+                        onClick={() => deleteAllFilesMt.mutate()}
+                    >
+                        <Trash size={22}></Trash>
+                    </button>
                 </form>
-                {allFilesAndFolders.fileLoad ? (
+                {allFilesOnly.fileLoad ? (
                     <div className="flex justify-center items-center h-full">
                         <Loading/>
                     </div>
-                ) : allFilesAndFolders.fileError ? (
+                ) : allFilesOnly.fileError ? (
                     <div className="flex justify-center items-center h-full bg-white">
-                        <span className="text-[2rem] font-[600] text-gray-700">{allFilesAndFolders.fileError.message}</span>
+                        <span className="text-[2rem] font-[600] text-gray-700">{allFilesOnly.fileError.message}</span>
                     </div>
                 ) : (
                     <HybridDataList
                         addToFavoriteMt={addToFavoriteMt}
-                        filesAndFolders={allFilesAndFolders.fileData}
-                        fetchNextPage={allFilesAndFolders.fileNext}
+                        filesAndFolders={allFilesOnly.fileData}
+                        fetchNextPage={allFilesOnly.fileNext}
                         getData={getData}
-                        isFetchingNextPage={allFilesAndFolders.fileHasNext}
-                        isReachedEnd={allFilesAndFolders.fileEnd}
-                        isProcessing={isHybridProcessing || isFileProcessing || isFolderProcessing || allFilesAndFolders.fileLoad}
+                        isFetchingNextPage={allFilesOnly.fileHasNext}
+                        isReachedEnd={allFilesOnly.fileEnd}
+                        isProcessing={isHybridProcessing || isFileProcessing || isHybridProcessing || allFilesOnly.fileLoad}
                         moveFileOutsideFolder={moveOutsideFolderMt}
-                        moveChildFolderOutsideParentFolder={moveChildFolderToOutsideMt}
                         onDeleteFile={deleteOneFileMt}
-                        onDeleteFolder={removeOneFolderMt}
-                        onEditFolder={changeFolderName}
-                        onSelectFolder={selectFolder}
                         removeFromFavoritedMt={removeFromFavoritedMt}
-                        selectedFolderId={selectedFolderId}
                         showFolderListForFile={showFolderListForFile}
-                        showFolderListForFolder={showFolderListForFolder}
                     />
                 )}
             </div>
-            {Navbar1(isFileProcessing || isFolderProcessing || allFilesAndFolders.fileLoad || isHybridProcessing)}
-            {Navbar2(isFileProcessing || isFolderProcessing || allFilesAndFolders.fileLoad || isHybridProcessing)}
+            {Navbar1(isFileProcessing || isHybridProcessing || allFilesOnly.fileLoad)}
+            {Navbar2(isFileProcessing || isHybridProcessing || allFilesOnly.fileLoad)}
         </section>
     );
 }

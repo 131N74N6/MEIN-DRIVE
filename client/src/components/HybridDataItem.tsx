@@ -1,41 +1,41 @@
+import type { HybridItemIntrf } from "../models/hybrid.model";
 import { EllipsisVertical, Folder, LucideCheckSquare2, X } from "lucide-react";
-import type { FolderItemIntrf } from "../client_models/folder.client_model";
-import { Link } from "react-router-dom";
+import FileIcon from "./HybridDataIcon";
 import { useEffect, useState } from "react";
+import FileItemOption from "./HybridDataOption";
 import useShowOption from "../hooks/useShowOption";
-import FolderItemOption from "./FolderItemOption";
 
-export default function FolderItem(props: FolderItemIntrf) {
+export default function HybridDataItem(props: HybridItemIntrf) {
     const [folderName, setFolderName] = useState<string>('');
     const { showOption, handleShowOption } = useShowOption();
 
     useEffect(() => {
-        if (props.is_selected) {
-            setFolderName(props.folder.folder_name);
+        if (props.isFolderSelected) {
+            setFolderName(props.fileAndFolder.folder_name!);
         } else {
             setFolderName('');
         }
-    }, [props.is_selected, props.folder.parent_folder_id, props.folder.folder_name, props.folder._id]);
+    }, [props.isFolderSelected, props.fileAndFolder.parent_folder_id, props.fileAndFolder.folder_name, props.fileAndFolder._id]);
 
-    const { data: isFavorited } = props.get_data<boolean>({
-        api_url: `${import.meta.env.VITE_API_BASE_URL}/folders/is-favorited/${props.folder._id}`,
-        query_key: [`is-folder-favorited-${props.folder._id}`],
+    const { data: isFavorited } = props.getData<boolean>({
+        api_url: `${import.meta.env.VITE_API_BASE_URL}/hybrids/is-favorited/${props.fileAndFolder._id}`,
+        query_key: [`is-favorited-${props.fileAndFolder._id}`],
         stale_time: Infinity
     });
-    
-    function updateFolderName(event: React.FormEvent) {
-        event.preventDefault();
-        props.on_edit.mutate({ _id: props.folder._id, folder_name: folderName.trim() });
+
+    function handleFavorite() {
+        if (isFavorited) props.removeFromFavoritedMt.mutate(props.fileAndFolder._id);
+        else props.addToFavoriteMt.mutate(props.fileAndFolder._id);
     }
 
-    function handleFavoriteButton() {
-        if (isFavorited) props.remove_from_favorite.mutate(props.folder._id);
-        else props.add_to_favorite.mutate(props.folder._id);
+    function updateFolderName(event: React.FormEvent) {
+        event.preventDefault();
+        props.onEditFolder.mutate({ _id: props.fileAndFolder._id, folder_name: folderName.trim() });
     }
     
-    const cancel = () => props.on_select(props.folder._id);
-    
-    if (props.is_selected) {
+    const cancel = () => props.onSelectFolder(props.fileAndFolder._id);
+
+    if (props.isFolderSelected) {
         return (
             <form onSubmit={updateFolderName} className="border-gray-500 text-gray-600 border rounded-md p-[0.7rem] flex flex-col gap-[0.5rem]">
                 <div className="flex gap-2 items-center">
@@ -50,7 +50,7 @@ export default function FolderItem(props: FolderItemIntrf) {
                 <div className="flex gap-3 flex-col">
                     <button 
                         type="submit" 
-                        disabled={props.is_processing}
+                        disabled={props.isProcessing}
                         className="cursor-pointer text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <div className="flex gap-4">
@@ -60,7 +60,7 @@ export default function FolderItem(props: FolderItemIntrf) {
                     </button>
                     <button 
                         type="button" 
-                        disabled={props.is_processing}
+                        disabled={props.isProcessing}
                         onClick={cancel}
                         className="cursor-pointer text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -77,37 +77,35 @@ export default function FolderItem(props: FolderItemIntrf) {
     return (
         <div className="border-gray-500 border rounded-md p-[0.7rem] flex flex-col gap-[0.5rem]">
             {showOption ? (
-                <FolderItemOption
-                    folder={props.folder}
-                    handle_favorite={handleFavoriteButton}
-                    is_favorited={isFavorited!}
-                    is_processing={props.is_processing}
-                    move_outside_parent_folder={props.move_outside_parent_folder}
-                    on_delete={props.on_delete}
-                    on_select={props.on_select}
-                    show_folder_list={props.show_folder_list}
-                    show_more_options={handleShowOption}
+                <FileItemOption
+                    fileAndFolder={props.fileAndFolder}
+                    handleFavorite={handleFavorite}
+                    isFavorited={isFavorited!}
+                    isFileInFolder={props.isFileInFolder}
+                    isFileOptionShow={showOption}
+                    isProcessing={props.isProcessing}
+                    moveFileOutsideFolder={props.moveFileOutsideFolder}
+                    moveChildFolderOutsideParentFolder={props.moveChildFolderOutsideParentFolder}
+                    onDeleteFile={props.onDeleteFile}
+                    onDeleteFolder={props.onDeleteFolder}
+                    onSelectFolder={props.onSelectFolder}
+                    showFolderListForFile={props.showFolderListForFile}
+                    showFolderListForFolder={props.showFolderListForFolder}
+                    showMoreOption={handleShowOption}
                 />
             ) : (
                 <>
-                    <div className="flex gap-2 flex-col">
-                        <Link to={`/folder-content/branch/${props.folder._id}`}>
-                            <div className="flex justify-center items-center aspect-square text-gray-500 text-[2rem] border border-gray-500 rounded">
-                                <Folder></Folder>
-                            </div>
-                        </Link>
-                    </div>
+                    <FileIcon fileAndFolder={props.fileAndFolder}/>
                     <hr className="bg-gray-500"/>
-                    <div className="flex justify-between">
+                    <div className="flex gap-2">
                         <button 
                             type="button" 
-                            disabled={props.is_processing}
+                            disabled={props.isProcessing}
                             onClick={handleShowOption}
                             className='cursor-pointer font-[500] text-[1rem] disabled:opacity-50 disabled:cursor-not-allowed text-gray-500'
                         >
-                            <EllipsisVertical/>
+                            <EllipsisVertical size={16}/>
                         </button>
-                        <div className="line-clamp-1">{props.folder.folder_name}</div>
                     </div>
                 </>
             )}

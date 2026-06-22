@@ -1,6 +1,7 @@
 import type { FetchNextPageOptions, InfiniteData, InfiniteQueryObserverResult, UseMutationResult } from "@tanstack/react-query";
 import type { Dispatch, SetStateAction } from "react";
-import type { GetDataProps } from "./data.client_model";
+import type { GetDataProps } from "./data.model";
+import type { HybridIntrf } from "./hybrid.model";
 
 export type FolderIntrf = {
     _id: string;
@@ -24,7 +25,7 @@ export type FolderListPrevIntrf = {
     chosen_folder_id?: string | null;
     error: Error | null;
     for: string;
-    folder_prev: FolderIntrf[];
+    folder_prev: HybridIntrf[];
     fetchNextPage: (options?: FetchNextPageOptions | undefined) => Promise<InfiniteQueryObserverResult<InfiniteData<any, unknown>, Error>>
     isLoading: boolean;
     isFetchingNextPage: boolean
@@ -99,6 +100,7 @@ export type FolderOptionIntrf = {
 
 export type FolderServieIntrf = {
     parent_folder_id?: string;
+    setMessage: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export type ChildFolderIntrf = {

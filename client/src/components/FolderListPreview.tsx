@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { FolderListPrevIntrf } from "../client_models/folder.client_model";
+import type { FolderListPrevIntrf } from "../models/folder.model";
 import FolderItemPreview from "./FolderItemPreview";
 import Loading from "./Loading";
 
@@ -34,7 +34,7 @@ export default function FolderListPreview(props: FolderListPrevIntrf) {
                                 key={`folder-${index}`} 
                                 move={props.move} 
                                 _id={folder._id} 
-                                folder_name={folder.folder_name}
+                                folder_name={folder.folder_name!}
                                 set_chosen_folder={props.set_chosen_folder!}
                             />
                         ))}
@@ -79,7 +79,7 @@ export default function FolderListPreview(props: FolderListPrevIntrf) {
                                     key={`folder-${index}`} 
                                     move={props.move} 
                                     _id={folder._id} 
-                                    folder_name={folder.folder_name}
+                                    folder_name={folder.folder_name!}
                                     set_chosen_folder={props.set_chosen_folder!}
                                 />
                             )

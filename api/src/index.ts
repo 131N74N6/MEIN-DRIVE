@@ -17,6 +17,7 @@ import fileRoutes from "./routes/file.router";
 import authRoutes from './routes/auth.router';
 import folderRoutes from './routes/folder.router';
 import cookieParser from 'cookie-parser';
+import hybridRoutes from './routes/hybrid.router';
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/folders', folderRoutes);
+app.use('/api/hybrids', hybridRoutes);
 app.use('/api/users', userRoutes);
 
 if (process.env.NODE_ENV !== 'production') {

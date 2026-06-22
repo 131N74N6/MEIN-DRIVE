@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import type { FolderFormIntrf } from "../client_models/folder.client_model";
+import type { FolderFormIntrf } from "../models/folder.model";
 
 export default function FolderForm(props: FolderFormIntrf) {
     return (

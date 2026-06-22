@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
-import { File } from "../models/file.model";
-import { Folder } from "../models/folder.model";
+import { Data } from "../models/data.model";
 import { v2 } from "cloudinary";
 import { AuthRequest } from "../middleware/auth.middleware";
 
@@ -22,7 +21,7 @@ export async function changeUserInfo(req: AuthRequest, res: Response) {
 export async function deleteCurrentUser(req: AuthRequest, res: Response) {
     try {
         const currentUserId = req.user?.user_id;
-        const getCurrentUserFiles = await File.find({ user_id: currentUserId });
+        const getCurrentUserFiles = await Data.find({ category: "files", user_id: currentUserId });
 
         const deletePromise = getCurrentUserFiles.map(userFile => {
             return v2.uploader.destroy(userFile.files.public_id, { resource_type: userFile.files.resource_type });
@@ -30,8 +29,7 @@ export async function deleteCurrentUser(req: AuthRequest, res: Response) {
 
         await Promise.all([
             ...deletePromise,
-            File.deleteMany({ user_id: currentUserId }),
-            Folder.deleteMany({ user_id: currentUserId }),
+            Data.deleteMany({ user_id: currentUserId }),
             User.deleteOne({ _id: currentUserId })
         ]);
 

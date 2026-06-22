@@ -1,4 +1,4 @@
-import type { MediaFilesProps } from "../client_models/file.client_model";
+import type { MediaFilesProps } from "../models/file.model";
 import { Database, FolderArchive, File, AudioLines, Sheet, FileChartColumn, FileText, FileTypeCorner, Table, Paperclip } from "lucide-react";
 
 export default function FileIconPreview(props: MediaFilesProps) {
