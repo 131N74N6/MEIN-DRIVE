@@ -2,26 +2,33 @@ import Notification from "../components/Notification";
 import { X } from "lucide-react";
 import FileIconPreview from "../components/FileIconPreview";
 import FileServices from "../services/file.service";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function AddFiles() {
+    const [messageText, setMessageText] = useState<string | null>(null);
+        
+    useEffect(() => {
+        if (messageText) {
+            const timer = setTimeout(() => setMessageText(null), 1500);
+            return () => clearTimeout(timer);
+        }
+    }, [messageText, setMessageText]);
+
     const { 
         fileInputRef, 
         handleChosenFiles, 
         mediaFiles, 
-        message, 
         navigate, 
         removeChosenFiles, 
-        setMessage, 
         uploadFilesMutation 
-    } = FileServices();
+    } = FileServices({ setMessage: setMessageText });
 
     useEffect(() => {
-        if (message) {
-            const timer = setTimeout(() => setMessage(null), 1500);
+        if (messageText) {
+            const timer = setTimeout(() => setMessageText(null), 1500);
             return () => clearTimeout(timer);
         }
-    }, [message, setMessage]);
+    }, [messageText, setMessageText]);
     
     const uploadFiles = (event: React.FormEvent) => {
         event.preventDefault();
@@ -30,7 +37,7 @@ export default function AddFiles() {
 
     return (
         <section className="flex gap-[1rem] p-[1rem] md:flex-row flex-col h-screen">
-            {message ? Notification(message) : null}
+            {messageText ? Notification(messageText) : null}
             <form onSubmit={uploadFiles} className="flex gap-[1.3rem] w-full p-4 flex-col bg-white backdrop-blur-lg h-full shadow-[0_0_4px_#1a1a1a] rounded">
                 <input onChange={handleChosenFiles} multiple type="file" ref={fileInputRef} className="hidden"/>
                 <div className="border-dashed h-full overflow-y-auto p-4 cursor-pointer border-2 border-gray-400 rounded-lg" onClick={() => fileInputRef.current?.click()}>
