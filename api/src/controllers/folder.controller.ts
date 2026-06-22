@@ -59,8 +59,10 @@ export async function deleteAllChildFolders(req: AuthRequest, res: Response) {
 
         const folderTree = await Data.aggregate([
             { $match: { 
-                _id: new mongoose.Types.ObjectId(getParentFolderId), 
-                category: "folders"
+                $or: [
+                    { _id: new mongoose.Types.ObjectId(getParentFolderId) }, 
+                    { category: "folders" }
+                ]
             }},
             { $graphLookup: {
                 from: "datas", 
@@ -99,7 +101,12 @@ export async function deleteOneFolder(req: Request, res: Response) {
         const getFolderId = req.params._id;
 
         const folderTree = await Data.aggregate([
-            { $match: { _id: new mongoose.Types.ObjectId(getFolderId) } },
+            { $match: { 
+                $or: [
+                    { _id: new mongoose.Types.ObjectId(getFolderId) }, 
+                    { category: "folders" }
+                ]
+            }},
             { $graphLookup: {
                 from: "datas",
                 startWith: "$_id",
