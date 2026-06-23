@@ -144,7 +144,7 @@ export async function getSelectedFiles(req: Request, res: Response) {
 export async function moveFromFolder(req: Request, res: Response) {
     try {
         await Data.updateOne({ _id: req.params._id, category: "files" }, { 
-            $set: { folder_id: null }
+            $unset: { folder_id: '' }
         });
         res.status(200).json({ message: 'removed 1 file' });
     } catch (error) {
